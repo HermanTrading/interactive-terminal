@@ -1,880 +1,868 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Herman Trading – Probability Maps</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Tailwind -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React + ReactDOM + Babel -->
-    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: #020617;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="root" class="min-h-screen"></div>
+<head>
+  <meta charset="UTF-8" />
+  <title>Herman Trading – Probability Maps</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React + ReactDOM + Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <script type="text/babel">
-      const { useState, useRef } = React;
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: #020617;
+      color: #e5e7eb;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
 
-      // Proste ikonki zamiast lucide-react (emoji / znaki)
-      const ChevronRight = ({ size = 16 }) => (
-        <span style={{ fontSize: size }}>›</span>
-      );
-      const ChevronLeft = ({ size = 16 }) => (
-        <span style={{ fontSize: size }}>‹</span>
-      );
-      const Play = ({ size = 16 }) => (
-        <span style={{ fontSize: size }}>▶</span>
-      );
-      const BarChart2 = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>📊</span>
-      );
-      const Clock = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>⏱</span>
-      );
-      const Globe = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>🌍</span>
-      );
-      const TrendingUp = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>📈</span>
-      );
-      const Target = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>🎯</span>
-      );
-      const Database = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>💾</span>
-      );
-      const ShoppingCart = ({ size = 18 }) => (
-        <span style={{ fontSize: size }}>🛒</span>
-      );
-      const Youtube = ({ size = 18 }) => (
-        <span style={{ fontSize: size }}>▶</span>
-      );
-      const Twitter = ({ size = 18 }) => (
-        <span style={{ fontSize: size }}>𝕏</span>
-      );
-      const MessageCircle = ({ size = 18 }) => (
-        <span style={{ fontSize: size }}>💬</span>
-      );
-      const TerminalIcon = ({ size = 12 }) => (
-        <span style={{ fontSize: size }}>⌨</span>
-      );
-      const Brain = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>🧠</span>
-      );
-      const ShieldCheck = ({ size = 24 }) => (
-        <span style={{ fontSize: size }}>✅</span>
-      );
+  <script type="text/babel">
+    const { useState, useRef } = React;
 
-      // --- Social Link component ---
-      const SocialLink = ({ href, icon: Icon, label }) => (
+    // --------- MAIN APP ---------
+
+    function HermanProbabilityMaps() {
+      const [currentCardIndex, setCurrentCardIndex] = useState(0);
+      const [logs, setLogs] = useState([]);
+      const [isAnimating, setIsAnimating] = useState(false);
+      const [visualState, setVisualState] = useState({ progress: 0, showProb: false, sweep: "none" });
+
+      const logCounter = useRef(0);
+
+      const addLog = (text, type = "info") => {
+        const now = new Date();
+        const timeString = `${now.getHours().toString().padStart(2, "0")}:${now
+          .getMinutes()
+          .toString()
+          .padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+        const newLog = { id: logCounter.current++, text, type, timestamp: timeString };
+        setLogs((prev) => [newLog, ...prev].slice(0, 5));
+      };
+
+      const runAnimation = (duration, callback) => {
+        setIsAnimating(true);
+        setVisualState({ progress: 0, showProb: false, sweep: "none" });
+
+        let start = null;
+        const animate = (timestamp) => {
+          if (!start) start = timestamp;
+          const progress = Math.min((timestamp - start) / duration, 1);
+          setVisualState((prev) => ({ ...prev, progress }));
+
+          if (progress < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            setIsAnimating(false);
+            if (callback) callback();
+          }
+        };
+
+        requestAnimationFrame(animate);
+      };
+
+      const cards = [
+        {
+          id: 1,
+          title: "Driven by Statistics",
+          subtitle: "10 Years of Historical Data",
+          content:
+            "Trading isn't about luck; it's about probabilities. This system is built on 10 years of raw historical data, calculating the statistical likelihood of every move. Don't trade what you think—trade what the data proves.",
+          buttonText: "Load Statistical Models",
+          icon: "📊",
+          visualMode: "intro",
+          buttonAction: () => {
+            addLog("Accessing Historical Database...", "info");
+            setTimeout(() => addLog("Processing 10 Years of Price Action...", "info"), 800);
+            setTimeout(() => addLog("Probability Models Loaded. 98% Integrity.", "success"), 1600);
+            runAnimation(2500);
+          },
+        },
+        {
+          id: 2,
+          title: "The Backbone: 10 Years of Data",
+          subtitle: "Python + Jupyter Powered",
+          content:
+            "Every signal is backed by rigorous testing. Historical data backtests were conducted using Python + Jupyter for 72 different variants. The indicator recognizes current chart conditions and matches them to historical outcomes.",
+          buttonText: "Scan Historical Database",
+          icon: "🧮",
+          visualMode: "data",
+          buttonAction: () => {
+            addLog("Connecting to Python backend...", "info");
+            addLog("Scanning 72 Variants across 10 years...", "info");
+            runAnimation(2500, () => {
+              addLog("Match Found: Variant #42. 99.8% Confidence.", "success");
+            });
+          },
+        },
+        {
+          id: 3,
+          title: "New York Session Map",
+          subtitle: "Real-Time Probabilities on NQ",
+          content:
+            "At 8:00 AM NY Open, the indicator instantly marks the High and Low. It calculates the % probability of which side will be swept first based on history. Example: 81.7% chance to Sweep Low.",
+          buttonText: "Simulate NY Open (8:00 AM)",
+          icon: "🕗",
+          visualMode: "ny_session",
+          buttonAction: () => {
+            addLog("NY Open detected (08:00 EST). Calculation started.", "info");
+            setVisualState({ progress: 0, showProb: false, sweep: "none" });
+            runAnimation(2000, () => {
+              setVisualState((prev) => ({ ...prev, showProb: true, sweep: "low" }));
+              addLog("Result: 81.7% Probability -> SWEEP LOW FIRST.", "success");
+              addLog("Historical Occurrences: 115 times. Success: 81%.", "info");
+            });
+          },
+        },
+        {
+          id: 4,
+          title: "London Session Map",
+          subtitle: "Gold (GC) & NQ Precision",
+          content:
+            "Don't guess the trend. In London, the map might show a 70.3% chance to sweep the High. Even if the price drops initially, the 'Magnet' of the probability pulls it back.",
+          buttonText: "Analyze London Gold",
+          icon: "🌍",
+          visualMode: "london_session",
+          buttonAction: () => {
+            addLog("London Session Open. Symbol: GC (Gold).", "info");
+            runAnimation(2000, () => {
+              setVisualState((prev) => ({ ...prev, showProb: true, sweep: "high" }));
+              addLog("Probability Map: 70.3% SWEEP HIGH.", "success");
+              addLog("This scenario happened 236 times in 10 years.", "info");
+            });
+          },
+        },
+        {
+          id: 5,
+          title: "Prediction Metrics",
+          subtitle: "Beyond Just Direction",
+          content:
+            "It's not just Up or Down. The indicator provides 'Median Penetration' stats. How far does price usually go after a sweep? 39 points? 50 points? Know your exit before you enter.",
+          buttonText: "Calculate Metrics",
+          icon: "📈",
+          visualMode: "metrics",
+          buttonAction: () => {
+            addLog("Calculating Median Penetration for current setup...", "info");
+            runAnimation(2000, () => {
+              addLog("Avg. Extension after sweep: 39.5 points.", "success");
+              addLog("Reversal Probability: 65%.", "info");
+            });
+          },
+        },
+        {
+          id: 6,
+          title: "Silver Bullet Add-On",
+          subtitle: "4 Indicators in One Suite",
+          content:
+            "Complete coverage for every key time window. Includes London SB, New York AM SB, New York PM SB, and Power Hour. Each window has its own unique probability stats for sweeping High vs Low first.",
+          buttonText: "Scan All Time Windows",
+          icon: "🎯",
+          visualMode: "silver_bullet",
+          buttonAction: () => {
+            addLog("Scanning Silver Bullet Windows...", "info");
+            setTimeout(() => addLog("London SB: High Probability Long Setup.", "info"), 500);
+            setTimeout(() => addLog("NY AM SB: 72% Sweep Low.", "info"), 1200);
+            setTimeout(() => addLog("Power Hour: Consolidation Profile.", "alert"), 1800);
+            runAnimation(3000, () => {
+              addLog("All sessions analyzed. Optimization Complete.", "success");
+            });
+          },
+        },
+        {
+          id: 7,
+          title: "Confluences & Inversions",
+          subtitle: "Turning Resistance into Support",
+          content:
+            "A Bearish FVG is a gap between candles created by aggressive selling. Watch as price reverses towards the Probable High, CLOSES above the gap, and turns it into an Inversion FVG (iFVG) for entry.",
+          buttonText: "Simulate iFVG Entry",
+          icon: "📊",
+          visualMode: "confluence",
+          buttonAction: () => {
+            addLog("Price Action: Bearish Displacement created FVG.", "alert");
+            setTimeout(() => addLog("Reversal initiated towards Probable High...", "info"), 800);
+            setTimeout(() => addLog("Candle CLOSED above FVG. Inversion Confirmed!", "success"), 2200);
+            setTimeout(() => addLog("Entry Triggered on retest of iFVG.", "success"), 3000);
+            runAnimation(4000);
+          },
+        },
+        {
+          id: 8,
+          title: "The Psychology of Stats",
+          subtitle: "Calm. Collected. Confident.",
+          content:
+            "Emotions destroy portfolios. Statistics build them. When you trade with the backing of 10 years of data, hesitation disappears. Replace 'guessing' with 'knowing' and trade with absolute confidence.",
+          buttonText: "Compare Mindsets",
+          icon: "🧠",
+          visualMode: "psychology",
+          buttonAction: () => {
+            addLog("Simulating Emotional Trading: HIGH STRESS.", "alert");
+            setTimeout(() => addLog("Switching to Herman Probability Model...", "info"), 1000);
+            setTimeout(() => addLog("Stress: 0%. Confidence: 100%.", "success"), 2000);
+            runAnimation(3000);
+          },
+        },
+        {
+          id: 9,
+          title: "Gold (GC) Precision",
+          subtitle: "Targeting the Probable High",
+          content:
+            "Gold often moves with institutional precision. Observe how the price action aggressively seeks the 'More Probable High' identified by the algorithm, ignoring short-term noise.",
+          buttonText: "Target High Prob Level",
+          icon: "🥇",
+          visualMode: "gold",
+          buttonAction: () => {
+            addLog("Loading GC_V2_London_Variant...", "info");
+            addLog("Target Acquired: 74% Probable High.", "info");
+            runAnimation(3000, () => {
+              addLog("Target Smashed. Precision confirmed.", "success");
+            });
+          },
+        },
+        {
+          id: 10,
+          title: "Profitability vs. Guessing",
+          subtitle: "The Statistical Edge",
+          content:
+            "Why guess when you can calculate? See the difference between random trading and statistical trading. The Probability Maps provide a quantifiable edge that compounds into consistent profitability over time.",
+          buttonText: "See the Edge",
+          icon: "🛡️",
+          visualMode: "offer",
+          buttonAction: () => {
+            addLog("Running Comparison Simulation...", "info");
+            addLog("Guessing Strategy: -15% ROI.", "alert");
+            addLog("Probability Map Strategy: +45% ROI.", "success");
+            runAnimation(3000);
+          },
+        },
+      ];
+
+      const handleNext = () => {
+        setCurrentCardIndex((prev) => (prev + 1) % cards.length);
+        setVisualState({ progress: 0, showProb: false, sweep: "none" });
+      };
+
+      const handlePrev = () => {
+        setCurrentCardIndex((prev) => (prev - 1 + cards.length) % cards.length);
+        setVisualState({ progress: 0, showProb: false, sweep: "none" });
+      };
+
+      const currentCard = cards[currentCardIndex];
+
+      return (
+        <div className="flex flex-col md:flex-row w-full min-h-[900px] bg-slate-950 text-slate-200 overflow-hidden selection:bg-emerald-500/30">
+          {/* LEFT PANEL */}
+          <div className="w-full md:w-3/5 h-[420px] md:h-[900px] bg-slate-900 relative border-r border-slate-800 flex flex-col">
+            {/* Header */}
+            <div className="absolute top-0 left-0 p-6 z-10 w-full flex justify-between items-start bg-gradient-to-b from-slate-900/90 to-transparent">
+              <div>
+                <h2 className="text-emerald-400 font-bold tracking-wider text-sm mb-1 uppercase">
+                  Herman Trading
+                </h2>
+                <h1 className="text-2xl font-light text-white">
+                  Probability Maps{" "}
+                  <span className="text-xs align-top bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded ml-2">
+                    PRO
+                  </span>
+                </h1>
+              </div>
+              <div className="flex gap-2">
+                <div className="px-3 py-1 bg-slate-800 rounded text-xs font-mono text-slate-400 border border-slate-700">
+                  NQ1!
+                </div>
+                <div className="px-3 py-1 bg-slate-800 rounded text-xs font-mono text-slate-400 border border-slate-700">
+                  5M
+                </div>
+              </div>
+            </div>
+
+            {/* Canvas */}
+            <div className="flex-grow flex items-center justify-center relative overflow-hidden mt-16">
+              <VisualCanvas mode={currentCard.visualMode} state={visualState} />
+              <div
+                className="absolute inset-0 pointer-events-none opacity-5"
+                style={{
+                  backgroundImage:
+                    "linear-gradient(to right, #808080 1px, transparent 1px), linear-gradient(to bottom, #808080 1px, transparent 1px)",
+                  backgroundSize: "40px 40px",
+                }}
+              ></div>
+            </div>
+
+            {/* Log */}
+            <div className="h-48 bg-slate-950 border-t border-slate-800 p-4 font-mono text-xs overflow-y-auto">
+              <div className="flex items-center gap-2 mb-2 text-slate-500 uppercase tracking-widest text-[10px]">
+                <span className="text-emerald-400">▮</span>
+                <span>System Log</span>
+              </div>
+              <div className="space-y-1.5 flex flex-col-reverse">
+                {logs.map((log) => (
+                  <div
+                    key={log.id}
+                    className={
+                      "flex gap-3" +
+                      " " +
+                      (log.type === "success"
+                        ? "text-emerald-400"
+                        : log.type === "alert"
+                        ? "text-rose-400"
+                        : "text-slate-300")
+                    }
+                  >
+                    <span className="opacity-40 select-none">[{log.timestamp}]</span>
+                    <span>
+                      {log.type === "success" && "✓ "}
+                      {log.type === "alert" && "⚠ "}
+                      {log.text}
+                    </span>
+                  </div>
+                ))}
+                {logs.length === 0 && (
+                  <span className="text-slate-600 italic">Ready for input... Await commands.</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className="w-full md:w-2/5 md:h-[900px] bg-slate-950 flex flex-col relative z-20 shadow-2xl shadow-black">
+            {/* Progress bar */}
+            <div className="w-full h-1 bg-slate-800">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-500 ease-out"
+                style={{ width: `${((currentCardIndex + 1) / cards.length) * 100}%` }}
+              />
+            </div>
+
+            {/* Card */}
+            <div className="flex-grow flex flex-col justify-center p-8 md:p-12 relative">
+              <div key={currentCard.id} className="flex flex-col h-full justify-center">
+                <div className="mb-6 inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-slate-900 border border-slate-800 text-emerald-400 shadow-lg shadow-emerald-900/10 text-xl">
+                  {currentCard.icon}
+                </div>
+
+                <h3 className="text-emerald-500 font-medium tracking-wide text-sm uppercase mb-2">
+                  Topic {currentCard.id} / {cards.length}
+                </h3>
+
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 leading-tight">
+                  {currentCard.title}
+                </h2>
+
+                <h4 className="text-xl text-slate-400 mb-6 font-light">{currentCard.subtitle}</h4>
+
+                <p className="text-slate-300 leading-relaxed text-lg mb-8 border-l-2 border-slate-800 pl-4">
+                  {currentCard.content}
+                </p>
+
+                <div className="mt-auto space-y-4">
+                  <button
+                    onClick={currentCard.buttonAction}
+                    disabled={isAnimating}
+                    className="group w-full py-4 px-6 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 disabled:text-slate-500 text-white rounded-lg font-semibold transition-all shadow-lg hover:shadow-emerald-500/20 flex items-center justify-between"
+                  >
+                    <span>{isAnimating ? "Processing..." : currentCard.buttonText}</span>
+                    <span
+                      className={
+                        "text-sm transition-transform " + (isAnimating ? "opacity-0" : "group-hover:translate-x-1")
+                      }
+                    >
+                      ▶
+                    </span>
+                  </button>
+
+                  {currentCard.visualMode === "offer" && (
+                    <div className="grid grid-cols-2 gap-2 mt-4 text-xs">
+                      <SocialLink href="https://whop.com/herman-macro-edge-premium" label="WHOP Store" />
+                      <SocialLink href="https://discord.gg/7tWKTTFnJk" label="Discord" />
+                      <SocialLink href="https://www.youtube.com/@HermanTradingHub" label="YouTube" />
+                      <SocialLink href="https://x.com/RHerman" label="Twitter / X" />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Nav */}
+            <div className="h-20 border-t border-slate-900 bg-slate-950 flex items-center justify-between px-8">
+              <button
+                onClick={handlePrev}
+                className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors uppercase text-xs font-bold tracking-widest"
+              >
+                ◀ Previous
+              </button>
+
+              <div className="flex gap-1">
+                {cards.map((_, idx) => (
+                  <div
+                    key={idx}
+                    className={
+                      "w-1.5 h-1.5 rounded-full transition-colors " +
+                      (idx === currentCardIndex ? "bg-emerald-500" : "bg-slate-800")
+                    }
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={handleNext}
+                className="flex items-center gap-2 text-slate-500 hover:text-white transition-colors uppercase text-xs font-bold tracking-widest"
+              >
+                Next ▶
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function SocialLink({ href, label }) {
+      return (
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 py-2 px-4 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 rounded text-xs font-medium transition-colors"
         >
-          <Icon size={14} /> {label}
+          <span>🔗</span> {label}
         </a>
       );
+    }
 
-      // --- Visual Canvas Component ---
-      const VisualCanvas = ({ mode, state }) => {
-        const width = 600;
-        const height = 400;
+    // ---------- VISUAL CANVAS ----------
 
-        const generateCandles = (
-          seed,
-          count,
-          trend,
-          startPrice = 200
-        ) => {
-          let price = startPrice;
-          return Array.from({ length: count }).map((_, i) => {
-            const vol = trend === "volatile" ? 25 : 8;
-            const bias = trend === "up" ? 4 : trend === "down" ? -4 : 0;
-            const move =
-              Math.sin(i * seed) * vol + bias + (Math.random() * 5 - 2.5);
-            const open = price;
-            const close = price + move;
-            const high = Math.max(open, close) + Math.random() * 8;
-            const low = Math.min(open, close) - Math.random() * 8;
-            price = close;
-            return { x: i * 25 + 50, open, close, high, low };
-          });
-        };
+    function VisualCanvas({ mode, state }) {
+      const width = 600;
+      const height = 400;
 
-        let candles = [];
-        let overlay = null;
+      const generateCandles = (seed, count, trend, startPrice = 200) => {
+        let price = startPrice;
+        return Array.from({ length: count }).map((_, i) => {
+          const vol = trend === "volatile" ? 25 : 8;
+          const bias = trend === "up" ? 4 : trend === "down" ? -4 : 0;
+          const move = Math.sin(i * seed) * vol + bias + (Math.random() * 5 - 2.5);
+          const open = price;
+          const close = price + move;
+          const high = Math.max(open, close) + Math.random() * 8;
+          const low = Math.min(open, close) - Math.random() * 8;
+          price = close;
+          return { x: i * 25 + 50, open, close, high, low };
+        });
+      };
 
-        switch (mode) {
-          case "intro": {
-            candles = [];
-            const dataPoints = Array.from({ length: 40 }).map((_, i) => ({
-              x: Math.random() * width,
-              y: Math.random() * height,
-              val: Math.random() > 0.5 ? "1" : "0",
-              opacity: Math.random(),
-            }));
+      let candles = [];
+      let overlay = null;
 
-            overlay = (
-              <g>
-                {dataPoints.map((d, i) => (
-                  <text
-                    key={i}
-                    x={d.x}
-                    y={d.y}
-                    fill="#10b981"
-                    fontSize="10"
-                    opacity={d.opacity * (1 - state.progress)}
-                  >
-                    {d.val}
-                  </text>
-                ))}
+      if (mode === "intro") {
+        candles = [];
+        const dataPoints = Array.from({ length: 40 }).map(() => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          val: Math.random() > 0.5 ? "1" : "0",
+          opacity: Math.random(),
+        }));
 
-                <g transform="translate(300, 200)">
-                  <circle
-                    r={100 * state.progress}
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                    opacity={1 - state.progress}
-                  />
-                  <text
-                    y="-20"
-                    textAnchor="middle"
-                    fill="#10b981"
-                    fontSize="48"
-                    fontWeight="bold"
-                    opacity={state.progress}
-                  >
-                    {Math.floor(state.progress * 81)}%
-                  </text>
-                  <text
-                    y="20"
-                    textAnchor="middle"
-                    fill="white"
-                    fontSize="16"
-                    opacity={state.progress}
-                  >
-                    PROBABILITY
-                  </text>
-                  <text
-                    y="40"
-                    textAnchor="middle"
-                    fill="#64748b"
-                    fontSize="12"
-                    opacity={state.progress}
-                  >
-                    Based on 10 Years Data
+        overlay = (
+          <g>
+            {dataPoints.map((d, i) => (
+              <text key={i} x={d.x} y={d.y} fill="#10b981" fontSize="10" opacity={d.opacity * (1 - state.progress)}>
+                {d.val}
+              </text>
+            ))}
+
+            <g transform="translate(300, 200)">
+              <circle
+                r={100 * state.progress}
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="2"
+                opacity={1 - state.progress}
+              />
+              <text y="-20" textAnchor="middle" fill="#10b981" fontSize="48" fontWeight="bold" opacity={state.progress}>
+                {Math.floor(state.progress * 81)}%
+              </text>
+              <text y="20" textAnchor="middle" fill="white" fontSize="16" opacity={state.progress}>
+                PROBABILITY
+              </text>
+              <text y="40" textAnchor="middle" fill="#64748b" fontSize="12" opacity={state.progress}>
+                Based on 10 Years Data
+              </text>
+            </g>
+          </g>
+        );
+      } else if (mode === "data") {
+        candles = [];
+        overlay = (
+          <g>
+            <rect x="220" y="120" width="160" height="80" rx="12" fill="#020617" stroke="#64748b" />
+            <text x="300" y="150" textAnchor="middle" fill="#10b981" fontSize="18" fontWeight="bold">
+              PYTHON + JUPYTER
+            </text>
+            <text x="300" y="170" textAnchor="middle" fill="#e5e7eb" fontSize="12">
+              Backtest Engine
+            </text>
+
+            <rect x="150" y="270" width="300" height="4" fill="#1e293b" rx="2" />
+            <rect
+              x="150"
+              y="270"
+              width={300 * state.progress}
+              height="4"
+              fill="#10b981"
+              rx="2"
+            ></rect>
+            <text x="300" y="300" textAnchor="middle" fill="#94a3b8" fontSize="12">
+              Scanning 72 Variants... {Math.round(state.progress * 100)}%
+            </text>
+          </g>
+        );
+      } else if (mode === "ny_session") {
+        candles = generateCandles(0.8, 12, "down");
+        const nyLowY = 320;
+        const nyHighY = 80;
+        overlay = (
+          <g>
+            <line x1="50" y1={nyHighY} x2="550" y2={nyHighY} stroke="#ef4444" strokeWidth="2" strokeDasharray="5,5" opacity="0.5" />
+            <line x1="50" y1={nyLowY} x2="550" y2={nyLowY} stroke="#10b981" strokeWidth="2" strokeDasharray="5,5" opacity="0.5" />
+            <text x="560" y={nyHighY} fill="#ef4444" fontSize="12" alignmentBaseline="middle">
+              High
+            </text>
+            <text x="560" y={nyLowY} fill="#10b981" fontSize="12" alignmentBaseline="middle">
+              Low
+            </text>
+            {state.showProb && (
+              <>
+                <g transform="translate(450, 90)">
+                  <rect width="90" height="36" fill="#1e293b" stroke="#ef4444" rx="4" />
+                  <text x="45" y="23" textAnchor="middle" fill="#ef4444" fontSize="14" fontWeight="bold">
+                    18.3%
                   </text>
                 </g>
-              </g>
-            );
-            break;
-          }
-
-          case "data": {
-            candles = [];
-            overlay = (
-              <g>
-                <circle
-                  cx="300"
-                  cy="150"
-                  r="40"
-                  fill="#020617"
-                  stroke="#64748b"
-                  strokeWidth="2"
-                />
-                <text
-                  x="300"
-                  y="150"
-                  textAnchor="middle"
-                  fill="#64748b"
-                  fontSize="26"
-                  fontWeight="bold"
-                  dy="8"
-                >
-                  DATA
-                </text>
-                <text
-                  x="300"
-                  y="210"
-                  textAnchor="middle"
-                  fill="#10b981"
-                  fontSize="18"
-                  fontWeight="bold"
-                >
-                  PYTHON + JUPYTER
-                </text>
-                <text
-                  x="300"
-                  y="235"
-                  textAnchor="middle"
-                  fill="white"
-                  fontSize="13"
-                >
-                  POWERED BACKTESTING ENGINE
-                </text>
-                <rect
-                  x="150"
-                  y="270"
-                  width="300"
-                  height="4"
-                  fill="#1e293b"
-                  rx="2"
-                />
-                <rect
-                  x="150"
-                  y="270"
-                  width={300 * state.progress}
-                  height="4"
-                  fill="#10b981"
-                  rx="2"
-                />
-                <text
-                  x="300"
-                  y="300"
-                  textAnchor="middle"
-                  fill="#94a3b8"
-                  fontSize="12"
-                >
-                  Scanning 72 Variants... {Math.round(state.progress * 100)}%
-                </text>
-              </g>
-            );
-            break;
-          }
-
-          case "ny_session": {
-            candles = generateCandles(0.8, 12, "down");
-            const nyLowY = 320;
-            const nyHighY = 80;
-            overlay = (
-              <g>
-                <line
-                  x1="50"
-                  y1={nyHighY}
-                  x2="550"
-                  y2={nyHighY}
-                  stroke="#ef4444"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                  opacity="0.5"
-                />
-                <line
-                  x1="50"
-                  y1={nyLowY}
-                  x2="550"
-                  y2={nyLowY}
-                  stroke="#10b981"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                  opacity="0.5"
-                />
-                <text
-                  x="560"
-                  y={nyHighY}
-                  fill="#ef4444"
-                  fontSize="12"
-                  alignmentBaseline="middle"
-                >
-                  High
-                </text>
-                <text
-                  x="560"
-                  y={nyLowY}
-                  fill="#10b981"
-                  fontSize="12"
-                  alignmentBaseline="middle"
-                >
-                  Low
-                </text>
-                {state.showProb && (
-                  <>
-                    <g transform="translate(450, 90)">
-                      <rect
-                        width="90"
-                        height="36"
-                        fill="#1e293b"
-                        stroke="#ef4444"
-                        rx="4"
-                      />
-                      <text
-                        x="45"
-                        y="23"
-                        textAnchor="middle"
-                        fill="#ef4444"
-                        fontSize="14"
-                        fontWeight="bold"
-                      >
-                        18.3%
-                      </text>
-                    </g>
-                    <g transform="translate(450, 270)">
-                      <rect
-                        width="90"
-                        height="36"
-                        fill="#1e293b"
-                        stroke="#10b981"
-                        rx="4"
-                      />
-                      <text
-                        x="45"
-                        y="23"
-                        textAnchor="middle"
-                        fill="#10b981"
-                        fontSize="14"
-                        fontWeight="bold"
-                      >
-                        81.7%
-                      </text>
-                    </g>
-                    <path
-                      d={`M 320,200 Q 380,200 400,${
-                        nyLowY + 20
-                      }`}
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="3"
-                      strokeDasharray="100"
-                      strokeDashoffset={100 - state.progress * 100}
-                      markerEnd="url(#arrowhead-green)"
-                    />
-                  </>
-                )}
-              </g>
-            );
-            break;
-          }
-
-          case "london_session": {
-            candles = generateCandles(1.2, 12, "up");
-            const lonLowY = 300;
-            const lonHighY = 100;
-            overlay = (
-              <g>
-                <line
-                  x1="50"
-                  y1={lonHighY}
-                  x2="550"
-                  y2={lonHighY}
-                  stroke="#10b981"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                  opacity="0.5"
-                />
-                <line
-                  x1="50"
-                  y1={lonLowY}
-                  x2="550"
-                  y2={lonLowY}
-                  stroke="#ef4444"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                  opacity="0.5"
-                />
-                {state.showProb && (
-                  <>
-                    <g transform="translate(450, 50)">
-                      <rect
-                        width="90"
-                        height="36"
-                        fill="#1e293b"
-                        stroke="#10b981"
-                        rx="4"
-                      />
-                      <text
-                        x="45"
-                        y="23"
-                        textAnchor="middle"
-                        fill="#10b981"
-                        fontSize="14"
-                        fontWeight="bold"
-                      >
-                        70.3%
-                      </text>
-                    </g>
-                    <g transform="translate(450, 310)">
-                      <rect
-                        width="90"
-                        height="36"
-                        fill="#1e293b"
-                        stroke="#ef4444"
-                        rx="4"
-                      />
-                      <text
-                        x="45"
-                        y="23"
-                        textAnchor="middle"
-                        fill="#ef4444"
-                        fontSize="14"
-                        fontWeight="bold"
-                      >
-                        29.7%
-                      </text>
-                    </g>
-                    <path
-                      d={`M 320,250 Q 380,200 400,${
-                        lonHighY - 20
-                      }`}
-                      fill="none"
-                      stroke="#10b981"
-                      strokeWidth="3"
-                      strokeDasharray="100"
-                      strokeDashoffset={100 - state.progress * 100}
-                      markerEnd="url(#arrowhead-green)"
-                    />
-                  </>
-                )}
-              </g>
-            );
-            break;
-          }
-
-          case "metrics": {
-            candles = generateCandles(1.5, 10, "up");
-            const sweepHighY = 120;
-            overlay = (
-              <g>
-                <line
-                  x1="50"
-                  y1={sweepHighY}
-                  x2="550"
-                  y2={sweepHighY}
-                  stroke="#64748b"
-                  strokeWidth="1"
-                  strokeDasharray="5,5"
-                />
-                <text
-                  x="560"
-                  y={sweepHighY}
-                  fill="#64748b"
-                  fontSize="12"
-                  alignmentBaseline="middle"
-                >
-                  Sweep Level
-                </text>
-
-                {state.progress > 0.1 && (
-                  <path
-                    d={`M 280,${sweepHighY + 10} L 300,${
-                      sweepHighY - 20
-                    } L 320,${sweepHighY + 5}`}
-                    fill="none"
-                    stroke="#ef4444"
-                    strokeWidth="2"
+                <g transform="translate(450, 270)">
+                  <rect
+                    width="90"
+                    height="36"
+                    fill="#1e293b"
+                    stroke="#10b981"
+                    rx="4"
+                    style={{ filter: "drop-shadow(0 0 10px rgba(16,185,129,0.4))" }}
                   />
-                )}
-
-                {state.progress > 0.5 && (
-                  <g opacity={(state.progress - 0.5) * 2}>
-                    <line
-                      x1="300"
-                      y1={sweepHighY - 20}
-                      x2="300"
-                      y2={sweepHighY - 100}
-                      stroke="#10b981"
-                      strokeWidth="2"
-                      markerEnd="url(#arrowhead-green)"
-                    />
-                    <line
-                      x1="290"
-                      y1={sweepHighY - 100}
-                      x2="310"
-                      y2={sweepHighY - 100}
-                      stroke="#10b981"
-                      strokeWidth="1"
-                    />
-                    <text
-                      x="320"
-                      y={sweepHighY - 60}
-                      fill="#10b981"
-                      fontSize="12"
-                    >
-                      MEDIAN PENETRATION
-                    </text>
-                    <text
-                      x="320"
-                      y={sweepHighY - 45}
-                      fill="white"
-                      fontSize="14"
-                      fontWeight="bold"
-                    >
-                      ~39 PTS
-                    </text>
-                  </g>
-                )}
-              </g>
-            );
-            break;
-          }
-
-          case "silver_bullet": {
-            candles = [];
-            overlay = (
-              <g>
-                <line
-                  x1="50"
-                  y1="200"
-                  x2="550"
-                  y2="200"
-                  stroke="#334155"
-                  strokeWidth="2"
-                />
-                {[
-                  { label: "London", x: 100, color: "#3b82f6", prob: "68% High" },
-                  { label: "NY AM", x: 230, color: "#10b981", prob: "72% Low" },
-                  { label: "NY PM", x: 360, color: "#f59e0b", prob: "60% High" },
-                  { label: "Power Hr", x: 490, color: "#ef4444", prob: "Consol." },
-                ].map((win, i) => (
-                  <g
-                    key={i}
-                    opacity={state.progress > i * 0.25 ? 1 : 0.2}
-                    transform={`translate(${win.x}, 200)`}
-                  >
-                    <circle r="8" fill={win.color} />
-                    <line
-                      x1="0"
-                      y1="0"
-                      x2="0"
-                      y2="-40"
-                      stroke={win.color}
-                      strokeWidth="1"
-                      strokeDasharray="2,2"
-                    />
-                    <rect
-                      x="-35"
-                      y="-70"
-                      width="70"
-                      height="30"
-                      rx="4"
-                      fill="#1e293b"
-                      stroke={win.color}
-                    />
-                    <text
-                      x="0"
-                      y="-50"
-                      textAnchor="middle"
-                      fill={win.color}
-                      fontSize="10"
-                      fontWeight="bold"
-                    >
-                      {win.label}
-                    </text>
-                    <g
-                      opacity={state.progress > i * 0.25 + 0.1 ? 1 : 0}
-                      transform="translate(0, 30)"
-                    >
-                      <text
-                        x="0"
-                        y="0"
-                        textAnchor="middle"
-                        fill="white"
-                        fontSize="10"
-                      >
-                        {win.prob}
-                      </text>
-                    </g>
-                  </g>
-                ))}
-                <text
-                  x="300"
-                  y="320"
-                  textAnchor="middle"
-                  fill="#94a3b8"
-                  fontSize="14"
-                >
-                  4 Distinct Algorithms. 4 Unique Opportunities.
-                </text>
-              </g>
-            );
-            break;
-          }
-
-          case "confluence": {
-            const cProbHighY = 80;
-            let baseCandles = [
-              { x: 60, open: 220, close: 245, high: 215, low: 250 },
-              { x: 90, open: 245, close: 310, high: 245, low: 315 },
-              { x: 120, open: 310, close: 320, high: 290, low: 330 },
-              { x: 150, open: 320, close: 300, high: 300, low: 325 },
-              { x: 180, open: 300, close: 260, high: 260, low: 305 },
-              { x: 210, open: 260, close: 230, high: 225, low: 265 },
-              { x: 240, open: 230, close: 200, high: 195, low: 255 },
-              { x: 270, open: 200, close: 150, high: 145, low: 205 },
-              { x: 300, open: 150, close: 100, high: 95, low: 155 },
-            ];
-
-            const visible = baseCandles.slice(
-              0,
-              Math.floor(state.progress * baseCandles.length) + 1
-            );
-
-            const fvgTop = 250;
-            const fvgBottom = 290;
-            const fvgPresent = visible.length > 2;
-            const isInverted = visible.length > 5;
-
-            const fvgColor = isInverted ? "#10b981" : "#ef4444";
-            const fvgOpacity = isInverted ? 0.2 : 0.3;
-            const fvgText = isInverted ? "iFVG (Inverted)" : "Bearish FVG";
-
-            overlay = (
-              <g>
-                {fvgPresent && (
-                  <g>
-                    <rect
-                      x="60"
-                      y={fvgTop}
-                      width={500}
-                      height={fvgBottom - fvgTop}
-                      fill={fvgColor}
-                      opacity={fvgOpacity}
-                    />
-                    <line
-                      x1="60"
-                      y1={fvgTop}
-                      x2="560"
-                      y2={fvgTop}
-                      stroke={fvgColor}
-                      strokeWidth="1"
-                      strokeDasharray="2,2"
-                    />
-                    <line
-                      x1="60"
-                      y1={fvgBottom}
-                      x2="560"
-                      y2={fvgBottom}
-                      stroke={fvgColor}
-                      strokeWidth="1"
-                      strokeDasharray="2,2"
-                    />
-                    <text
-                      x="550"
-                      y={fvgTop + 25}
-                      textAnchor="end"
-                      fill={fvgColor}
-                      fontSize="12"
-                      fontWeight="bold"
-                    >
-                      {fvgText}
-                    </text>
-                  </g>
-                )}
-
-                <line
-                  x1="50"
-                  y1={cProbHighY}
-                  x2="550"
-                  y2={cProbHighY}
-                  stroke="#10b981"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                  opacity="0.5"
-                />
-                <text
-                  x="500"
-                  y={cProbHighY - 10}
-                  fill="#10b981"
-                  fontSize="10"
-                >
-                  Probable High Target
-                </text>
-
-                {visible.length > 6 && (
-                  <g transform="translate(255, 250)">
-                    <circle r="4" fill="#10b981" />
-                    <text
-                      x="10"
-                      y="5"
-                      fill="#10b981"
-                      fontSize="10"
-                      fontWeight="bold"
-                    >
-                      ENTRY
-                    </text>
-                  </g>
-                )}
-              </g>
-            );
-
-            candles = visible;
-            break;
-          }
-
-          case "psychology": {
-            candles = [];
-            overlay = (
-              <g>
-                <path
-                  d="M 50,300 C 80,200 100,350 150,280 S 200,380 250,300 S 300,150 350,320"
-                  fill="none"
-                  stroke="#ef4444"
-                  strokeWidth="1"
-                  opacity={1 - state.progress}
-                />
-                <text
-                  x="100"
-                  y="360"
-                  fill="#ef4444"
-                  fontSize="12"
-                  opacity={1 - state.progress}
-                >
-                  EMOTIONAL CHAOS
-                </text>
-
-                <path
-                  d={`M 50,300 L ${
-                    50 + 500 * state.progress
-                  }, ${300 - 200 * state.progress}`}
-                  fill="none"
-                  stroke="#10b981"
-                  strokeWidth="4"
-                />
-
-                <g
-                  transform={`translate(${
-                    50 + 500 * state.progress
-                  }, ${300 - 200 * state.progress})`}
-                >
-                  {state.progress > 0 && <circle r="6" fill="#10b981" />}
-                  {state.progress > 0.5 && (
-                    <g transform="translate(-80, -20)">
-                      <rect
-                        width="100"
-                        height="30"
-                        fill="#1e293b"
-                        rx="4"
-                        stroke="#10b981"
-                      />
-                      <text
-                        x="50"
-                        y="20"
-                        textAnchor="middle"
-                        fill="#10b981"
-                        fontSize="12"
-                        fontWeight="bold"
-                      >
-                        CONFIDENCE
-                      </text>
-                    </g>
-                  )}
+                  <text x="45" y="23" textAnchor="middle" fill="#10b981" fontSize="14" fontWeight="bold">
+                    81.7%
+                  </text>
                 </g>
-
-                <text
-                  x="300"
-                  y="100"
-                  textAnchor="middle"
-                  fill="white"
-                  fontSize="24"
-                  opacity={state.progress}
-                >
-                  NO EMOTION. PURE STATS.
-                </text>
-              </g>
-            );
-            break;
-          }
-
-          case "gold": {
-            const startP = 350;
-            const endP = 50;
-            const steps = 15;
-
-            let base = Array.from({ length: steps }).map((_, i) => {
-              const progress = i / (steps - 1);
-              const targetY = startP - progress * (startP - endP);
-              const noise = Math.sin(i * 1.5) * 15;
-              const open = targetY + noise;
-              const isGreen = Math.random() > 0.3;
-              const close = isGreen
-                ? open - (Math.random() * 20 + 5)
-                : open + Math.random() * 10;
-
-              return {
-                x: 50 + i * 35,
-                open,
-                close,
-                high: Math.min(open, close) - Math.random() * 10,
-                low: Math.max(open, close) + Math.random() * 10,
-              };
-            });
-
-            const visibleGoldCandles = base.slice(
-              0,
-              Math.floor(state.progress * steps) + 1
-            );
-            candles = visibleGoldCandles;
-
-            const goldTargetY = 50;
-
-            overlay = (
-              <g>
-                <line
-                  x1="50"
-                  y1={goldTargetY}
-                  x2="550"
-                  y2={goldTargetY}
-                  stroke="#10b981"
-                  strokeWidth="2"
-                  strokeDasharray="5,5"
-                />
-                <text
-                  x="480"
-                  y={goldTargetY - 10}
-                  fill="#10b981"
-                  fontSize="12"
-                >
-                  MORE PROBABLE HIGH
-                </text>
-
-                <g transform={`translate(300, ${goldTargetY})`}>
-                  <circle
-                    r={state.progress * 300}
-                    fill="none"
+              </>
+            )}
+          </g>
+        );
+      } else if (mode === "london_session") {
+        candles = generateCandles(1.2, 12, "up");
+        const lonLowY = 300;
+        const lonHighY = 100;
+        overlay = (
+          <g>
+            <line x1="50" y1={lonHighY} x2="550" y2={lonHighY} stroke="#10b981" strokeWidth="2" strokeDasharray="5,5" opacity="0.5" />
+            <line x1="50" y1={lonLowY} x2="550" y2={lonLowY} stroke="#ef4444" strokeWidth="2" strokeDasharray="5,5" opacity="0.5" />
+            {state.showProb && (
+              <>
+                <g transform="translate(450, 50)">
+                  <rect
+                    width="90"
+                    height="36"
+                    fill="#1e293b"
                     stroke="#10b981"
-                    strokeWidth="1"
-                    opacity={1 - state.progress}
+                    rx="4"
+                    style={{ filter: "drop-shadow(0 0 10px rgba(16,185,129,0.4))" }}
                   />
-                  <circle
-                    r={(state.progress * 300) / 2}
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="1"
-                    opacity={1 - state.progress}
-                  />
+                  <text x="45" y="23" textAnchor="middle" fill="#10b981" fontSize="14" fontWeight="bold">
+                    70.3%
+                  </text>
                 </g>
-
-                {visibleGoldCandles.length > 0 && (
-                  <path
-                    d={`M ${
-                      visibleGoldCandles[visibleGoldCandles.length - 1].x
-                    },${
-                      visibleGoldCandles[visibleGoldCandles.length - 1].close
-                    } L 350,${goldTargetY + 20}`}
-                    fill="none"
-                    stroke="#10b981"
-                    strokeWidth="2"
-                    strokeDasharray="5,5"
-                    opacity="0.3"
-                  />
-                )}
-              </g>
-            );
-            break;
-          }
-
-          case "offer": {
-            candles = [];
-            overlay = (
+                <g transform="translate(450, 310)">
+                  <rect width="90" height="36" fill="#1e293b" stroke="#ef4444" rx="4" />
+                  <text x="45" y="23" textAnchor="middle" fill="#ef4444" fontSize="14" fontWeight="bold">
+                    29.7%
+                  </text>
+                </g>
+              </>
+            )}
+          </g>
+        );
+      } else if (mode === "metrics") {
+        candles = generateCandles(1.5, 10, "up");
+        const sweepHighY = 120;
+        overlay = (
+          <g>
+            <line x1="50" y1={sweepHighY} x2="550" y2={sweepHighY} stroke="#64748b" strokeWidth="1" strokeDasharray="5,5" />
+            <text x="560" y={sweepHighY} fill="#64748b" fontSize="12" alignmentBaseline="middle">
+              Sweep Level
+            </text>
+          </g>
+        );
+      } else if (mode === "silver_bullet") {
+        candles = [];
+        overlay = (
+          <g>
+            <line x1="50" y1="200" x2="550" y2="200" stroke="#334155" strokeWidth="2" />
+            {[
+              { label: "London", x: 100, color: "#3b82f6", prob: "68% High" },
+              { label: "NY AM", x: 230, color: "#10b981", prob: "72% Low" },
+              { label: "NY PM", x: 360, color: "#f59e0b", prob: "60% High" },
+              { label: "Power Hr", x: 490, color: "#ef4444", prob: "Consol." },
+            ].map((win, i) => (
               <g
+                key={i}
+                opacity={state.progress > i * 0.25 ? 1 : 0.2}
+                transform={`translate(${win.x}, 200)`}
+              >
+                <circle r="8" fill={win.color} />
+                <line x1="0" y1="0" x2="0" y2="-40" stroke={win.color} strokeWidth="1" strokeDasharray="2,2" />
+                <rect x="-35" y="-70" width="70" height="30" rx="4" fill="#1e293b" stroke={win.color} />
+                <text x="0" y="-50" textAnchor="middle" fill={win.color} fontSize="10" fontWeight="bold">
+                  {win.label}
+                </text>
+                <g opacity={state.progress > i * 0.25 + 0.1 ? 1 : 0} transform="translate(0, 30)">
+                  <text x="0" y="0" textAnchor="middle" fill="white" fontSize="10">
+                    {win.prob}
+                  </text>
+                </g>
+              </g>
+            ))}
+            <text x="300" y="320" textAnchor="middle" fill="#94a3b8" fontSize="14">
+              4 Distinct Algorithms. 4 Unique Opportunities.
+            </text>
+          </g>
+        );
+      } else if (mode === "confluence") {
+        const cProbHighY = 80;
+        let allCandles = [
+          { x: 60, open: 220, close: 245, high: 215, low: 250 },
+          { x: 90, open: 245, close: 310, high: 245, low: 315 },
+          { x: 120, open: 310, close: 320, high: 290, low: 330 },
+          { x: 150, open: 320, close: 300, high: 300, low: 325 },
+          { x: 180, open: 300, close: 260, high: 260, low: 305 },
+          { x: 210, open: 260, close: 230, high: 225, low: 265 },
+          { x: 240, open: 230, close: 200, high: 195, low: 255 },
+          { x: 270, open: 200, close: 150, high: 145, low: 205 },
+          { x: 300, open: 150, close: 100, high: 95, low: 155 },
+        ];
+        const visible = allCandles.slice(0, Math.floor(state.progress * allCandles.length) + 1);
+        candles = visible;
 
+        const fvgTop = 250;
+        const fvgBottom = 290;
+        const fvgPresent = visible.length > 2;
+        const isInverted = visible.length > 5;
+        const fvgColor = isInverted ? "#10b981" : "#ef4444";
+        const fvgOpacity = isInverted ? 0.2 : 0.3;
+        const fvgText = isInverted ? "iFVG (Inverted)" : "Bearish FVG";
+
+        overlay = (
+          <g>
+            {fvgPresent && (
+              <g>
+                <rect
+                  x="60"
+                  y={fvgTop}
+                  width="500"
+                  height={fvgBottom - fvgTop}
+                  fill={fvgColor}
+                  opacity={fvgOpacity}
+                />
+                <line
+                  x1="60"
+                  y1={fvgTop}
+                  x2="560"
+                  y2={fvgTop}
+                  stroke={fvgColor}
+                  strokeWidth="1"
+                  strokeDasharray="2,2"
+                />
+                <line
+                  x1="60"
+                  y1={fvgBottom}
+                  x2="560"
+                  y2={fvgBottom}
+                  stroke={fvgColor}
+                  strokeWidth="1"
+                  strokeDasharray="2,2"
+                />
+                <text x="550" y={fvgTop + 25} textAnchor="end" fill={fvgColor} fontSize="12" fontWeight="bold">
+                  {fvgText}
+                </text>
+              </g>
+            )}
+            <line
+              x1="50"
+              y1={cProbHighY}
+              x2="550"
+              y2={cProbHighY}
+              stroke="#10b981"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+              opacity="0.5"
+            />
+            <text x="500" y={cProbHighY - 10} fill="#10b981" fontSize="10">
+              Probable High Target
+            </text>
+            {visible.length > 6 && (
+              <g transform="translate(255, 250)">
+                <circle r="4" fill="#10b981" />
+                <text x="10" y="5" fill="#10b981" fontSize="10" fontWeight="bold">
+                  ENTRY
+                </text>
+              </g>
+            )}
+          </g>
+        );
+      } else if (mode === "psychology") {
+        candles = [];
+        overlay = (
+          <g>
+            <path
+              d="M 50,300 C 80,200 100,350 150,280 S 200,380 250,300 S 300,150 350,320"
+              fill="none"
+              stroke="#ef4444"
+              strokeWidth="1"
+              opacity={1 - state.progress}
+            />
+            <text x="100" y="360" fill="#ef4444" fontSize="12" opacity={1 - state.progress}>
+              EMOTIONAL CHAOS
+            </text>
+            <path
+              d={`M 50,300 L ${50 + 500 * state.progress}, ${300 - 200 * state.progress}`}
+              fill="none"
+              stroke="#10b981"
+              strokeWidth="4"
+            />
+            <g transform={`translate(${50 + 500 * state.progress}, ${300 - 200 * state.progress})`}>
+              {state.progress > 0 && <circle r="6" fill="#10b981" />}
+            </g>
+            <text x="300" y="100" textAnchor="middle" fill="white" fontSize="24" opacity={state.progress}>
+              NO EMOTION. PURE STATS.
+            </text>
+          </g>
+        );
+      } else if (mode === "gold") {
+        const startP = 350;
+        const endP = 50;
+        const steps = 15;
+
+        let allCandles = Array.from({ length: steps }).map((_, i) => {
+          const progress = i / (steps - 1);
+          const targetY = startP - progress * (startP - endP);
+          const noise = Math.sin(i * 1.5) * 15;
+          const open = targetY + noise;
+          const isGreen = Math.random() > 0.3;
+          const close = isGreen ? open - (Math.random() * 20 + 5) : open + Math.random() * 10;
+
+          return {
+            x: 50 + i * 35,
+            open,
+            close,
+            high: Math.min(open, close) - Math.random() * 10,
+            low: Math.max(open, close) + Math.random() * 10,
+          };
+        });
+
+        const visibleGoldCandles = allCandles.slice(0, Math.floor(state.progress * steps) + 1);
+        candles = visibleGoldCandles;
+        const goldTargetY = 50;
+
+        overlay = (
+          <g>
+            <line
+              x1="50"
+              y1={goldTargetY}
+              x2="550"
+              y2={goldTargetY}
+              stroke="#10b981"
+              strokeWidth="2"
+              strokeDasharray="5,5"
+            />
+            <text x="480" y={goldTargetY - 10} fill="#10b981" fontSize="12">
+              MORE PROBABLE HIGH
+            </text>
+          </g>
+        );
+      } else if (mode === "offer") {
+        candles = [];
+        overlay = (
+          <g>
+            <g opacity={state.progress > 0.2 ? 0.3 : 1}>
+              <text x="150" y="80" textAnchor="middle" fill="#ef4444" fontSize="16" fontWeight="bold">
+                GUESSING
+              </text>
+              <path
+                d="M 50,150 L 100,100 L 150,200 L 200,120 L 250,250"
+                fill="none"
+                stroke="#ef4444"
+                strokeWidth="2"
+              />
+              <text x="150" y="280" textAnchor="middle" fill="#ef4444" fontSize="14">
+                - LOSING -
+              </text>
+            </g>
+            <line x1="300" y1="50" x2="300" y2="350" stroke="#334155" strokeWidth="1" strokeDasharray="5,5" />
+            <g opacity={state.progress}>
+              <text x="450" y="80" textAnchor="middle" fill="#10b981" fontSize="16" fontWeight="bold">
+                STATISTICS
+              </text>
+              <path
+                d="M 350,250 L 400,230 L 420,240 L 450,200 L 480,210 L 550,100"
+                fill="none"
+                stroke="#10b981"
+                strokeWidth="4"
+              />
+              <text x="450" y="280" textAnchor="middle" fill="#10b981" fontSize="14" fontWeight="bold">
+                + PROFITABLE +
+              </text>
+            </g>
+          </g>
+        );
+      } else {
+        candles = generateCandles(2.3, 12, "volatile");
+      }
+
+      return (
+        <svg
+          width="100%"
+          height="100%"
+          viewBox={`0 0 ${width} ${height}`}
+          className="w-full h-full p-4"
+        >
+          {candles.map((c, i) => (
+            <g key={i}>
+              <line
+                x1={c.x}
+                y1={c.high}
+                x2={c.x}
+                y2={c.low}
+                stroke={c.open > c.close ? "#ef4444" : "#10b981"}
+                strokeWidth="1"
+              />
+              <rect
+                x={c.x - 8}
+                y={Math.min(c.open, c.close)}
+                width="16"
+                height={Math.abs(c.close - c.open) || 1}
+                fill={c.open > c.close ? "#ef4444" : "#10b981"}
+              />
+            </g>
+          ))}
+          {overlay}
+        </svg>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<HermanProbabilityMaps />);
+  </script>
+</body>
+</html>
