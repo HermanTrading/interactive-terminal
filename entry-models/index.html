@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Herman Trading – Entry Models Guide</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background:#020617; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center bg-slate-950">
+  <div id="root" class="w-full p-4"></div>
+
+  <!-- React + ReactDOM + Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Prosty placeholder zamiast lucide-react
+    const Icon = ({ className, size = 20 }) => (
+      <div
+        className={
+          (className || "") +
+          " flex items-center justify-center rounded-full bg-slate-800/70 text-slate-200"
+        }
+        style={{ width: size, height: size }}
+      >
+        <span className="text-[9px]">★</span>
+      </div>
+    );
+
+    // Mapy ikon
+    const ArrowRight = Icon;
+    const ArrowLeft = Icon;
+    const BookOpen = Icon;
+    const HelpCircle = Icon;
+    const CheckCircle = Icon;
+    const XCircle = Icon;
+    const TrendingUp = Icon;
+    const BarChart2 = Icon;
+    const Info = Icon;
+    const RefreshCw = Icon;
+
+    // --- DATA & CONTENT ---
+
+    const models = [
+      {
+        id: 'fvg',
+        title: 'FVG Entry Model',
+        subtitle: 'Fair Value Gap',
+        description: `
+      ### What is it?
+      A Fair Value Gap (FVG) occurs when there is a strong imbalance in price delivery. In a bullish scenario, it happens when a single candle's range is so expansive that the previous candle's high and the next candle's low do not overlap. This leaves a "gap" where only buying occurred, leaving pending sell-side liquidity unfilled.
+
+      ### How to use it?
+      1. **Identify the Move:** Look for a strong displacement move up that breaks market structure (MSS).
+      2. **Find the Gap:** Locate the 3-candle sequence where the gap exists between Candle 1's High and Candle 3's Low.
+      3. **The Entry:** Wait for price to retrace *into* this gap. The market often seeks to "rebalance" this inefficient price action.
+      4. **Stop Loss:** Typically placed below the swing low formed before the displacement.
+    `,
+        quiz: {
+          question: "What creates a bullish Fair Value Gap (FVG)?",
+          options: [
+            "Price moving slowly sideways",
+            "A 3-candle sequence where the 1st candle's high and 3rd candle's low do not overlap",
+            "When the market hits a round psychological number",
+            "A gap between the market close and open"
+          ],
+          correct: 1
+        },
+        visualType: 'fvg'
+      },
+      {
+        id: 'breaker',
+        title: 'Breaker Block Entry Model',
+        subtitle: 'Mitigation of Failed Supply/Demand',
+        description: `
+      ### What is it?
+      A Bullish Breaker Block is a range of price (usually a previous up-close candle or swing high) that formed prior to a liquidity sweep. Traditionally, this level acted as resistance. However, once price aggressively breaks *through* it to the upside, that old resistance flips into support.
+
+      ### How to use it?
+      1. **The Setup:** Identify a Low, then a High, then a Lower Low (Liquidity Sweep).
+      2. **The Break:** Price must reverse from the Lower Low and break aggressively *above* the previous High.
+      3. **The Entry:** That broken High (the Breaker) is now your entry zone. Place your limit orders at the retest of this level.
+      4. **Why it works:** Shorts who sold at that High are now trapped underwater; when price returns, they exit at breakeven, fueling the buy pressure.
+    `,
+        quiz: {
+          question: "In a Bullish Breaker model, what old level acts as new support?",
+          options: [
+            "The lowest low",
+            "The swing high that formed between the Low and the Lower Low",
+            "The open of the day",
+            "The previous week's low"
+          ],
+          correct: 1
+        },
+        visualType: 'breaker'
+      },
+      {
+        id: 'ifvg',
+        title: 'iFVG Entry Model',
+        subtitle: 'Inversion Fair Value Gap',
+        description: `
+      ### What is it?
+      An Inversion FVG is a standard Fair Value Gap that failed to hold price. For example, a Bearish FVG typically pushes price down. If price blasts *up* through a Bearish FVG, that "failed" resistance zone flips its polarity and becomes a strong support level.
+
+      ### How to use it?
+      1. **Spot the Failure:** Identify an opposing FVG (e.g., a Bearish FVG from a down move).
+      2. **The Violation:** Watch for a strong candle close *through* and above that FVG.
+      3. **The Entry:** Use the area of the broken FVG as your entry support.
+      4. **Context:** This is powerful because it signals a complete shift in order flow—sellers have been overrun.
+    `,
+        quiz: {
+          question: "What defines an Inversion FVG?",
+          options: [
+            "An FVG that is very large",
+            "An FVG that price respects perfectly",
+            "An FVG that gets violated/broken and then acts as the opposite support/resistance",
+            "An FVG found only on the 1-minute chart"
+          ],
+          correct: 2
+        },
+        visualType: 'ifvg'
+      },
+      {
+        id: 'premium_discount',
+        title: 'Premium/Discount Entry',
+        subtitle: 'Pricing Valuation',
+        description: `
+      ### What is it?
+      This model relies on the logic that you should "Buy Low (Discount)" and "Sell High (Premium)." It splits a dealing range (a defined swing from low to high) into two halves. The lower 50% is Discount, and the upper 50% is Premium.
+
+      ### How to use it?
+      1. **Define the Range:** Identify a clear swing low and the subsequent swing high after a market structure break.
+      2. **Measure:** Use a Fibonacci tool or simple box to find the 50% equilibrium point.
+      3. **The Rule:** **Never** buy in the Premium (top half). **Only** look for buy setups (like FVGs or OBs) inside the Discount (bottom half).
+      4. **The Entry:** Wait for price to drop below the 50% level before executing a long.
+    `,
+        quiz: {
+          question: "Where should you look for long (buy) entries in a dealing range?",
+          options: [
+            "Anywhere above the 50% level",
+            "In the Premium zone",
+            "In the Discount zone (below 50%)",
+            "Exactly at the high"
+          ],
+          correct: 2
+        },
+        visualType: 'pd'
+      },
+      {
+        id: 'ob',
+        title: 'OB Entry Model',
+        subtitle: 'Order Block',
+        description: `
+      ### What is it?
+      A Bullish Order Block (OB) is specifically the last down-close candle (bearish candle) before a strong impulsive move up that breaks market structure. It represents the specific footprint where institutions accumulated long positions.
+
+      ### How to use it?
+      1. **Identification:** Find the move that broke structure. Look backward to the origin of that move.
+      2. **The Candle:** Isolate the last down candle.
+      3. **The Entry:** Highlight the body of that candle (Open to Close) or the entire range (High to Low). Place limits at the Open or the 50% mean threshold of the Order Block.
+      4. **Confirmation:** Price should tap this block and react quickly.
+    `,
+        quiz: {
+          question: "Which candle represents a Bullish Order Block?",
+          options: [
+            "The last up candle before a drop",
+            "The last down candle before a strong impulsive move up",
+            "Any doji candle",
+            "The longest candle in the trend"
+          ],
+          correct: 1
+        },
+        visualType: 'ob'
+      },
+      {
+        id: 'ote',
+        title: 'OTE Entry Model',
+        subtitle: 'Optimal Trade Entry',
+        description: `
+      ### What is it?
+      OTE stands for Optimal Trade Entry. It is a specific Fibonacci retracement zone that offers a high probability of reversal with a tight stop loss. The "sweet spot" lies between the 62% and 79% retracement levels.
+
+      ### How to use it?
+      1. **Draw Fibs:** Anchor your Fibonacci tool from the Swing Low to the Swing High of the impulse leg.
+      2. **The Levels:** Focus on 0.618 (62%), 0.705, and 0.79 (79%).
+      3. **The Entry:** The 0.705 level is often considered the institutional entry point.
+      4. **Confluence:** It is most powerful when the OTE zone aligns with another PD Array like an Order Block or FVG.
+    `,
+        quiz: {
+          question: "What are the classic Fibonacci levels for OTE?",
+          options: [
+            "0.236, 0.382, 0.50",
+            "0.618, 0.705, 0.79",
+            "1.0, 1.272, 1.618",
+            "0.88, 0.90, 0.99"
+          ],
+          correct: 1
+        },
+        visualType: 'ote'
+      }
+    ];
+
+    // --- VISUAL COMPONENTS ---
+
+    const ChartPath = () => (
+      <path
+        d="M 20 120 L 50 180 L 80 140 L 110 240 L 160 100 L 200 180 L 260 40"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="text-slate-700"
+      />
+    );
+
+    const Visualizer = ({ type }) => {
+      return (
+        <div className="relative w-full h-64 bg-slate-50 border border-slate-200 rounded-xl overflow-hidden shadow-inner">
+          <div
+            className="absolute inset-0 opacity-10"
+            style={{
+              backgroundImage:
+                'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)',
+              backgroundSize: '20px 20px'
+            }}
+          ></div>
+
+          <svg viewBox="0 0 300 300" className="w-full h-full p-4">
+            {type === 'fvg' && (
+              <>
+                <rect x="125" y="160" width="160" height="40" fill="rgba(34,197,94,0.2)" stroke="#22c55e" strokeWidth="1" />
+                <text x="205" y="215" textAnchor="middle" className="text-[10px] font-bold fill-green-700">FVG ZONE (Buy)</text>
+                <ChartPath />
+                <circle cx="125" cy="200" r="2" fill="#22c55e" />
+                <circle cx="139" cy="160" r="2" fill="#22c55e" />
+                <circle cx="200" cy="180" r="5" fill="#22c55e" stroke="white" strokeWidth="2" />
+              </>
+            )}
+
+            {type === 'breaker' && (
+              <>
+                <rect x="70" y="130" width="230" height="20" fill="rgba(234,179,8,0.2)" stroke="rgba(234,179,8,0.8)" strokeWidth="1" />
+                <text x="250" y="125" textAnchor="end" className="text-[10px] font-bold fill-yellow-700">Breaker (Old High)</text>
+                <ChartPath />
+                <circle cx="80" cy="140" r="4" fill="#eab308" />
+                <circle cx="200" cy="180" r="5" fill="#eab308" stroke="white" strokeWidth="2">
+                  <animate attributeName="cy" from="180" to="40" dur="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="cx" from="200" to="260" dur="1.5s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="1;0" dur="1.5s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="200" cy="180" r="3" fill="#eab308" />
+              </>
+            )}
+
+            {type === 'ifvg' && (
+              <>
+                <rect x="95" y="180" width="30" height="30" fill="rgba(239,68,68,0.2)" stroke="rgba(239,68,68,0.6)" strokeDasharray="2 2" />
+                <text x="85" y="195" textAnchor="end" className="text-[9px] font-bold fill-red-500">Bearish FVG</text>
+                <rect x="125" y="180" width="140" height="30" fill="rgba(34,197,94,0.2)" stroke="#22c55e" />
+                <text x="200" y="225" textAnchor="middle" className="text-[10px] font-bold fill-green-700">Inv. FVG Zone</text>
+                <ChartPath />
+                <circle cx="135" cy="150" r="6" fill="#22c55e" stroke="white" strokeWidth="2" />
+                <text x="135" y="140" textAnchor="middle" className="text-[10px] font-bold fill-green-700">ENTRY (Break)</text>
+                <line x1="135" y1="180" x2="135" y2="150" stroke="#22c55e" strokeWidth="1" strokeDasharray="2 2" />
+              </>
+            )}
+
+            {type === 'pd' && (
+              <>
+                <rect x="110" y="100" width="150" height="70" fill="rgba(239,68,68,0.1)" />
+                <rect x="110" y="170" width="150" height="70" fill="rgba(34,197,94,0.1)" />
+                <line x1="110" y1="170" x2="260" y2="170" stroke="#666" strokeWidth="1" strokeDasharray="4 4" />
+                <text x="120" y="120" className="text-[10px] font-bold fill-red-500">PREMIUM</text>
+                <text x="120" y="230" className="text-[10px] font-bold fill-green-500">DISCOUNT</text>
+                <ChartPath />
+                <circle cx="200" cy="180" r="4" fill="#22c55e" />
+              </>
+            )}
+
+            {type === 'ob' && (
+              <>
+                <rect x="100" y="220" width="120" height="30" fill="rgba(59,130,246,0.2)" stroke="rgba(59,130,246,0.5)" />
+                <text x="160" y="260" textAnchor="middle" className="text-[10px] font-bold fill-blue-600">Order Block (OB)</text>
+                <ChartPath />
+                <path d="M 200 180 L 200 220" stroke="#3b82f6" strokeWidth="1" strokeDasharray="2 2" />
+                <circle cx="200" cy="180" r="4" fill="#3b82f6" />
+              </>
+            )}
+
+            {type === 'ote' && (
+              <>
+                <line x1="140" y1="100" x2="240" y2="100" stroke="#ccc" strokeWidth="1" />
+                <text x="242" y="100" className="text-[8px] fill-slate-400">0</text>
+                <line x1="140" y1="186" x2="240" y2="186" stroke="orange" strokeWidth="1" />
+                <text x="242" y="186" className="text-[8px] fill-orange-500">0.618</text>
+                <line x1="140" y1="198" x2="240" y2="198" stroke="orange" strokeWidth="1" />
+                <text x="242" y="198" className="text-[8px] fill-orange-500">0.705</text>
+                <line x1="140" y1="210" x2="240" y2="210" stroke="orange" strokeWidth="1" />
+                <text x="242" y="210" className="text-[8px] fill-orange-500">0.79</text>
+                <line x1="140" y1="240" x2="240" y2="240" stroke="#ccc" strokeWidth="1" />
+                <text x="242" y="240" className="text-[8px] fill-slate-400">1</text>
+                <ChartPath />
+                <circle cx="200" cy="180" r="4" fill="orange" />
+              </>
+            )}
+
+            <text x="110" y="260" textAnchor="middle" className="text-[10px] fill-slate-400">Liquidity Sweep</text>
+            <line x1="20" y1="242" x2="110" y2="242" stroke="#94a3b8" strokeWidth="1" />
+          </svg>
+        </div>
+      );
+    };
+
+    // --- MAIN APP COMPONENT ---
+
+    function EntryModelsExperience() {
+      const [currentIndex, setCurrentIndex] = useState(0);
+      const [showQuiz, setShowQuiz] = useState(false);
+      const [selectedOption, setSelectedOption] = useState(null);
+      const [isCorrect, setIsCorrect] = useState(null);
+      const [completedCards, setCompletedCards] = useState([]);
+
+      const currentModel = models[currentIndex];
+
+      const handleNext = () => {
+        if (currentIndex < models.length - 1) {
+          setCurrentIndex(curr => curr + 1);
+          resetQuiz();
+        }
+      };
+
+      const handlePrev = () => {
+        if (currentIndex > 0) {
+          setCurrentIndex(curr => curr - 1);
+          resetQuiz();
+        }
+      };
+
+      const resetQuiz = () => {
+        setShowQuiz(false);
+        setSelectedOption(null);
+        setIsCorrect(null);
+      };
+
+      const handleOptionSelect = (index) => {
+        setSelectedOption(index);
+        const correct = index === currentModel.quiz.correct;
+        setIsCorrect(correct);
+        if (correct && !completedCards.includes(currentIndex)) {
+          setCompletedCards([...completedCards, currentIndex]);
+        }
+      };
+
+      const renderDescription = (text) => {
+        return text.split('\n').map((line, i) => {
+          if (line.trim().startsWith('###')) {
+            return (
+              <h3
+                key={i}
+                className="text-lg font-bold text-indigo-900 dark:text-indigo-300 mt-4 mb-2"
+              >
+                {line.replace('###', '')}
+              </h3>
+            );
+          }
+          const parts = line.split(/(\*\*.*?\*\*)/);
+          return (
+            <p
+              key={i}
+              className="text-slate-600 dark:text-slate-300 mb-2 leading-relaxed text-sm sm:text-base"
+            >
+              {parts.map((part, j) => {
+                if (part.startsWith('**') && part.endsWith('**')) {
+                  return (
+                    <strong
+                      key={j}
+                      className="font-semibold text-slate-800 dark:text-slate-100"
+                    >
+                      {part.slice(2, -2)}
+                    </strong>
+                  );
+                }
+                return part;
+              })}
+            </p>
+          );
+        });
+      };
+
+      return (
+        <div className="min-h-screen bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 p-4 font-sans flex flex-col items-center">
+          {/* Header */}
+          <div className="w-full max-w-4xl flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+                Trade Entry Models
+              </h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Interactive Mastery Guide</p>
+            </div>
+            <div className="flex items-center gap-2 bg-white dark:bg-slate-800 px-4 py-2 rounded-full shadow-sm">
+              <CheckCircle size={18} className="text-green-500" />
+              <span className="font-bold text-sm">
+                {completedCards.length} / {models.length} Mastered
+              </span>
+            </div>
+          </div>
+
+          {/* Main Card Container */}
+          <div className="w-full max-w-4xl bg-white dark:bg-slate-800 rounded-3xl shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+            {/* Left: Visual */}
+            <div className="w-full md:w-5/12 bg-slate-50 dark:bg-slate-800/50 p-6 border-r border-slate-100 dark:border-slate-700 flex flex-col">
+              <div className="mb-6">
+                <span className="inline-block px-3 py-1 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-bold uppercase tracking-wide mb-2">
+                  Model {currentIndex + 1} of {models.length}
+                </span>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">
+                  {currentModel.title}
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 mt-1">{currentModel.subtitle}</p>
+              </div>
+
+              <div className="flex-grow flex flex-col justify-center">
+                <Visualizer type={currentModel.visualType} />
+                <p className="text-center text-xs text-slate-400 mt-3 italic">
+                  *Schematic Representation of Bullish Setup
+                </p>
+              </div>
+
+              {/* Mobile nav */}
+              <div className="md:hidden flex justify-between mt-6">
+                <button
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                  className="p-2 rounded-full bg-slate-200 dark:bg-slate-700 disabled:opacity-50"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  disabled={currentIndex === models.length - 1}
+                  className="p-2 rounded-full bg-indigo-600 text-white disabled:opacity-50"
+                >
+                  <ArrowRight size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Right: Content & Quiz */}
+            <div className="w-full md:w-7/12 p-6 md:p-8 relative overflow-y-auto">
+              {!showQuiz ? (
+                <div>
+                  <div className="flex items-center gap-2 mb-4 text-indigo-600 dark:text-indigo-400">
+                    <BookOpen size={20} />
+                    <span className="font-bold text-sm uppercase">Concept Breakdown</span>
+                  </div>
+                  <div className="prose dark:prose-invert max-w-none mb-8">
+                    {renderDescription(currentModel.description)}
+                  </div>
+                  <div className="mt-auto pt-6 border-t border-slate-100 dark:border-slate-700 flex flex-col sm:flex-row gap-3">
+                    <button
+                      onClick={() => setShowQuiz(true)}
+                      className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all shadow-lg shadow-indigo-200 dark:shadow-none"
+                    >
+                      <HelpCircle size={20} />
+                      Take Quiz
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="h-full flex flex-col">
+                  <button
+                    onClick={() => setShowQuiz(false)}
+                    className="mb-4 text-slate-400 hover:text-slate-600 flex items-center gap-1 text-sm font-medium"
+                  >
+                    <ArrowLeft size={16} /> Back to Lesson
+                  </button>
+
+                  <div className="flex-grow flex flex-col justify-center">
+                    <h3 className="text-xl font-bold mb-6 text-slate-800 dark:text-white">
+                      {currentModel.quiz.question}
+                    </h3>
+
+                    <div className="space-y-3">
+                      {currentModel.quiz.options.map((option, idx) => {
+                        let btnClass =
+                          "w-full p-4 rounded-xl border-2 text-left transition-all duration-200 flex justify-between items-center ";
+
+                        if (selectedOption === null) {
+                          btnClass +=
+                            "border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 dark:border-slate-700 dark:hover:bg-slate-700";
+                        } else if (idx === currentModel.quiz.correct) {
+                          btnClass +=
+                            "border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300";
+                        } else if (selectedOption === idx && idx !== currentModel.quiz.correct) {
+                          btnClass +=
+                            "border-red-500 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300";
+                        } else {
+                          btnClass += "border-slate-100 opacity-50 dark:border-slate-800";
+                        }
+
+                        return (
+                          <button
+                            key={idx}
+                            onClick={() => selectedOption === null && handleOptionSelect(idx)}
+                            className={btnClass}
+                            disabled={selectedOption !== null}
+                          >
+                            <span className="font-medium">{option}</span>
+                            {selectedOption !== null &&
+                              idx === currentModel.quiz.correct && (
+                                <CheckCircle size={20} className="text-green-500" />
+                              )}
+                            {selectedOption === idx &&
+                              idx !== currentModel.quiz.correct && (
+                                <XCircle size={20} className="text-red-500" />
+                              )}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {selectedOption !== null && (
+                      <div
+                        className={
+                          "mt-6 p-4 rounded-lg text-center " +
+                          (isCorrect
+                            ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-200"
+                            : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-200")
+                        }
+                      >
+                        <p className="font-bold mb-2">
+                          {isCorrect ? "Correct! Great job." : "Incorrect. Review the lesson and try again."}
+                        </p>
+                        {!isCorrect && (
+                          <button
+                            onClick={() => resetQuiz()}
+                            className="text-sm underline flex items-center justify-center gap-1 mx-auto"
+                          >
+                            <RefreshCw size={14} /> Retry
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Desktop nav */}
+              <div className="hidden md:flex absolute bottom-6 right-6 gap-3">
+                <button
+                  onClick={handlePrev}
+                  disabled={currentIndex === 0}
+                  className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                  title="Previous Model"
+                >
+                  <ArrowLeft size={20} />
+                </button>
+                <button
+                  onClick={handleNext}
+                  disabled={currentIndex === models.length - 1}
+                  className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 dark:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Next Model"
+                >
+                  <ArrowRight size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Legend */}
+          <div className="mt-8 flex flex-wrap justify-center gap-4 text-xs text-slate-400">
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-green-500/20 border border-green-500 rounded-sm"></div> Buy Zone
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-3 h-3 bg-red-500/20 border border-red-500 rounded-sm"></div> Sell Zone
+            </div>
+            <div className="flex items-center gap-1">
+              <TrendingUp size={12} /> Price Action
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<EntryModelsExperience />);
+  </script>
+</body>
+</html>
