@@ -15,7 +15,7 @@
 <body class="min-h-screen flex items-center justify-center bg-slate-950">
   <div id="root" class="p-4"></div>
 
-  <!-- React + ReactDOM + Babel (do kompilacji JSX w przeglądarce) -->
+  <!-- React + ReactDOM + Babel -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -23,14 +23,13 @@
   <script type="text/babel">
     const { useState } = React;
 
-    // Jeden wspólny placeholder dla wszystkich ikon (zamiast lucide-react)
+    // Proste placeholdery zamiast ikon z lucide-react (tylko wizualka, logika ta sama)
     const Icon = ({ className }) => (
       <div className={className + " rounded-full bg-slate-800 flex items-center justify-center"}>
         <span className="text-[8px] text-slate-300">★</span>
       </div>
     );
 
-    // „Podrabiamy” komponenty, które importowałeś z lucide-react
     const TrendingUp = Icon;
     const BarChart3 = Icon;
     const Clock = Icon;
@@ -86,7 +85,6 @@
       };
 
       const cards = [
-        // --- TU W KARTACH ZOSTAWIŁEM TWÓJ KOD BEZ ZMIAN ---
         // 1. Intro
         {
           id: 'intro',
@@ -141,128 +139,392 @@
           ),
           actions: [{ label: 'The Technology', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
         },
-        // --- TU DALEJ WKLEJAMY CAŁĄ TWOJĄ TABLICĘ `cards` BEZ ZMIAN ---
-        // Żeby nie robić ściany tekstu w tej odpowiedzi:
-        // SKOPIUJ teraz POZOSTAŁĄ CZĘŚĆ swojego kodu `cards = [...]`
-        // od komentarza // 3. Core Tech aż do końca tablicy
-        // i wklej ją tutaj ZA tym komentarzem, w miejsce tego komentarza.
-        // (reszta komponentu niżej już jest gotowa)
-      ];
-
-      const currentCard = cards[currentStep];
-
-      const getThemeColor = (theme) => {
-        switch(theme) {
-          case 'emerald': return 'bg-emerald-500';
-          case 'blue': return 'bg-blue-500';
-          case 'purple': return 'bg-purple-500';
-          case 'yellow': return 'bg-yellow-500';
-          case 'red': return 'bg-red-500';
-          case 'orange': return 'bg-orange-500';
-          case 'indigo': return 'bg-indigo-500';
-          case 'pink': return 'bg-pink-500';
-          case 'teal': return 'bg-teal-500';
-          case 'cyan': return 'bg-cyan-500';
-          default: return 'bg-slate-500';
-        }
-      };
-
-      const currentCardActions = currentCard.actions ?? [];
-
-      return (
-        <div className="w-full max-w-md mx-auto min-h-[640px] bg-slate-950 rounded-xl shadow-2xl overflow-hidden border border-slate-800 flex flex-col font-sans">
-          <div className="bg-slate-900 px-5 py-4 border-b border-slate-800 relative overflow-hidden">
-            <div className={`absolute top-0 right-0 w-32 h-32 ${getThemeColor(currentCard.theme)} blur-[60px] opacity-10 rounded-full pointer-events-none transition-colors duration-500`}></div>
-            <div className="flex items-center justify-between mb-2 relative z-10">
-              <div className="flex items-center gap-2">
-                <div className={`w-2 h-2 ${getThemeColor(currentCard.theme)} rounded-full animate-pulse transition-colors duration-500`}></div>
-                <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">Terminal V2.1</span>
+        // 3. Core Tech
+        {
+          id: 'core_tech',
+          title: 'Probability Maps',
+          subtitle: 'Revolutionary Indicator',
+          icon: <BrainCircuit className="w-8 h-8 text-purple-400" />,
+          theme: 'purple',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                Our flagship product. The first system on TradingView to combine real-time structure detection with historical back-testing.
+              </p>
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 text-center">
+                  <div className="text-purple-400 font-bold text-lg">10yr</div>
+                  <div className="text-[9px] text-slate-500 uppercase">Data</div>
+                </div>
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 text-center">
+                  <div className="text-purple-400 font-bold text-lg">72</div>
+                  <div className="text-[9px] text-slate-500 uppercase">Variants</div>
+                </div>
+                <div className="bg-slate-900 p-2 rounded border border-slate-800 text-center">
+                  <div className="text-purple-400 font-bold text-lg">0ms</div>
+                  <div className="text-[9px] text-slate-500 uppercase">Lag</div>
+                </div>
               </div>
-              <span className="text-[10px] text-slate-500 font-mono">{currentStep + 1} / {cards.length}</span>
             </div>
-            <h1 className="text-white text-lg font-bold tracking-tight relative z-10">Herman Trading</h1>
-          </div>
-
-          <div className="w-full h-1 bg-slate-900">
-            <div
-              className={`h-full transition-all duration-300 ease-out ${getThemeColor(currentCard.theme)}`}
-              style={{ width: `${((currentStep + 1) / cards.length) * 100}%`, boxShadow: '0 0 10px rgba(255,255,255,0.2)' }}
-            ></div>
-          </div>
-
-          <div className="flex-1 p-6 flex flex-col relative">
-            <div key={currentCard.id} className="flex-1 flex flex-col">
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">{currentCard.title}</h2>
-                  <p className="font-medium text-sm uppercase tracking-wider opacity-80 text-slate-400">
-                    {currentCard.subtitle}
-                  </p>
-                </div>
-                <div className="p-3 bg-slate-900/80 rounded-2xl border border-slate-800 shadow-lg backdrop-blur-sm">
-                  {currentCard.icon}
+          ),
+          actions: [{ label: 'Data Foundation', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 4. Data History
+        {
+          id: 'data_history',
+          title: 'The Foundation',
+          subtitle: '2015 – 2025 History',
+          icon: <History className="w-8 h-8 text-yellow-400" />,
+          theme: 'yellow',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                To predict the future, you must understand the past. Our engine is fed with millions of data points.
+              </p>
+              <div className="relative pt-2 pb-2">
+                <div className="h-0.5 w-full bg-slate-700 absolute top-1/2"></div>
+                <div className="flex justify-between relative z-10">
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 bg-slate-500 rounded-full mb-1"></div>
+                    <span className="text-[10px] text-slate-500">2015</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 bg-slate-500 rounded-full mb-1"></div>
+                    <span className="text-[10px] text-slate-500">2018</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-2 h-2 bg-slate-500 rounded-full mb-1"></div>
+                    <span className="text-[10px] text-slate-500">2021</span>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full mb-1 shadow-[0_0_10px_rgba(250,204,21,0.5)]"></div>
+                    <span className="text-[10px] text-yellow-400 font-bold">2025</span>
+                  </div>
                 </div>
               </div>
-
-              <div className="mb-6 flex-1">
-                {currentCard.content}
+              <div className="text-xs text-center text-slate-400 italic">
+                Includes Bull Markets, Bear Markets, and Consolidations.
               </div>
-
-              {expandedSection && currentCard.details && currentCard.details[expandedSection] && (
-                <div className="mb-4">
-                  {currentCard.details[expandedSection]}
-                </div>
-              )}
             </div>
-
-            <div className="mt-auto pt-6 border-t border-slate-900/50">
-              <div className="flex gap-3">
-                {currentStep > 0 && (
-                  <button
-                    onClick={prevStep}
-                    className="px-3 py-3 rounded-xl border border-slate-800 text-slate-500 hover:bg-slate-900 hover:text-white hover:border-slate-600 transition-all active:scale-95"
-                    aria-label="Previous card"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                )}
-
-                {currentCardActions.map((action, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => {
-                      if (action.type === 'next') nextStep();
-                      if (action.type === 'restart') setCurrentStep(0);
-                      if (action.type === 'expand') toggleSection(action.target);
-                    }}
-                    className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold text-sm transition-all duration-200 shadow-lg active:scale-95
-                      ${action.type === 'expand'
-                        ? 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
-                        : 'text-white ' + getThemeColor(currentCard.theme) + ' brightness-90 hover:brightness-110 hover:-translate-y-0.5'
-                      }`}
-                  >
-                    {action.label}
-                    {action.icon}
-                  </button>
+          ),
+          actions: [{ label: 'The Brain', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 5. Variants
+        {
+          id: 'variants',
+          title: '72 Market Variants',
+          subtitle: 'The System "Thinks"',
+          icon: <Layers className="w-8 h-8 text-indigo-400" />,
+          theme: 'indigo',
+          content: (
+            <div className="space-y-3">
+              <p className="text-slate-300 text-sm">
+                The market isn't static. We identified <span className="text-indigo-400 font-bold">72 unique scenarios</span>. The indicator dynamically switches between them in real-time.
+              </p>
+              <div className="grid grid-cols-6 gap-1 opacity-80">
+                {[...Array(18)].map((_, i) => (
+                  <div key={i} className={`h-2 rounded-sm ${i === 7 ? 'bg-indigo-500 animate-pulse' : 'bg-slate-800'}`}></div>
                 ))}
               </div>
+              <div className="flex justify-between items-center text-[10px] text-slate-500 uppercase tracking-wider">
+                <span>Scanning Conditions...</span>
+                <span className="text-indigo-400">Variant #42 Active</span>
+              </div>
             </div>
-          </div>
-
-          <div className="px-6 py-2 bg-slate-950 text-center border-t border-slate-900 flex justify-between items-center">
-            <p className="text-[8px] text-slate-700 uppercase tracking-widest font-mono">Powered by Herman Trading</p>
-            <div className="flex gap-1">
-              <div className="w-1 h-1 rounded-full bg-slate-800"></div>
-              <div className="w-1 h-1 rounded-full bg-slate-800"></div>
-              <div className="w-1 h-1 rounded-full bg-green-900 animate-pulse"></div>
+          ),
+          actions: [
+            { label: 'Variant Logic', type: 'expand', target: 'details', icon: <Search className="w-4 h-4" /> },
+            { label: 'Step 1: Detection', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }
+          ],
+          details: {
+            details: (
+              <div className="mt-3 text-xs bg-slate-900 p-3 rounded text-slate-300 border border-slate-700">
+                <strong className="text-indigo-300">Logic Factors:</strong>
+                <ul className="mt-1 space-y-1 list-disc list-inside text-slate-400">
+                  <li>Session Structure (e.g., Did London break Asia High?)</li>
+                  <li>Volatility Index</li>
+                  <li>Day of Week bias</li>
+                  <li>Time-of-day windows</li>
+                </ul>
+              </div>
+            )
+          }
+        },
+        // 6. Step 1
+        {
+          id: 'step1',
+          title: 'Step 1: Detection',
+          subtitle: 'Scanning the Structure',
+          icon: <Search className="w-8 h-8 text-red-400" />,
+          theme: 'red',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                Upon loading, the system scans the live chart to understand the current environment.
+              </p>
+              <div className="bg-black/40 p-3 rounded border border-slate-800 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Trend Status</span>
+                  <span className="text-xs text-red-400 font-mono">BEARISH</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Volatility</span>
+                  <span className="text-xs text-white font-mono">HIGH (87%)</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-400">Previous Session</span>
+                  <span className="text-xs text-slate-300 font-mono">EXPANDED</span>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      );
-    };
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<HermanTradingExperience />);
-  </script>
-</body>
-</html>
+          ),
+          actions: [{ label: 'Step 2: Matching', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 7. Step 2
+        {
+          id: 'step2',
+          title: 'Step 2: Matching',
+          subtitle: 'Finding the Twin',
+          icon: <Cpu className="w-8 h-8 text-teal-400" />,
+          theme: 'teal',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                The algorithm dives into the 2015-2025 database to find moments where the market looked <span className="italic text-teal-400">identical</span> to right now.
+              </p>
+              <div className="flex items-center justify-center gap-4 py-2">
+                <div className="w-16 h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center">
+                  <div className="text-[10px] text-slate-400 mb-1">NOW</div>
+                  <Activity className="w-6 h-6 text-white" />
+                </div>
+                <div className="text-teal-500 font-bold text-xl animate-pulse">=</div>
+                <div className="w-16 h-20 bg-slate-800 border border-teal-500/50 rounded flex flex-col items-center justify-center shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+                  <div className="text-[10px] text-teal-400 mb-1">2019</div>
+                  <Activity className="w-6 h-6 text-teal-400" />
+                </div>
+              </div>
+              <div className="text-center text-xs text-teal-400 font-medium">
+                "Pattern Match Found: 98.2% Accuracy"
+              </div>
+            </div>
+          ),
+          actions: [{ label: 'Step 3: Projection', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 8. Step 3
+        {
+          id: 'step3',
+          title: 'Step 3: Projection',
+          subtitle: 'The Probability Map',
+          icon: <Target className="w-8 h-8 text-pink-400" />,
+          theme: 'pink',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                Finally, it projects the statistical outcome. Where is price most likely to go?
+              </p>
+              <div className="bg-slate-800 p-4 rounded-lg border border-pink-500/30 relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-1 bg-pink-500 text-[8px] font-bold text-white rounded-bl">LIVE</div>
+                <div className="mb-4">
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs text-green-400 font-bold">High Sweep Prob</span>
+                    <span className="text-xs text-white">72%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-700 rounded-full">
+                    <div className="h-full bg-green-500 rounded-full" style={{width: '72%'}}></div>
+                  </div>
+                </div>
+                <div>
+                  <div className="flex justify-between mb-1">
+                    <span className="text-xs text-red-400 font-bold">Low Sweep Prob</span>
+                    <span className="text-xs text-white">28%</span>
+                  </div>
+                  <div className="w-full h-2 bg-slate-700 rounded-full">
+                    <div className="h-full bg-red-500 rounded-full" style={{width: '28%'}}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [{ label: 'NQ Series Products', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 9. NQ Intro
+        {
+          id: 'nq_intro',
+          title: 'NQ Series',
+          subtitle: 'Nasdaq Specialized',
+          icon: <BarChart3 className="w-8 h-8 text-orange-400" />,
+          theme: 'orange',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                The Nasdaq (NQ) is our primary instrument. We have broken down the day into three critical sessions, each with its own behavior.
+              </p>
+              <div className="flex justify-center gap-4 text-xs text-slate-400">
+                <div className="flex flex-col items-center">
+                  <Globe className="w-5 h-5 mb-1 text-indigo-400" />
+                  Asia
+                </div>
+                <div className="flex flex-col items-center">
+                  <Clock className="w-5 h-5 mb-1 text-blue-400" />
+                  London
+                </div>
+                <div className="flex flex-col items-center">
+                  <TrendingUp className="w-5 h-5 mb-1 text-orange-400" />
+                  New York
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [{ label: 'Asia Session', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 10. Asia
+        {
+          id: 'asia',
+          title: 'Asia Map',
+          subtitle: 'The Foundation',
+          icon: <Globe className="w-8 h-8 text-indigo-300" />,
+          theme: 'indigo',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                The Asia session sets the initial range. This map helps identify consolidation versus early trending moves.
+              </p>
+              <div className="p-3 bg-indigo-950/50 border border-indigo-900 rounded text-center">
+                <span className="text-xs text-indigo-200 font-mono">EST: 18:00 - 02:00</span>
+              </div>
+              <a href="https://www.hermantrading.pro/premium/asia-probability-map-nq" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center py-2 bg-slate-800 hover:bg-slate-700 rounded text-xs text-white transition-colors border border-slate-600">
+                View Asia NQ Map <ExternalLink className="w-3 h-3 ml-2" />
+              </a>
+            </div>
+          ),
+          actions: [{ label: 'London Session', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 11. London
+        {
+          id: 'london',
+          title: 'London Map',
+          subtitle: 'The Manipulation',
+          icon: <Clock className="w-8 h-8 text-blue-500" />,
+          theme: 'blue',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                London often creates the "Judas Swing" (False move). This map calculates the probability of the breakout being real or fake.
+              </p>
+              <DataBar label="False Breakouts" value={65} color="bg-blue-500" />
+              <a href="https://www.hermantrading.pro/premium/london-probability-map-nq" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center py-2 bg-blue-900/20 hover:bg-blue-800/30 rounded text-xs text-blue-200 transition-colors border border-blue-800">
+                View London NQ Map <ExternalLink className="w-3 h-3 ml-2" />
+              </a>
+            </div>
+          ),
+          actions: [{ label: 'New York Session', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 12. New York
+        {
+          id: 'ny',
+          title: 'New York Map',
+          subtitle: 'The Expansion',
+          icon: <TrendingUp className="w-8 h-8 text-orange-500" />,
+          theme: 'orange',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                The main event. High volatility. This map analyzes the US Open (09:30 EST) relative to the London range.
+              </p>
+              <DataBar label="Volatility Index" value={92} color="bg-orange-500" />
+              <a href="https://www.hermantrading.pro/premium/new-york-probability-map-nq" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center py-2 bg-orange-900/20 hover:bg-orange-800/30 rounded text-xs text-orange-200 transition-colors border border-orange-800">
+                View New York NQ Map <ExternalLink className="w-3 h-3 ml-2" />
+              </a>
+            </div>
+          ),
+          actions: [{ label: 'Silver Bullet', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 13. Silver Bullet
+        {
+          id: 'sb_intro',
+          title: 'Silver Bullet',
+          subtitle: 'Time Precision',
+          icon: <Zap className="w-8 h-8 text-yellow-300" />,
+          theme: 'yellow',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                Specific 60-minute windows where algo activity is highest. We have separate statistical maps for each.
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-[10px] uppercase font-bold text-slate-300">
+                <div className="bg-slate-800 p-2 rounded border border-slate-700 text-center">London SB</div>
+                <div className="bg-slate-800 p-2 rounded border border-slate-700 text-center">NY AM SB</div>
+                <div className="bg-slate-800 p-2 rounded border border-slate-700 text-center">NY PM SB</div>
+                <div className="bg-slate-800 p-2 rounded border border-slate-700 text-center text-yellow-400">Power Hour</div>
+              </div>
+              <a href="https://www.hermantrading.pro/premium/silver-bullet-probability-map-nq" target="_blank" rel="noreferrer" className="block text-center text-xs text-yellow-400 hover:text-yellow-300 mt-2">
+                Check Silver Bullet Add-on
+              </a>
+            </div>
+          ),
+          actions: [{ label: 'Gold Maps', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 14. Gold
+        {
+          id: 'gold',
+          title: 'Gold (GC) Maps',
+          subtitle: 'Precious Metal Logic',
+          icon: (
+            <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center text-black font-bold text-xs shadow-lg shadow-yellow-900/50">
+              GC
+            </div>
+          ),
+          theme: 'yellow',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                Gold moves differently than indices. Herman Trading created a dedicated suite just for Gold (GC) contracts.
+              </p>
+              <div className="flex items-center gap-2 bg-yellow-900/10 p-2 rounded border border-yellow-700/30">
+                <ShieldCheck className="w-4 h-4 text-yellow-500" />
+                <span className="text-xs text-yellow-100">Custom Gold Algo Logic</span>
+              </div>
+              <a href="https://www.hermantrading.pro/premium/gold-probability-maps" target="_blank" rel="noreferrer" className="w-full flex items-center justify-center py-2 bg-yellow-600 hover:bg-yellow-500 rounded text-xs text-black font-bold transition-colors shadow-lg shadow-yellow-900/20">
+                View Gold Maps
+              </a>
+            </div>
+          ),
+          actions: [{ label: 'Uniqueness', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 15. Unique
+        {
+          id: 'unique',
+          title: 'World First',
+          subtitle: 'Innovation',
+          icon: <Lock className="w-8 h-8 text-white" />,
+          theme: 'slate',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                No other indicator embeds 10 years of hardcoded back-test data directly into the chart script.
+              </p>
+              <div className="bg-slate-800 p-3 rounded border-l-2 border-white">
+                <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Competitors vs Herman</p>
+                <div className="flex items-center justify-between text-xs text-white">
+                  <span>Subjective Lines</span>
+                  <ArrowRight className="w-3 h-3 text-slate-500" />
+                  <span className="font-bold text-emerald-400">Hard Data</span>
+                </div>
+              </div>
+            </div>
+          ),
+          actions: [{ label: 'Clarity', type: 'next', icon: <ChevronRight className="w-4 h-4" /> }]
+        },
+        // 16. Clarity
+        {
+          id: 'clarity',
+          title: 'Visual Clarity',
+          subtitle: 'Clean Charts',
+          icon: <Activity className="w-8 h-8 text-cyan-400" />,
+          theme: 'cyan',
+          content: (
+            <div className="space-y-4">
+              <p className="text-slate-300 text-sm">
+                Trading is stressful. Your charts shouldn't be. We provide instant visual cues: Green (High Prob) or Red (Low Prob).
+              </p>
+              <div
