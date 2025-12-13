@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading | The Mental Gym</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #030508;
+            --bg-panel: #0a0f18;
+            --neon-purple: #a855f7;
+            --neon-cyan: #06b6d4;
+            --neon-green: #10b981;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+            --font-tech: 'Segoe UI', 'Roboto Mono', monospace;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.08) 0%, transparent 20%);
+        }
+
+        /* --- HUD --- */
+        .hud {
+            height: 70px;
+            background: rgba(10, 15, 24, 0.95);
+            border-bottom: 1px solid rgba(168, 85, 247, 0.3);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 30px;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: var(--font-tech);
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: white;
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+            cursor: pointer;
+        }
+        .brand span { color: var(--neon-cyan); }
+
+        .stats-bar { display: flex; gap: 40px; align-items: center; }
+        .stat-label { font-size: 0.7rem; color: var(--neon-cyan); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: var(--font-tech); font-size: 1.1rem; font-weight: bold; color: var(--neon-purple); text-align: right; }
+
+        .flow-meter { width: 150px; height: 6px; background: #1e293b; border-radius: 3px; overflow: hidden; }
+        .flow-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-purple)); box-shadow: 0 0 10px var(--neon-purple); }
+
+        /* --- LAYOUT --- */
+        .layout { display: flex; height: calc(100vh - 70px); }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px; background: var(--bg-panel); border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .nav-btn {
+            padding: 15px 20px; cursor: pointer; color: var(--text-muted); border-left: 3px solid transparent;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 10px; font-weight: 500;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.03); color: white; }
+        .nav-btn.active {
+            background: linear-gradient(90deg, rgba(168, 85, 247, 0.1), transparent);
+            border-left-color: var(--neon-purple); color: var(--neon-cyan);
+        }
+        /* Completed indicator */
+        .nav-btn.completed i { color: var(--neon-green); }
+
+        /* --- VIEWPORT --- */
+        .viewport {
+            flex: 1; padding: 40px; overflow-y: auto; position: relative;
+            background: radial-gradient(circle at 50% 50%, rgba(0,0,0,0) 0%, rgba(0,0,0,0.8) 100%);
+        }
+
+        .module { max-width: 900px; margin: 0 auto; display: none; animation: holoFade 0.4s ease-out forwards; }
+        .module.active { display: block; }
+
+        @keyframes holoFade {
+            0% { opacity: 0; transform: scale(0.98) translateY(10px); filter: blur(3px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+
+        h1 { font-size: 2.2rem; margin: 0 0 10px 0; background: linear-gradient(90deg, #fff, var(--neon-cyan)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { font-family: var(--font-tech); color: var(--neon-purple); font-size: 0.8rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; }
+        p { line-height: 1.7; color: var(--text-muted); font-size: 1.05rem; margin-bottom: 25px; }
+
+        /* --- WIDGETS --- */
+        .widget-box {
+            background: rgba(15, 20, 30, 0.6); border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 12px; padding: 30px; position: relative; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); backdrop-filter: blur(5px);
+        }
+        
+        .steenbarger-ref {
+            font-family: var(--font-tech); font-size: 0.85rem; color: #d8b4fe;
+            margin-bottom: 15px; border-left: 2px solid var(--neon-purple); padding-left: 10px; font-style: italic;
+        }
+        .steenbarger-ref strong { color: var(--neon-purple); font-style: normal; }
+
+        .btn-main {
+            background: transparent; border: 1px solid var(--neon-cyan); color: var(--neon-cyan);
+            padding: 12px 25px; font-family: var(--font-tech); font-weight: bold; cursor: pointer;
+            border-radius: 4px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-main:hover { background: var(--neon-cyan); color: #000; box-shadow: 0 0 20px rgba(6, 182, 212, 0.4); }
+
+        .btn-next {
+            float: right; margin-top: 30px; background: var(--neon-purple); color: white; border: none;
+            padding: 15px 40px; border-radius: 6px; font-weight: bold; font-size: 1rem;
+            cursor: pointer; display: flex; align-items: center; gap: 10px;
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
+        }
+        .btn-next:hover { transform: translateX(5px); box-shadow: 0 0 25px rgba(168, 85, 247, 0.6); }
+
+        .herman-anchor {
+            margin-top: 40px; background: linear-gradient(90deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+            border-left: 4px solid var(--neon-green); padding: 20px; border-radius: 0 8px 8px 0;
+            display: flex; gap: 20px; align-items: flex-start;
+        }
+        .herman-anchor i { color: var(--neon-green); font-size: 1.5rem; margin-top: 5px; }
+        .herman-anchor strong { display: block; color: var(--neon-green); font-family: var(--font-tech); margin-bottom: 5px; letter-spacing: 1px; }
+
+        /* Specific Widgets */
+        .observer-eye { width: 80px; height: 80px; margin: 0 auto 20px auto; border: 2px solid var(--neon-cyan); border-radius: 50%; position: relative; display: flex; align-items: center; justify-content: center; }
+        .pupil { width: 20px; height: 20px; background: var(--neon-cyan); border-radius: 50%; transition: transform 0.1s; box-shadow: 0 0 10px var(--neon-cyan); }
+        
+        .card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; }
+        .holo-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 20px; text-align: center; cursor: pointer; border-radius: 8px; }
+        .holo-card:hover { border-color: var(--neon-purple); background: rgba(168, 85, 247, 0.1); }
+        .holo-card.selected { border-color: var(--neon-green); background: rgba(16, 185, 129, 0.1); color: var(--neon-green); }
+
+        .thought-box { padding: 15px; border: 1px dashed var(--neon-purple); color: var(--text-muted); margin-bottom: 10px; cursor: pointer; text-align: center; }
+        .thought-box.reframed { border-style: solid; border-color: var(--neon-green); color: var(--neon-green); background: rgba(16, 185, 129, 0.1); }
+
+        .bio-graph { height: 60px; width: 100%; background: #000; position: relative; overflow: hidden; border: 1px solid #333; margin-top: 15px; }
+        .bio-line { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: var(--neon-green); box-shadow: 0 0 5px var(--neon-green); animation: heartbeat 2s infinite linear; }
+        @keyframes heartbeat { 0% { transform: scaleY(1); opacity: 0.5; } 20% { transform: scaleY(4); opacity: 1; } 40% { transform: scaleY(1); opacity: 0.5; } 100% { transform: scaleY(1); opacity: 0.5; } }
+
+    </style>
+</head>
+<body>
+
+<div class="hud">
+    <div class="brand" onclick="goToStep(0)">HERMAN<span>TRADING</span></div>
+    <div class="stats-bar">
+        <div>
+            <div class="stat-label">Neuro Points</div>
+            <div class="stat-value" id="xp-display">0 NP</div>
+        </div>
+        <div>
+            <div class="stat-label">Mental State</div>
+            <div class="flow-meter"><div class="flow-fill" id="flow-bar"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="nav-btn active" id="nav-0" onclick="goToStep(0)"><i class="fas fa-eye"></i> 1. The Observer Self</div>
+        <div class="nav-btn" id="nav-1" onclick="goToStep(1)"><i class="fas fa-dna"></i> 2. Signature Strengths</div>
+        <div class="nav-btn" id="nav-2" onclick="goToStep(2)"><i class="fas fa-sliders-h"></i> 3. The Flow Channel</div>
+        <div class="nav-btn" id="nav-3" onclick="goToStep(3)"><i class="fas fa-sync-alt"></i> 4. Cognitive Reframing</div>
+        <div class="nav-btn" id="nav-4" onclick="goToStep(4)"><i class="fas fa-search-plus"></i> 5. Solution Focus</div>
+        <div class="nav-btn" id="nav-5" onclick="goToStep(5)"><i class="fas fa-heartbeat"></i> 6. Bio-Regulation</div>
+        <div class="nav-btn" id="nav-6" onclick="goToStep(6)"><i class="fas fa-recycle"></i> 7. The Learning Loop</div>
+        <div class="nav-btn" id="nav-7" onclick="goToStep(7)"><i class="fas fa-dungeon"></i> 8. Environment Design</div>
+        <div class="nav-btn" id="nav-8" onclick="goToStep(8)"><i class="fas fa-clipboard-check"></i> 9. Process Goals</div>
+        <div class="nav-btn" id="nav-9" onclick="goToStep(9)"><i class="fas fa-crown"></i> 10. The Master Trader</div>
+    </div>
+
+    <div class="viewport" id="viewport">
+
+        <div class="module active" id="mod-0">
+            <h2>Metacognition Protocol</h2>
+            <h1>1. The Observer Self</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Steenbarger Logic:</strong> "You must divide yourself into two: The Performer (who trades) and The Inner Coach (who watches). Without the Observer, you are just gambling."
+            </div>
+
+            <p>You must develop a 'dual consciousness'. Activate the camera in your mind.</p>
+            
+            <div class="widget-box" onmousemove="moveEye(event)">
+                <h3 style="text-align:center; color:var(--neon-cyan); margin-top:0;">ACTIVATE INNER CAMERA</h3>
+                <div class="observer-eye"><div class="pupil" id="pupil"></div></div>
+                <p style="text-align:center; font-size:0.9rem;">Move your mouse. The Observer is always watching.</p>
+                <div style="text-align:center;">
+                    <button class="btn-main" onclick="activateObserver()">Initialize Observer Mode</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-video"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    The Inner Coach needs a playbook. Herman Trading Data acts as your "External Observer." It gives you the cold stats so your Inner Coach doesn't have to guess.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Find Your Strength <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-1">
+            <h2>Positive Psychology</h2>
+            <h1>2. Signature Strengths</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Brett Says:</strong> "Don't try to trade like someone else. Identify your 'Performance Niche'—the specific conditions where you naturally excel."
+            </div>
+
+            <p>Amplify what you are already good at. Are you a Sniper or a Machine Gunner?</p>
+            
+            <div class="widget-box">
+                <div class="card-grid">
+                    <div class="holo-card" onclick="selectCard(this)">
+                        <i class="fas fa-chess-king" style="font-size:2rem; margin-bottom:10px;"></i><br>Strategic Planner
+                    </div>
+                    <div class="holo-card" onclick="selectCard(this)">
+                        <i class="fas fa-bolt" style="font-size:2rem; margin-bottom:10px;"></i><br>Intuitive Executor
+                    </div>
+                    <div class="holo-card" onclick="selectCard(this)">
+                        <i class="fas fa-shield-alt" style="font-size:2rem; margin-bottom:10px;"></i><br>Risk Manager
+                    </div>
+                    <div class="holo-card" onclick="selectCard(this)">
+                        <i class="fas fa-chart-pie" style="font-size:2rem; margin-bottom:10px;"></i><br>Data Analyst
+                    </div>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-fist-raised"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    Data multiplies your strength. If you are a Risk Manager, Herman helps you calculate Drawdown probability. If you are an Executor, we give you the levels.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: The Flow Channel <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-2">
+            <h2>State Optimization</h2>
+            <h1>3. The Flow Channel</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Steenbarger Logic:</strong> "Flow happens when high skill meets high challenge. If the market challenge exceeds your skill, you feel Anxiety. If skill exceeds challenge, you feel Boredom."
+            </div>
+            
+            <div class="widget-box">
+                <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                    <span style="color:var(--neon-cyan)">BOREDOM</span>
+                    <span style="color:var(--neon-purple); font-weight:bold;">FLOW STATE</span>
+                    <span style="color:var(--neon-cyan)">ANXIETY</span>
+                </div>
+                <input type="range" min="0" max="100" value="50" style="width:100%; accent-color: var(--neon-purple);" oninput="checkFlow(this.value)">
+                <div id="flow-msg" style="text-align:center; margin-top:15px; font-weight:bold;">Adjust to find Flow</div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-water"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    Trading causes anxiety when you lack the skill to interpret the data. Herman Trading acts as a "Skill Booster," instantly balancing the equation and putting you into Flow.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Reframe <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-3">
+            <h2>Cognitive Restructuring</h2>
+            <h1>4. Cognitive Reframing</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Brett Says:</strong> "We trade our beliefs, not the markets. Use 'Cognitive Journaling' to catch negative self-talk and rewrite the script immediately."
+            </div>
+            
+            <div class="widget-box">
+                <h3>Tap to Rewrite Negative Scripts:</h3>
+                <div class="thought-box" onclick="reframe(this, 'I was disciplined not to chase.')">"I missed the move! I'm too slow!"</div>
+                <div class="thought-box" onclick="reframe(this, 'I paid for market information.')">"I lost money, I'm an idiot."</div>
+                <div class="thought-box" onclick="reframe(this, 'The market is providing volatility.')">"The market is rigged against me."</div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-exchange-alt"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    It's easier to reframe when you have facts. "I'm an idiot" is an opinion. "This setup has a 40% failure rate" is a fact provided by Herman Trading. Facts kill negative emotions.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Solution Focus <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-4">
+            <h2>SFBT Therapy</h2>
+            <h1>5. Solution Focus</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Steenbarger Logic:</strong> "Stop psychoanalyzing your failures. Instead, identify your best trading days and simply ask: 'How can I do more of THAT?'"
+            </div>
+            
+            <div class="widget-box">
+                <h3><i class="fas fa-dna"></i> Cloning Excellence</h3>
+                <p>Select elements present in your best trades:</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="btn-main" onclick="toggleSelect(this)">Calm Morning</button>
+                    <button class="btn-main" onclick="toggleSelect(this)">Pre-planned Levels</button>
+                    <button class="btn-main" onclick="toggleSelect(this)">Wait for Close</button>
+                    <button class="btn-main" onclick="toggleSelect(this)">No Social Media</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-copy"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    You want to clone success? We have cloned the patterns of the last 10 years. HermanTrading.pro gives you the conditions of a "Best Day" before the market even opens.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Bio-Regulation <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-5">
+            <h2>Physiological Control</h2>
+            <h1>6. Bio-Regulation</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Brett Says:</strong> "Your body leads your mind. Watch your HRV (Heart Rate Variability). If your breathing is chaotic, your decision-making will be chaotic."
+            </div>
+            
+            <div class="widget-box" style="text-align:center;">
+                <h3><i class="fas fa-wave-square"></i> HRV Stabilizer</h3>
+                <p>Sync your breath to stabilize your physiology.</p>
+                <div class="bio-graph">
+                    <div class="bio-line"></div>
+                </div>
+                <button class="btn-main" style="margin-top:20px;" onclick="addXP(50); this.innerText='STABILIZED'; this.style.borderColor='var(--neon-green)'; this.style.color='var(--neon-green)';">SYNC BREATH</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-lungs"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    Why does your heart race? Uncertainty. 
+                    When you trade with Herman Data, you know the historical probability. Certainty acts as a natural beta-blocker.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Learning Loop <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-6">
+            <h2>Continuous Improvement</h2>
+            <h1>7. The Learning Loop</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Steenbarger Logic:</strong> "Trading is a performance activity. Like an athlete, you need Deliberate Practice. Plan, Execute, Review. The Review is where growth happens."
+            </div>
+            
+            <div class="widget-box" style="display:flex; align-items:center; justify-content:center; gap:20px;">
+                <div style="text-align:center;">
+                    <div style="font-size:2rem; color:var(--neon-cyan); margin-bottom:10px;"><i class="fas fa-file-alt"></i></div>
+                    PLAN
+                </div>
+                <i class="fas fa-arrow-right" style="color:var(--text-muted)"></i>
+                <div style="text-align:center;">
+                    <div style="font-size:2rem; color:var(--neon-purple); margin-bottom:10px;"><i class="fas fa-play-circle"></i></div>
+                    EXECUTE
+                </div>
+                <i class="fas fa-arrow-right" style="color:var(--text-muted)"></i>
+                <div style="text-align:center;">
+                    <div style="font-size:2rem; color:var(--neon-green); margin-bottom:10px;"><i class="fas fa-search"></i></div>
+                    REVIEW
+                </div>
+            </div>
+            <div style="text-align:center; margin-top:20px;">
+                <button class="btn-main" onclick="alert('Loop Closed. Knowledge Saved.')">CLOSE THE LOOP</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-circle-notch"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    Most traders skip the "Plan" because it takes hours. With Herman Trading, it takes minutes. We provide the levels; you provide the execution.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Environment <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-7">
+            <h2>Contextual Design</h2>
+            <h1>8. Environment Design</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Brett Says:</strong> "Cognitive load is the enemy. You have a finite amount of willpower. If your environment is messy, you are leaking mental energy."
+            </div>
+            
+            <div class="widget-box">
+                <h3><i class="fas fa-toggle-on"></i> Cognitive Load Reducer</h3>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <label style="display:flex; justify-content:space-between; padding:10px; background:rgba(0,0,0,0.2);">
+                        <span>Twitter / X (Noise)</span> <input type="checkbox" onclick="addXP(10)">
+                    </label>
+                    <label style="display:flex; justify-content:space-between; padding:10px; background:rgba(0,0,0,0.2);">
+                        <span>Phone Notifications</span> <input type="checkbox" onclick="addXP(10)">
+                    </label>
+                    <label style="display:flex; justify-content:space-between; padding:10px; background:rgba(0,0,0,0.2);">
+                        <span>Visual Clutter</span> <input type="checkbox" onclick="addXP(10)">
+                    </label>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-desktop"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    The biggest cognitive load comes from "Analysis Paralysis." HermanTrading.pro reduces this load by simplifying the market into clear, binary decisions based on data.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Process Goals <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-8">
+            <h2>Goal Setting</h2>
+            <h1>9. Process vs. Outcome</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Steenbarger Logic:</strong> "You cannot control the market (Outcome). You can only control your behavior (Process). Set 'Learning Goals', not 'P/L Goals'."
+            </div>
+            
+            <div class="widget-box">
+                <h3>Today's Contract</h3>
+                <p style="color:var(--text-muted); text-decoration:line-through;">"I will make $500 today."</p>
+                <p style="color:var(--neon-green); font-weight:bold; font-size:1.2rem;">"I will execute every valid setup perfectly."</p>
+                <button class="btn-main" style="width:100%; margin-top:15px;" onclick="this.innerText='CONTRACT SIGNED'; this.style.background='var(--neon-green)'; this.style.color='black'; addXP(100);">SIGN CONTRACT</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-file-contract"></i>
+                <div>
+                    <strong>Herman Data Insight</strong>
+                    Trusting the process is impossible if you don't trust the edge. Herman Trading validates the edge so you can blindly trust the process.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next: Mastery <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-9">
+            <h2>Integration</h2>
+            <h1>10. The Master Trader</h1>
+            
+            <div class="steenbarger-ref">
+                <strong>Brett Says:</strong> "Mastery is not a destination. It is the daily commitment to self-development. You have built the framework; now fill it with experience."
+            </div>
+            
+            <div class="widget-box" style="text-align:center; padding:40px;">
+                <i class="fas fa-brain" style="font-size:4rem; color:var(--neon-purple); margin-bottom:20px;"></i>
+                <h2 style="font-size:1.5rem; color:white;">MENTAL GYM SESSION COMPLETE</h2>
+                <p>Total Neuro Points: <span id="final-xp" style="color:var(--neon-cyan); font-weight:bold; font-size: 2rem;">0</span></p>
+                <p>You have the Steenbarger Psychology. Now you need the Herman Data.</p>
+                <a href="https://hermantrading.pro" target="_blank" style="text-decoration:none;">
+                    <button class="btn-next" style="float:none; display:inline-flex; margin:0 auto; background:linear-gradient(90deg, var(--neon-cyan), var(--neon-purple));">
+                        ACCESS HERMAN TRADING TERMINAL
+                    </button>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    let xp = 0;
+    const totalSteps = 10;
+    // Track if a step has been completed to prevent double XP farming
+    let stepCompleted = new Array(totalSteps).fill(false);
+
+    // --- NAVIGATION LOGIC ---
+    function goToStep(index) {
+        // Hide current
+        document.getElementById(`mod-${currentStep}`).classList.remove('active');
+        document.getElementById(`nav-${currentStep}`).classList.remove('active');
+        
+        currentStep = index;
+        
+        // Show new
+        document.getElementById(`mod-${currentStep}`).classList.add('active');
+        document.getElementById(`nav-${currentStep}`).classList.add('active');
+        
+        // Scroll to top
+        document.getElementById('viewport').scrollTop = 0;
+        
+        // Update Final XP if we are on the last step
+        if (currentStep === totalSteps - 1) { 
+             document.getElementById('final-xp').innerText = xp + " NP";
+        }
+    }
+
+    function nextMod() {
+        // Award XP only if this step wasn't completed before (to encourage progression but stop farming)
+        if (!stepCompleted[currentStep]) {
+            xp += 100;
+            stepCompleted[currentStep] = true;
+            document.getElementById(`nav-${currentStep}`).classList.add('completed');
+            updateHUD();
+        }
+        
+        if(currentStep < totalSteps - 1) {
+            goToStep(currentStep + 1);
+        } else {
+            // Just refresh the final screen if clicked again at the end
+            goToStep(currentStep);
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('xp-display').innerText = xp + " NP";
+        let pct = (xp / 1000) * 100;
+        document.getElementById('flow-bar').style.width = pct + "%";
+    }
+
+    // Generalized XP adder for interactions
+    function addXP(amount) {
+        xp += amount;
+        updateHUD();
+    }
+
+    // --- INTERACTIVE FUNCTIONS ---
+    function moveEye(event) {
+        const eye = document.querySelector('.observer-eye');
+        const pupil = document.getElementById('pupil');
+        const rect = eye.getBoundingClientRect();
+        
+        const x = (event.clientX - rect.left) / rect.width;
+        const y = (event.clientY - rect.top) / rect.height;
+        
+        const moveX = (x - 0.5) * 40; 
+        const moveY = (y - 0.5) * 40;
+        
+        pupil.style.transform = `translate(${moveX}px, ${moveY}px)`;
+    }
+
+    function activateObserver() {
+        const pupil = document.getElementById('pupil');
+        pupil.style.background = "var(--neon-purple)";
+        pupil.style.boxShadow = "0 0 20px var(--neon-purple)";
+        addXP(50);
+        alert("OBSERVER MODE: ACTIVATED.");
+    }
+
+    function selectCard(el) {
+        el.parentElement.querySelectorAll('.holo-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        addXP(20);
+    }
+
+    function checkFlow(val) {
+        const msg = document.getElementById('flow-msg');
+        if(val > 40 && val < 60) {
+            msg.innerText = "STATUS: FLOW STATE ACHIEVED";
+            msg.style.color = "var(--neon-purple)";
+            msg.style.textShadow = "0 0 10px var(--neon-purple)";
+        } else if (val < 40) {
+            msg.innerText = "STATUS: BOREDOM (Increase Challenge)";
+            msg.style.color = "var(--text-muted)";
+            msg.style.textShadow = "none";
+        } else {
+            msg.innerText = "STATUS: ANXIETY (Increase Skill)";
+            msg.style.color = "var(--neon-cyan)";
+            msg.style.textShadow = "none";
+        }
+    }
+
+    function reframe(el, text) {
+        if(!el.classList.contains('reframed')) {
+            el.innerHTML = `<i class="fas fa-check"></i> ${text}`;
+            el.classList.add('reframed');
+            addXP(30);
+        }
+    }
+
+    function toggleSelect(btn) {
+        if(btn.style.background === 'var(--neon-green)') {
+            btn.style.background = 'transparent';
+            btn.style.color = 'var(--neon-cyan)';
+        } else {
+            btn.style.background = 'var(--neon-green)';
+            btn.style.color = 'black';
+            addXP(10);
+        }
+    }
+
+</script>
+
+</body>
+</html>
