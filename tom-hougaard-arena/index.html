@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading | High Stakes Arena</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Hougaard Palette: Intense Conflict */
+            --bg-void: #000000;
+            --bg-arena: #0a0a12;
+            --human-red: #ff003c;    /* Instinct, Fear, Normal Behavior */
+            --trader-blue: #00f7ff;  /* Logic, Aggression, Herman Data */
+            --arena-gold: #ffd700;   /* Victory */
+            --text-core: #ffffff;
+            --text-dim: #8892b0;
+            --font-display: 'Arial Black', 'Impact', sans-serif;
+            --font-body: 'Inter', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-core);
+            font-family: var(--font-body);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: 
+                linear-gradient(45deg, rgba(255, 0, 60, 0.1) 0%, transparent 70%),
+                linear-gradient(-45deg, rgba(0, 247, 255, 0.1) 0%, transparent 70%);
+        }
+
+        /* --- HUD --- */
+        .hud {
+            height: 70px;
+            background: rgba(10, 10, 18, 0.95);
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 30px;
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .brand {
+            font-family: var(--font-display);
+            font-size: 1.5rem;
+            letter-spacing: 2px;
+            color: white;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 15px;
+            text-transform: uppercase;
+        }
+        .brand i { color: var(--human-red); animation: pulse-red 1.5s infinite alternate; }
+        .brand span { color: var(--trader-blue); text-shadow: 0 0 10px var(--trader-blue); }
+
+        .stats { display: flex; gap: 40px; }
+        .stat-box { text-align: right; }
+        .stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; font-weight: bold; }
+        .stat-val { font-family: var(--font-display); font-size: 1.2rem; color: var(--trader-blue); }
+
+        .arena-bar-container { width: 200px; height: 8px; background: #222; border: 1px solid #444; skewX(-20deg); overflow: hidden; margin-top: 5px; }
+        .arena-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--human-red), var(--trader-blue)); box-shadow: 0 0 15px var(--trader-blue); transform: skewX(-20deg); }
+
+        /* --- LAYOUT --- */
+        .layout { display: flex; height: calc(100vh - 70px); }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px; background: var(--bg-arena); border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .nav-item {
+            padding: 18px 25px; cursor: pointer; color: var(--text-dim); border-left: 4px solid transparent;
+            font-size: 0.9rem; display: flex; align-items: center; gap: 15px; font-weight: 700;
+            font-family: var(--font-body); text-transform: uppercase; letter-spacing: 1px;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; padding-left: 30px; }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 247, 255, 0.1), transparent);
+            border-left-color: var(--trader-blue); color: var(--trader-blue); padding-left: 30px;
+        }
+        .nav-item.completed { color: var(--arena-gold); border-left-color: var(--arena-gold); }
+        .nav-item.completed i { color: var(--arena-gold); }
+
+        /* --- VIEWPORT --- */
+        .viewport {
+            flex: 1; padding: 50px; overflow-y: auto; position: relative;
+            background: radial-gradient(circle at center, rgba(0, 0, 0, 0) 0%, rgba(0,0,0,0.8) 80%);
+        }
+
+        .module { max-width: 950px; margin: 0 auto; display: none; animation: arenaEntrance 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        .module.active { display: block; }
+
+        @keyframes arenaEntrance {
+            0% { opacity: 0; transform: perspective(1000px) rotateX(10deg) translateY(50px); }
+            100% { opacity: 1; transform: perspective(1000px) rotateX(0deg) translateY(0); }
+        }
+        @keyframes pulse-red { 0% { text-shadow: 0 0 10px var(--human-red); } 100% { text-shadow: 0 0 30px var(--human-red), 0 0 50px var(--human-red); } }
+        @keyframes shake { 0% { transform: translate(1px, 1px) rotate(0deg); } 10% { transform: translate(-1px, -2px) rotate(-1deg); } 20% { transform: translate(-3px, 0px) rotate(1deg); } 30% { transform: translate(3px, 2px) rotate(0deg); } 40% { transform: translate(1px, -1px) rotate(1deg); } 50% { transform: translate(-1px, 2px) rotate(-1deg); } 60% { transform: translate(-3px, 1px) rotate(0deg); } 70% { transform: translate(3px, 1px) rotate(-1deg); } 80% { transform: translate(-1px, -1px) rotate(1deg); } 90% { transform: translate(1px, 2px) rotate(0deg); } 100% { transform: translate(1px, -2px) rotate(-1deg); } }
+
+        h1 { font-family: var(--font-display); font-size: 2.5rem; margin: 0 0 15px 0; color: white; text-transform: uppercase; letter-spacing: 1px; }
+        h2 { font-family: var(--font-body); color: var(--human-red); font-size: 0.9rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 25px; display: flex; align-items: center; gap: 15px; font-weight: 800; }
+        h2::before { content: ''; width: 30px; height: 4px; background: var(--human-red); display: block; }
+        p { line-height: 1.8; color: var(--text-dim); font-size: 1.1rem; margin-bottom: 30px; max-width: 800px; }
+
+        /* --- WIDGETS --- */
+        .widget-box {
+            background: rgba(15, 15, 25, 0.8); border: 2px solid rgba(255,255,255,0.05);
+            border-radius: 4px; padding: 40px; position: relative; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6); backdrop-filter: blur(10px);
+            border-top: 2px solid var(--trader-blue);
+        }
+        
+        .hougaard-quote {
+            border-left: 4px solid var(--human-red); background: linear-gradient(90deg, rgba(255, 0, 60, 0.1), transparent);
+            padding: 25px; margin-bottom: 30px; color: #fff; font-style: italic; font-size: 1.2rem;
+            position: relative;
+        }
+        .quote-author {
+            display: block; text-align: right; font-size: 0.9rem; font-family: var(--font-display);
+            margin-top: 15px; font-style: normal; color: var(--human-red); text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-main {
+            background: transparent; border: 2px solid var(--trader-blue); color: var(--trader-blue);
+            padding: 15px 40px; font-family: var(--font-display); font-size: 1rem; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 2px; position: relative; overflow: hidden;
+            transition: 0.2s;
+        }
+        .btn-main:hover { background: var(--trader-blue); color: #000; box-shadow: 0 0 30px var(--trader-blue); transform: scale(1.05); }
+        .btn-red { border-color: var(--human-red); color: var(--human-red); }
+        .btn-red:hover { background: var(--human-red); color: white; box-shadow: 0 0 30px var(--human-red); }
+
+        .btn-next {
+            float: right; margin-top: 40px; background: var(--trader-blue); color: #000; border: none;
+            padding: 15px 50px; font-weight: 900; font-size: 1rem; font-family: var(--font-display);
+            cursor: pointer; display: flex; align-items: center; gap: 15px; text-transform: uppercase; letter-spacing: 1px;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+        }
+        .btn-next:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0, 247, 255, 0.4); }
+
+        .herman-anchor {
+            margin-top: 50px; background: linear-gradient(90deg, rgba(0, 247, 255, 0.08) 0%, transparent 100%);
+            border: 2px solid var(--trader-blue); padding: 25px; position: relative;
+            display: flex; gap: 25px; align-items: flex-start;
+        }
+        .herman-anchor::before { content: 'HERMAN DATA PROTOCOL'; position: absolute; top: -12px; left: 20px; background: var(--bg-void); padding: 0 10px; font-family: var(--font-display); color: var(--trader-blue); font-size: 0.8rem; }
+        .herman-anchor i { color: var(--trader-blue); font-size: 2rem; margin-top: 5px; }
+        .herman-anchor strong { display: block; color: var(--trader-blue); font-family: var(--font-display); margin-bottom: 10px; letter-spacing: 1px; font-size: 1rem; text-transform: uppercase; }
+
+        /* --- MODULE SPECIFIC ANIMATIONS --- */
+        
+        /* Mod 1: Brain wiring */
+        .brain-container { display: flex; justify-content: space-around; margin: 30px 0; }
+        .brain-box { width: 150px; padding: 20px; border: 2px solid #333; text-align: center; cursor: pointer; position: relative; }
+        .brain-box h3 { font-family: var(--font-display); margin-bottom: 10px; }
+        .brain-normal.active { border-color: var(--human-red); color: var(--human-red); box-shadow: 0 0 30px var(--human-red); }
+        .brain-trader.active { border-color: var(--trader-blue); color: var(--trader-blue); box-shadow: 0 0 30px var(--trader-blue); }
+
+        /* Mod 2: Dopamine Trap */
+        .profit-button {
+            width: 200px; height: 60px; background: #111; border: 2px solid var(--human-red); color: var(--human-red);
+            font-family: var(--font-display); font-size: 1.2rem; cursor: pointer; position: relative; overflow: hidden;
+        }
+        .profit-button:hover { animation: shake 0.5s; box-shadow: 0 0 20px var(--human-red); }
+        .profit-ghost { position: absolute; top:0; left:0; width:100%; height:100%; background: var(--trader-blue); color:black; display:flex; align-items:center; justify-content:center; opacity:0; transition:0.5s; transform: translateY(100%); }
+        .profit-button.clicked .profit-ghost { opacity:1; transform: translateY(0); }
+
+        /* Mod 3: The Flip */
+        .flip-container { display: flex; gap: 20px; justify-content: center; margin: 30px 0; perspective: 1000px; }
+        .flip-card { width: 150px; height: 100px; position: relative; transform-style: preserve-3d; transition: transform 0.8s; cursor: pointer; }
+        .flip-card.flipped { transform: rotateY(180deg); }
+        .flip-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; font-family: var(--font-display); font-size: 1.5rem; border: 3px solid; }
+        .face-front { border-color: var(--human-red); color: var(--human-red); background: rgba(255,0,60,0.1); }
+        .face-back { border-color: var(--trader-blue); color: var(--trader-blue); background: rgba(0,247,255,0.1); transform: rotateY(180deg); }
+
+        /* Mod 4: Best Loser Timer */
+        .timer-bar-bg { width: 100%; height: 30px; background: #222; border: 2px solid var(--human-red); position: relative; overflow: hidden; }
+        .timer-bar { width: 100%; height: 100%; background: var(--human-red); transition: width 3s linear; }
+        .timer-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: var(--font-display); color: white; mix-blend-mode: difference; }
+
+        /* Mod 6: Adding to Winners (Pyramid) */
+        .pyramid-container { display: flex; flex-direction: column-reverse; align-items: center; height: 200px; justify-content: flex-start; gap: 5px; margin-bottom: 20px;}
+        .pyramid-block { width: 50px; height: 30px; background: #222; border: 2px solid var(--trader-blue); transition: 0.3s; opacity: 0.3; }
+        .pyramid-block.active { background: var(--trader-blue); box-shadow: 0 0 20px var(--trader-blue); opacity: 1; width: 100%; }
+
+        /* Mod 7: Size Weight */
+        .weight-bar { width: 80%; height: 40px; background: #111; border: 3px solid #333; margin: 20px auto; position: relative; display: flex; }
+        .weight-load { height: 100%; background: var(--human-red); width: 10%; transition: width 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 0 20px var(--human-red); }
+        .weight-bar.heavy { animation: shake 0.5s infinite; border-color: var(--human-red); }
+        
+        /* Mod 9: Pain Spike */
+        .ekg-container { width: 100%; height: 120px; background: #000; border: 2px solid #333; position: relative; overflow: hidden; }
+        .ekg-line { position: absolute; top: 50%; left: 0; width: 100%; height: 2px; background: var(--human-red); box-shadow: 0 0 10px var(--human-red); }
+        .ekg-spike { animation: spikeAnim 2s infinite; }
+        @keyframes spikeAnim { 0% { transform: scaleY(1); } 10% { transform: scaleY(15); background: white; box-shadow: 0 0 30px white; } 20% { transform: scaleY(1); } 100% { transform: scaleY(1); } }
+        .ekg-flat { animation: none; background: var(--trader-blue); box-shadow: 0 0 10px var(--trader-blue); transition: 1s; }
+
+    </style>
+</head>
+<body>
+
+<div class="hud">
+    <div class="brand" onclick="goToStep(0)"><i class="fas fa-brain fa-lg"></i> HERMAN<span>ARENA</span></div>
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-label">Arena XP</div>
+            <div class="stat-val" id="xp-display">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Battle Progress</div>
+            <div class="arena-bar-container"><div class="arena-bar-fill" id="arena-bar"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="nav-item active" id="nav-0" onclick="goToStep(0)">1. The Human Flaw</div>
+        <div class="nav-item" id="nav-1" onclick="goToStep(1)">2. The Dopamine Trap</div>
+        <div class="nav-item" id="nav-2" onclick="goToStep(2)">3. Flipping The Switch</div>
+        <div class="nav-item" id="nav-3" onclick="goToStep(3)">4. The Best Loser</div>
+        <div class="nav-item" id="nav-4" onclick="goToStep(4)">5. The Comfort Paradox</div>
+        <div class="nav-item" id="nav-5" onclick="goToStep(5)">6. Adding to Winners</div>
+        <div class="nav-item" id="nav-6" onclick="goToStep(6)">7. Size & Psychosis</div>
+        <div class="nav-item" id="nav-7" onclick="goToStep(7)">8. The Internal Monologue</div>
+        <div class="nav-item" id="nav-8" onclick="goToStep(8)">9. Embracing Pain</div>
+        <div class="nav-item" id="nav-9" onclick="goToStep(9)">10. The New Normal</div>
+    </div>
+
+    <div class="viewport" id="viewport">
+
+        <div class="module active" id="mod-0">
+            <h2>ARENA_CHALLENGE // 01</h2>
+            <h1>The Human Flaw</h1>
+            <div class="hougaard-quote">
+                "Normal human behavior is to seek pleasure and avoid pain. In trading, what feels good is usually the wrong thing to do."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            <p>Your brain is wired to fail in the markets. You are fighting millions of years of evolution. Recognize the enemy: It is you.</p>
+            
+            <div class="widget-box" style="text-align:center;">
+                <h3>Select Your Operating System:</h3>
+                <div class="brain-container">
+                    <div class="brain-box brain-normal active" id="b-norm" onclick="selectBrain('norm')">
+                        <h3>NORMAL HUMAN</h3>
+                        <p>Seeks comfort.<br>Avoids pain.<br>Fails in markets.</p>
+                        <i class="fas fa-user color:var(--human-red)"></i>
+                    </div>
+                    <div class="brain-box brain-trader" id="b-trader" onclick="selectBrain('trader')">
+                        <h3>PROFESSIONAL</h3>
+                        <p>Seeks discomfort.<br>Embraces risk.<br>Wins in markets.</p>
+                        <i class="fas fa-robot color:var(--trader-blue)"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-microchip"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Fighting your own brain is exhausting. Herman Trading acts as an external cortex. We provide cold, hard data to override your flawed human instincts.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Enter The Arena <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-1">
+            <h2>ARENA_CHALLENGE // 02</h2>
+            <h1>The Dopamine Trap (Taking Profits Early)</h1>
+            <div class="hougaard-quote">
+                "You take small profits because your brain craves the dopamine hit of being 'right'. You are trading for the feeling, not the money."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            <p>The urge to click "Close" when you see green is overwhelming. It feels safe. It feels good. It is financial suicide.</p>
+            
+            <div class="widget-box" style="text-align:center; padding: 50px;">
+                <h3 style="color:var(--trader-blue); margin-bottom:30px;">Current Profit: +$150 (Target: $1000)</h3>
+                <p>Your brain is screaming: "TAKE IT! MAKE IT YOURS!"</p>
+                <button class="profit-button" onclick="clickProfit(this)">
+                    TAKE PROFIT NOW
+                    <div class="profit-ghost">MISSED +$850</div>
+                </button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-lock"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Herman Trading calculates the statistical probability of the trend continuing. We give you the mathematical confidence to ignore the dopamine craving and hold for the real move.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-2">
+            <h2>ARENA_CHALLENGE // 03</h2>
+            <h1>Flipping The Switch (Hope vs Fear)</h1>
+            <div class="hougaard-quote">
+                "Amateurs fear winners turning into losers, and hope losers turn into winners. Professionals fear losers and hope for winners. You must flip the switch."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            
+            <div class="widget-box" style="text-align:center;">
+                <h3>Invert Your Instincts:</h3>
+                <div class="flip-container">
+                    <div class="flip-card" onclick="this.classList.toggle('flipped'); checkFlip()">
+                        <div class="flip-face face-front">HOPE<br>(For Losers)</div>
+                        <div class="flip-face face-back">FEAR<br>(The Loss)</div>
+                    </div>
+                    <div class="flip-card" onclick="this.classList.toggle('flipped'); checkFlip()">
+                        <div class="flip-face face-front">FEAR<br>(Of Winning)</div>
+                        <div class="flip-face face-back">HOPE<br>(For More)</div>
+                    </div>
+                </div>
+                <div id="flip-msg" style="min-height:1.5em; font-weight:bold; color:var(--trader-blue);"></div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-sync-alt"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Herman Data automates this flip. When a trade goes red, our system flashes warnings (Fear). When it goes green, it projects higher targets (Hope).
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-3">
+            <h2>ARENA_CHALLENGE // 04</h2>
+            <h1>The Best Loser Wins</h1>
+            <div class="hougaard-quote">
+                "If you cannot take a loss, you cannot win. The best trader is the one who takes losses the best—quickly, cleanly, without emotion."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            <p>You are in a losing trade. Every second you wait, you bleed. Hesitation is death.</p>
+            
+            <div class="widget-box" style="text-align:center;">
+                <h3 style="color:var(--human-red);">WARNING: TRADE INVALIDATED</h3>
+                <div class="timer-bar-bg">
+                    <div class="timer-bar" id="loss-timer"></div>
+                    <div class="timer-text">CUT LOSS BEFORE EXPIRATION</div>
+                </div>
+                <button class="btn-main btn-red" style="margin-top:30px; font-size:1.5rem;" onclick="cutLoss()">CUT LOSS NOW</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-cut"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Taking a loss hurts the ego. Herman Trading removes the ego by providing predefined invalidation points. You don't decide to cut; the data decides for you.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-4">
+            <h2>ARENA_CHALLENGE // 05</h2>
+            <h1>The Comfort Paradox</h1>
+            <div class="hougaard-quote">
+                "If a trade feels comfortable, it is probably wrong. The best trades feel terrifying to enter and uncomfortable to hold."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            
+            <div class="widget-box" style="display:flex; gap:20px; justify-content:center;">
+                <div style="text-align:center; opacity:0.5; cursor:not-allowed;">
+                    <i class="fas fa-couch fa-4x" style="color:var(--human-red);"></i>
+                    <h3>The Comfortable Path</h3>
+                    <p>Buying support. Selling resistance. Doing what everyone else does.</p>
+                </div>
+                <div style="border-left: 2px solid #333;"></div>
+                <div style="text-align:center; cursor:pointer;" onclick="addXP(50); alert('Discomfort embraced. Trade executed.')">
+                    <i class="fas fa-bolt fa-4x" style="color:var(--trader-blue); animation:pulse-red 1s infinite;"></i>
+                    <h3>The Uncomfortable Path</h3>
+                    <p>Buying breakouts. Adding to winners. Holding through pullbacks.</p>
+                    <button class="btn-main">CHOOSE DISCOMFORT</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-skull"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Herman Trading identifies high-probability setups that look terrifying to the untrained eye. We provide the data backing the discomfort.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-5">
+            <h2>ARENA_CHALLENGE // 06</h2>
+            <h1>Adding to Winners (The Holy Grail)</h1>
+            <div class="hougaard-quote">
+                "Amateurs scale out of winners. Professionals scale INTO winners. This is the only way to achieve exponential returns."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            <p>Your trade is working. Normal behavior is to protect it. Trading behavior is to attack it.</p>
+            
+            <div class="widget-box" style="text-align:center;">
+                <h3>Pyramid Your Position</h3>
+                <div class="pyramid-container" id="pyramid">
+                    <div class="pyramid-block"></div>
+                    <div class="pyramid-block"></div>
+                    <div class="pyramid-block"></div>
+                    <div class="pyramid-block"></div>
+                    <div class="pyramid-block active">INITIAL ENTRY</div>
+                </div>
+                <p style="color:var(--trader-blue); font-weight:bold;">Current Size: <span id="pyr-size">1</span> Lots</p>
+                <button class="btn-main" onclick="addSize()">ADD SIZE (AGGRESSION)</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-layer-group"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Adding size is terrifying because you raise your average price. Herman Trading tells you exactly *where* it is safe to add, turning fear into calculated aggression.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-6">
+            <h2>ARENA_CHALLENGE // 07</h2>
+            <h1>Size & Psychosis</h1>
+            <div class="hougaard-quote">
+                "You are rational trading 1 lot. You become psychotic trading 10 lots. The money changes your brain chemistry."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            
+            <div class="widget-box">
+                <h3>Pressure Simulator</h3>
+                <div class="weight-bar" id="weight-bar">
+                    <div class="weight-load" id="weight-load"></div>
+                    <div style="position:absolute; width:100%; text-align:center; top:10px; font-weight:bold;">EMOTIONAL LOAD</div>
+                </div>
+                <input type="range" min="1" max="100" value="10" style="width:100%; accent-color:var(--human-red);" oninput="adjustWeight(this.value)">
+                <p style="text-align:center;">Current Size: <span id="weight-val" style="color:var(--trader-blue); font-weight:bold;">10 Lots</span></p>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-weight-hanging"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    The data doesn't care if you trade 1 lot or 100 lots. Herman Trading remains purely objective, regardless of the size, helping anchor your psychosis to reality.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-7">
+            <h2>ARENA_CHALLENGE // 08</h2>
+            <h1>The Internal Monologue</h1>
+            <div class="hougaard-quote">
+                "There is a constant battle in your head between the Lizard Brain (fear/greed) and the Disciplined Mind. You must silence the Lizard."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            
+            <div class="widget-box">
+                <div style="background:#111; padding:20px; border-radius:5px; margin-bottom:20px;">
+                    <p style="color:var(--human-red);"><strong style="text-transform:uppercase;">Lizard Brain:</strong> "It's pulling back! We're losing profit! Get out now before it goes red!"</p>
+                </div>
+                <h3>Select Response:</h3>
+                <button class="btn-main btn-red" style="width:100%; margin-bottom:10px;" onclick="alert('You obeyed the Lizard. You lost the trend.')">"Okay, closing now!" (Obey)</button>
+                <button class="btn-main" style="width:100%;" onclick="addXP(50); alert('Lizard silenced. Holding for target.')">"The structure is intact. Silence." (Override)</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-comment-slash"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    The internal monologue is noise. Herman Trading is the signal. When the voices start, look at the Herman dashboard. If the signal hasn't changed, the voices are lying.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Next Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-8">
+            <h2>ARENA_CHALLENGE // 09</h2>
+            <h1>Embracing Pain (Desensitization)</h1>
+            <div class="hougaard-quote">
+                "You must become desensitized to the swings. The pain of a drawdown or the excitement of a rally should not register emotionally."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            
+            <div class="widget-box" style="text-align:center;">
+                <h3>Emotional Response Monitor</h3>
+                <div class="ekg-container">
+                    <div class="ekg-line ekg-spike" id="ekg"></div>
+                </div>
+                <p style="color:var(--human-red);">STATUS: PANIC DETECTED</p>
+                <button class="btn-main" onclick="stabilizeEKG()">FORCED DESENSITIZATION</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-heartbeat"></i>
+                <div>
+                    <strong>Herman Protocol</strong>
+                    Pain comes from uncertainty. Herman Trading reduces uncertainty by providing historical probabilities. Knowing the odds is the best painkiller.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Final Challenge <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-9">
+            <h2>ARENA_CHALLENGE // 10</h2>
+            <h1>The New Normal</h1>
+            <div class="hougaard-quote">
+                "When doing the hard thing becomes easy, you have arrived. You are no longer fighting yourself; you are executing."
+                <span class="quote-author">— Tom Hougaard</span>
+            </div>
+            
+            <div class="widget-box" style="text-align:center; padding: 50px;">
+                <i class="fas fa-trophy" style="font-size:5rem; color:var(--arena-gold); margin-bottom:20px; text-shadow: 0 0 30px var(--arena-gold);"></i>
+                <h2 style="color:var(--arena-gold); justify-content:center; border:none;">ARENA CONQUERED</h2>
+                <p>Total Battle XP: <span id="final-xp" style="color:var(--trader-blue); font-weight:bold; font-size: 2rem;">0</span></p>
+                <p>You understand the Hougaard Philosophy. Now you need the Herman Weaponry.</p>
+                <a href="https://hermantrading.pro" target="_blank" style="text-decoration:none;">
+                    <button class="btn-next" style="float:none; display:inline-flex; margin:0 auto; background:var(--arena-gold); color:black; box-shadow:0 0 30px var(--arena-gold);">
+                        EQUIP HERMAN DATA SUIT
+                    </button>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    let xp = 0;
+    const totalSteps = 10;
+    let stepCompleted = new Array(totalSteps).fill(false);
+    
+    // Vars for interactions
+    let flipCount = 0;
+    let pyramidLevel = 0;
+
+    // --- NAVIGATION ---
+    function goToStep(index) {
+        document.getElementById(`mod-${currentStep}`).classList.remove('active');
+        document.getElementById(`nav-${currentStep}`).classList.remove('active');
+        
+        currentStep = index;
+        
+        document.getElementById(`mod-${currentStep}`).classList.add('active');
+        document.getElementById(`nav-${currentStep}`).classList.add('active');
+        document.getElementById('viewport').scrollTop = 0;
+
+        if (currentStep === totalSteps - 1) { 
+             document.getElementById('final-xp').innerText = xp;
+        }
+
+        // Reset specific modules if revisited
+        if(currentStep === 3) startTimer();
+    }
+
+    function nextMod() {
+        if (!stepCompleted[currentStep]) {
+            xp += 100;
+            stepCompleted[currentStep] = true;
+            document.getElementById(`nav-${currentStep}`).classList.add('completed');
+            updateHUD();
+        }
+        
+        if(currentStep < totalSteps - 1) {
+            goToStep(currentStep + 1);
+        } else {
+            goToStep(currentStep);
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('xp-display').innerText = xp;
+        let pct = (xp / 1000) * 100;
+        document.getElementById('arena-bar').style.width = pct + "%";
+    }
+
+    function addXP(amount) {
+        xp += amount;
+        updateHUD();
+    }
+
+    // --- INTERACTIONS ---
+
+    // Mod 1: Brain Select
+    function selectBrain(type) {
+        document.getElementById('b-norm').classList.remove('active');
+        document.getElementById('b-trader').classList.remove('active');
+        if(type === 'norm') {
+             document.getElementById('b-norm').classList.add('active');
+             alert("Failure selected. Try again.");
+        } else {
+             document.getElementById('b-trader').classList.add('active');
+             addXP(50);
+        }
+    }
+
+    // Mod 2: Profit Click
+    function clickProfit(btn) {
+        btn.classList.add('clicked');
+        btn.style.borderColor = "var(--trader-blue)";
+    }
+
+    // Mod 3: Flip
+    function checkFlip() {
+        flipCount++;
+        if(flipCount >= 2) {
+            document.getElementById('flip-msg').innerText = "SWITCH FLIPPED. MINDSET INVERTED.";
+            addXP(50);
+        }
+    }
+
+    // Mod 4: Timer
+    function startTimer() {
+        const bar = document.getElementById('loss-timer');
+        bar.style.width = "100%";
+        setTimeout(() => { bar.style.width = "0%"; }, 100);
+    }
+    function cutLoss() {
+        document.getElementById('loss-timer').style.width = "100%"; // Stop shrinking visually
+        addXP(50);
+        alert("Loss cut. You survived.");
+    }
+
+    // Mod 6: Add Size
+    function addSize() {
+        pyramidLevel++;
+        const blocks = document.querySelectorAll('.pyramid-block');
+        if(pyramidLevel < blocks.length) {
+            // Find next inactive block from bottom up (reverse index)
+            let targetIndex = blocks.length - 1 - pyramidLevel;
+            blocks[targetIndex].classList.add('active');
+            document.getElementById('pyr-size').innerText = Math.pow(2, pyramidLevel); // Exponential growth visualization
+            addXP(20);
+        }
+    }
+
+    // Mod 7: Weight Adjust
+    function adjustWeight(val) {
+        const load = document.getElementById('weight-load');
+        const bar = document.getElementById('weight-bar');
+        const txt = document.getElementById('weight-val');
+        
+        load.style.width = val + "%";
+        txt.innerText = val + " Lots";
+        
+        if(val > 50) {
+            bar.classList.add('heavy');
+            txt.style.color = "var(--human-red)";
+        } else {
+            bar.classList.remove('heavy');
+            txt.style.color = "var(--trader-blue)";
+        }
+    }
+
+    // Mod 9: EKG
+    function stabilizeEKG() {
+        const ekg = document.getElementById('ekg');
+        ekg.classList.remove('ekg-spike');
+        ekg.classList.add('ekg-flat');
+        ekg.parentElement.nextElementSibling.innerText = "STATUS: COLD BLOODED";
+        ekg.parentElement.nextElementSibling.style.color = "var(--trader-blue)";
+        addXP(50);
+    }
+
+</script>
+
+</body>
+</html>
