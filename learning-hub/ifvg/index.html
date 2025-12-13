@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading Hub | Inverted FVG Masterclass v13.0</title>
+    <style>
+        :root {
+            --bg-dark: #0b0e11;
+            --bg-panel: #151a21;
+            --text-main: #e0e0e0;
+            --text-dim: #949aa5;
+            --accent-gold: #d4af37;
+            --accent-gold-glow: rgba(212, 175, 55, 0.15);
+            --accent-blue: #00bcd4;
+            --success: #00c853;
+            --danger: #ff3d00;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid #2a323c;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 1px solid #2a323c;
+            padding-bottom: 20px;
+        }
+
+        .brand span { color: #fff; }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-bg {
+            height: 4px;
+            background: #2a323c;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-gold);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item:hover { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
+        .nav-item.active {
+            background-color: rgba(212, 175, 55, 0.1);
+            color: var(--accent-gold);
+            border-left: 3px solid var(--accent-gold);
+            font-weight: 600;
+        }
+        .nav-item.completed { text-decoration: none; }
+        .nav-item.completed::after { content: '✓'; margin-left: auto; color: var(--success); font-size: 0.8rem; }
+
+        .cta-box {
+            margin-top: auto;
+            background: linear-gradient(180deg, #1a2029, #0f1216);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        .cta-btn {
+            display: block;
+            background: var(--accent-gold);
+            color: #000;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .cta-btn:hover { transform: translateY(-2px); }
+
+        /* --- Main Content --- */
+        .main {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease;
+        }
+
+        h1 { font-size: 2.2rem; margin: 0 0 10px 0; color: #fff; }
+        .subtitle { color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 25px; font-weight: 400; }
+        p { line-height: 1.6; color: #c0c4cc; margin-bottom: 20px; font-size: 1rem; }
+
+        /* --- Visuals & Charts --- */
+        .visual-container {
+            background: #0f1216;
+            border: 1px solid #2a323c;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            height: 350px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        svg { width: 100%; height: 100%; overflow: visible; }
+        
+        /* Candle Styles */
+        .candle-up { fill: #00c853; stroke: #00c853; stroke-width: 1; opacity: 0.9; }
+        .candle-down { fill: #ff3d00; stroke: #ff3d00; stroke-width: 1; opacity: 0.9; }
+        .candle-wick { stroke: #555; stroke-width: 1.5; stroke-linecap: round; }
+        
+        .btn-control {
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-control:hover { background: var(--accent-gold); color: #000; }
+
+        .herman-note {
+            border-left: 3px solid var(--accent-gold);
+            background: rgba(212, 175, 55, 0.05);
+            padding: 15px 20px;
+            font-size: 0.95rem;
+            margin-top: 20px;
+            border-radius: 0 6px 6px 0;
+        }
+        .herman-note strong { color: var(--accent-gold); display: block; margin-bottom: 5px; font-size: 0.8rem; text-transform: uppercase; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">Herman <span>Trading</span></div>
+        
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0% Completed</div>
+        </div>
+
+        <ul class="nav-list" id="nav-list">
+            </ul>
+
+        <div class="cta-box">
+            <div style="color:var(--text-dim); font-size:0.8rem;">Stop guessing. Start trading.</div>
+            <a href="https://whop.com/herman-macro-edge-premium" target="_blank" class="cta-btn">Join Premium Discord</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div id="content-area" class="content-wrapper">
+            </div>
+    </main>
+
+    <script>
+        // --- DATA STORE ---
+        const modules = [
+            {
+                title: "1. Introduction: The FVG Recap",
+                subtitle: "The Foundation of Inversion",
+                content: `<p>Before we understand Inversion, we must respect the standard <strong>Fair Value Gap (FVG)</strong>. It is a 3-candle pattern where the 1st and 3rd candles do not overlap.</p><p>Normally, we expect price to respect this gap. But what happens when the market disrespects it? That is where the opportunity lies.</p>`,
+                note: "If you can't spot a standard FVG instantly, you aren't ready for Inversion. Master the basics first.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <text x="250" y="30" fill="#fff" text-anchor="middle" font-weight="bold">BEARISH FVG (SIBI)</text>
+                        
+                        <line x1="200" y1="50" x2="200" y2="100" class="candle-wick"/> <rect x="190" y="60" width="20" height="40" class="candle-down"/>
+                        
+                        <line x1="230" y1="90" x2="230" y2="170" class="candle-wick"/> <rect x="220" y="100" width="20" height="60" class="candle-down"/>
+                        
+                        <line x1="260" y1="150" x2="260" y2="200" class="candle-wick"/> <rect x="250" y="160" width="20" height="40" class="candle-down"/>
+
+                        <rect x="210" y="100" width="80" height="50" fill="rgba(255, 61, 0, 0.15)" stroke="#ff3d00" stroke-dasharray="2"/>
+                        <line x1="200" y1="100" x2="290" y2="100" stroke="#ff3d00" stroke-width="1" /> <line x1="230" y1="150" x2="290" y2="150" stroke="#ff3d00" stroke-width="1" /> <text x="300" y="130" fill="#ff3d00" font-size="10">THE GAP</text>
+                    </svg>
+                `
+            },
+            {
+                title: "2. The Logic of Inversion",
+                subtitle: "When Support becomes Resistance",
+                content: `<p>An <strong>Inverted Fair Value Gap (iFVG)</strong> occurs when price closes *through* a standard FVG.</p><p>Think of it as a failed defense. If the Bulls cannot hold the line at a Bullish FVG, the Bears take over. The "floor" becomes the "ceiling".</p>`,
+                note: "It's the same logic as S/R flip, but institutional. We trade the failure of the opposing side.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <text x="250" y="30" fill="#fff" text-anchor="middle">BISI FAILURE</text>
+                        
+                        <line x1="150" y1="180" x2="150" y2="140" class="candle-wick"/> <rect x="140" y="150" width="20" height="30" class="candle-up"/>
+                        <line x1="180" y1="150" x2="180" y2="100" class="candle-wick"/> <rect x="170" y="110" width="20" height="40" class="candle-up"/>
+                        <line x1="210" y1="110" x2="210" y2="80" class="candle-wick"/> <rect x="200" y="90" width="20" height="20" class="candle-up"/>
+
+                        <rect x="160" y="110" width="200" height="30" fill="rgba(0, 200, 83, 0.1)" stroke="#00c853" stroke-dasharray="2"/>
+                        <text x="130" y="125" fill="#00c853" font-size="10">BISI (Support)</text>
+
+                        <line x1="240" y1="80" x2="240" y2="160" class="candle-wick"/> <rect x="230" y="90" width="20" height="70" class="candle-down"/> <text x="270" y="155" fill="#ff3d00" font-weight="bold" font-size="12">CLOSE BELOW</text>
+
+                        <line x1="270" y1="160" x2="270" y2="110" class="candle-wick"/> <rect x="260" y="130" width="20" height="30" class="candle-down"/> <rect x="220" y="110" width="140" height="30" fill="rgba(255, 61, 0, 0.15)" stroke="none"/>
+                        <text x="370" y="125" fill="#ff3d00" font-size="10">NOW RESISTANCE</text>
+                    </svg>
+                `
+            },
+            {
+                title: "3. Bullish iFVG Anatomy",
+                subtitle: "From Resistance to Support",
+                content: `<p>We start with a <strong>SIBI (Sell Side Imbalance Buy Side Inefficiency)</strong> - a Red FVG. Price should react down from it.</p><p>Instead, a strong Green candle closes <strong>ABOVE</strong> it. This invalidates the SIBI and turns it into a Bullish iFVG. We look to buy the retest of this zone.</p>`,
+                note: "Watch the animation. Notice the Zone strictly covers the GAP area (Wick Low to Wick High), not the whole move.",
+                isInteractive: true,
+                type: 'bullish',
+                renderVisual: (id) => `<div id="chart-bullish" style="width:100%;height:100%;"></div>`
+            },
+            {
+                title: "4. Bearish iFVG Anatomy",
+                subtitle: "From Support to Resistance",
+                content: `<p>We start with a <strong>BISI (Buy Side Imbalance Sell Side Inefficiency)</strong> - a Green FVG. Price should bounce up from it.</p><p>Instead, a heavy Red candle closes <strong>BELOW</strong> it. The Bulls have failed. The BISI is now a Bearish iFVG. We look to sell the retest.</p>`,
+                note: "Aggressive displacement through the gap is your biggest clue. Close implies commitment.",
+                isInteractive: true,
+                type: 'bearish',
+                renderVisual: (id) => `<div id="chart-bearish" style="width:100%;height:100%;"></div>`
+            },
+            {
+                title: "5. Validating the Break",
+                subtitle: "Wicks vs Bodies",
+                content: `<p>What counts as a break? In Herman's methodology, <strong>THE BODY TELLS THE STORY</strong>.</p><p>A wick poking through the FVG is not an inversion. It might just be a liquidity grab. You need a candle <strong>Body Close</strong> completely outside the opposing FVG to confirm the inversion.</p>`,
+                note: "No Close = No Trade. Don't guess.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="250" y1="20" x2="250" y2="230" stroke="#333" stroke-width="2"/>
+                        
+                        <text x="125" y="40" fill="#ff3d00" text-anchor="middle" font-weight="bold">WICK ONLY (NO)</text>
+                        <rect x="80" y="100" width="90" height="40" fill="rgba(255,255,255,0.1)" stroke="#555"/>
+                        <line x1="125" y1="160" x2="125" y2="80" class="candle-wick" stroke-width="2"/>
+                        <rect x="115" y="120" width="20" height="40" class="candle-up"/> <text x="125" y="200" fill="#777" text-anchor="middle" font-size="10">Rejection, not Inversion</text>
+
+                        <text x="375" y="40" fill="#00c853" text-anchor="middle" font-weight="bold">BODY CLOSE (YES)</text>
+                        <rect x="330" y="100" width="90" height="40" fill="rgba(255,255,255,0.1)" stroke="#555"/>
+                        <line x1="375" y1="160" x2="375" y2="60" class="candle-wick" stroke-width="2"/>
+                        <rect x="365" y="60" width="20" height="70" class="candle-up"/> <text x="375" y="200" fill="#777" text-anchor="middle" font-size="10">Confirmed Inversion</text>
+                    </svg>
+                `
+            },
+            {
+                title: "6. Consequent Encroachment (CE)",
+                subtitle: "Precision Trading at 50%",
+                content: `<p>The <strong>Consequent Encroachment (CE)</strong> is the 50% midpoint of the Fair Value Gap.</p><p>When an FVG becomes an iFVG, the CE becomes an extremely sensitive level. We want to see wicks respect this level.</p><p style="color:#d4af37; font-weight:bold;">CRITICAL: We do NOT want to see a candle body close below the 50% level (for bullish iFVG).</p>`,
+                note: "Bodies must respect the C.E. Wicks can poke, bodies must stay out.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <rect x="150" y="80" width="200" height="80" fill="rgba(212, 175, 55, 0.1)" stroke="#d4af37" stroke-width="2"/>
+                        
+                        <line x1="150" y1="120" x2="350" y2="120" stroke="#d4af37" stroke-dasharray="4"/>
+                        <text x="360" y="125" fill="#d4af37" font-size="12" font-weight="bold">C.E. (50%)</text>
+
+                        <line x1="250" y1="80" x2="250" y2="130" class="candle-wick"/> <rect x="240" y="80" width="20" height="35" class="candle-down"/> <text x="250" y="150" fill="#fff" font-size="10" text-anchor="middle">Wick crossed, Body Closed Above</text>
+                        <text x="250" y="165" fill="#00c853" font-weight="bold" text-anchor="middle">VALID</text>
+                    </svg>
+                `
+            },
+            {
+                title: "7. Old SIBI / BISI",
+                subtitle: "The Curve Switch",
+                content: `<p>Markets move in curves (Sell-side Curve to Buy-side Curve). When the market shifts, old arrays from the previous curve act as bridges.</p><p>An <strong>Old SIBI</strong> created during the downtrend will often be reclaimed and used as support when the market enters the Buy-side of the curve.</p>`,
+                note: "It's not just a level; it's a structural pivot point.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <path d="M 50,50 Q 100,200 200,200" stroke="#ff3d00" stroke-width="2" fill="none" stroke-dasharray="2"/>
+                        <text x="100" y="180" fill="#ff3d00" font-size="10">Sell-Side Curve</text>
+                        
+                        <rect x="80" y="100" width="40" height="20" fill="rgba(255, 61, 0, 0.3)" stroke="#ff3d00"/>
+                        <text x="40" y="115" fill="#ff3d00" font-size="8">SIBI</text>
+                        
+                        <rect x="120" y="100" width="300" height="20" fill="rgba(255, 255, 255, 0.05)" stroke="none"/>
+                        
+                        <path d="M 200,200 Q 300,200 450,50" stroke="#00c853" stroke-width="2" fill="none"/>
+                        <text x="350" y="180" fill="#00c853" font-size="10">Buy-Side Curve</text>
+
+                        <line x1="280" y1="130" x2="280" y2="80" stroke="#00c853" stroke-width="2"/>
+                        <circle cx="320" cy="110" r="5" fill="#d4af37"/>
+                        <text x="330" y="135" fill="#fff" font-size="10">Old SIBI holds as Support</text>
+                    </svg>
+                `
+            },
+            {
+                title: "8. Reaccumulation & Redistribution",
+                subtitle: "Trend Continuation",
+                content: `<p>In a strong trend, price creates gaps on the opposing side just to break them. This is engineering liquidity.</p><p><strong>Reaccumulation:</strong> Deep retracement creates a Bearish FVG. Price then inverts it to launch higher. This is the 'stepping stone'.</p>`,
+                note: "Notice the deep pullback versus the tight inversion entry box.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="50" y1="200" x2="150" y2="100" stroke="#555" stroke-width="1"/>
+                        
+                        <line x1="150" y1="100" x2="200" y2="150" stroke="#ff3d00" stroke-width="2"/>
+                        
+                        <rect x="180" y="120" width="40" height="15" fill="rgba(0, 200, 83, 0.3)" stroke="#00c853"/>
+                        <text x="230" y="130" fill="#00c853" font-size="10">Tight iFVG</text>
+                        
+                        <line x1="200" y1="150" x2="300" y2="50" stroke="#00c853" stroke-width="2"/>
+                        
+                        <line x1="300" y1="50" x2="350" y2="100" stroke="#ff3d00" stroke-width="2"/>
+                        
+                        <rect x="330" y="70" width="40" height="15" fill="rgba(0, 200, 83, 0.3)" stroke="#00c853"/>
+                        
+                        <line x1="350" y1="100" x2="450" y2="20" stroke="#00c853" stroke-width="2" marker-end="url(#arrow)"/>
+                    </svg>
+                `
+            },
+            {
+                title: "9. iFVG Entry Model",
+                subtitle: "The Sweep & Invert Setup",
+                content: `<p>The highest probability setup combining Liquidity and Inversion.</p><ol><li><strong>Liquidity Sweep:</strong> A leg down sweeps a Low.</li><li><strong>SIBI Creation:</strong> This same leg leaves a Bearish Gap (SIBI).</li><li><strong>Inversion:</strong> Price reverses and closes ABOVE the SIBI.</li><li><strong>Entry:</strong> Look for entry at the iFVG retest.</li></ol>`,
+                note: "Notice the perfect Gap between Candle 1 Low and Candle 3 High. No Overlap.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <text x="50" y="30" fill="#ff3d00" font-weight="bold" font-size="10">LEG DOWN (SWEEP)</text>
+                        
+                        <line x1="100" y1="80" x2="100" y2="120" class="candle-wick"/> 
+                        <rect x="90" y="90" width="20" height="20" class="candle-down"/>
+
+                        <line x1="130" y1="110" x2="130" y2="210" class="candle-wick"/> 
+                        <rect x="120" y="120" width="20" height="80" class="candle-down"/>
+
+                        <line x1="160" y1="150" x2="160" y2="200" class="candle-wick"/> 
+                        <rect x="150" y="160" width="20" height="30" class="candle-down"/>
+
+                        <rect x="110" y="120" width="200" height="30" fill="rgba(255, 61, 0, 0.15)" stroke="#ff3d00" stroke-dasharray="2"/>
+                        <text x="115" y="130" fill="#ff3d00" font-size="9">GAP (120-150)</text>
+
+                        <line x1="50" y1="190" x2="140" y2="190" stroke="#555" stroke-dasharray="2"/>
+                        <text x="60" y="205" fill="#fff" font-size="9">OLD LOW</text>
+
+                        <line x1="220" y1="190" x2="220" y2="90" class="candle-wick"/>
+                        <rect x="210" y="100" width="20" height="90" class="candle-up"/>
+                        <text x="240" y="90" fill="#00c853" font-weight="bold" font-size="10">CLOSE ABOVE</text>
+
+                        <rect x="230" y="120" width="150" height="30" fill="rgba(0, 200, 83, 0.15)" stroke="none"/>
+
+                        <line x1="260" y1="100" x2="260" y2="135" class="candle-wick"/>
+                        <rect x="250" y="100" width="20" height="20" class="candle-up"/>
+                        
+                        <circle cx="260" cy="135" r="5" fill="#d4af37" stroke="#fff"/>
+                        <text x="270" y="150" fill="#d4af37" font-weight="bold">LOOK FOR ENTRY</text>
+
+                        <path d="M 270,110 L 400,30" stroke="#00c853" stroke-width="2" marker-end="url(#arrow)"/>
+                        
+                        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#00c853" /></marker></defs>
+                    </svg>
+                `
+            },
+            {
+                title: "10. Execution Protocol",
+                subtitle: "Join the Herman Trading Hub",
+                content: `<p>Inversions are powerful because they show you exactly when the opposing algorithm has failed. It gives you a clear "line in the sand".</p><p>We trade these live every day. If you want to see Herman call these out in real-time before they happen, you know where to go.</p>`,
+                note: "Master the Inversion, Master the Flow.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 400 200">
+                        <rect x="0" y="0" width="400" height="200" fill="#000" />
+                        <text x="200" y="80" fill="#d4af37" font-size="30" text-anchor="middle" font-weight="bold">HERMAN</text>
+                        <text x="200" y="110" fill="#fff" font-size="16" text-anchor="middle" letter-spacing="4">TRADING HUB</text>
+                        <rect x="150" y="140" width="100" height="2" fill="#d4af37" />
+                        <text x="200" y="170" fill="#00bcd4" font-size="12" text-anchor="middle">Click below to start</text>
+                    </svg>
+                `
+            }
+        ];
+
+        // --- STATE ---
+        let currentIndex = 0;
+        let chartStep = 0;
+
+        // --- DOM ---
+        const navList = document.getElementById('nav-list');
+        const contentArea = document.getElementById('content-area');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        // --- INIT ---
+        function init() {
+            renderNav();
+            loadModule(0);
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderNav() {
+            navList.innerHTML = '';
+            modules.forEach((mod, idx) => {
+                const li = document.createElement('li');
+                li.className = `nav-item ${idx === currentIndex ? 'active' : ''} ${idx < currentIndex ? 'completed' : ''}`;
+                li.innerText = mod.title;
+                li.onclick = () => loadModule(idx);
+                navList.appendChild(li);
+            });
+            const pct = Math.round(((currentIndex + 1) / modules.length) * 100);
+            progressFill.style.width = `${pct}%`;
+            progressText.innerText = `${pct}% Completed`;
+        }
+
+        function loadModule(index) {
+            currentIndex = index;
+            const data = modules[index];
+            
+            let html = `
+                <h1>${data.title}</h1>
+                <div class="subtitle">${data.subtitle}</div>
+                <div class="visual-container">${data.renderVisual(index)}</div>
+                ${data.content}
+                <div class="herman-note">
+                    <strong>Herman's Edge</strong>
+                    "${data.note}"
+                </div>
+            `;
+
+            html += `<div style="display:flex; justify-content:space-between; margin-top:40px;">`;
+            if (index > 0) html += `<button class="btn-control" onclick="loadModule(${index - 1})">&larr; Previous</button>`;
+            else html += `<div></div>`;
+            
+            if (index < modules.length - 1) html += `<button class="btn-control" onclick="loadModule(${index + 1})">Next Module &rarr;</button>`;
+            else html += `<a href="https://whop.com/herman-macro-edge-premium" target="_blank" class="btn-control" style="text-decoration:none; border-color:#00bcd4; color:#00bcd4;">Finish Course</a>`;
+            html += `</div>`;
+
+            contentArea.innerHTML = html;
+            renderNav();
+
+            if (data.isInteractive) {
+                initInteractiveChart(data.type);
+            }
+        }
+
+        function initInteractiveChart(type) {
+            const containerId = type === 'bullish' ? 'chart-bullish' : 'chart-bearish';
+            const container = document.getElementById(containerId);
+            chartStep = 0; 
+            
+            // Button Positioning
+            const btnX = 280;
+            const btnY = type === 'bullish' ? 160 : 10;
+
+            container.innerHTML = `
+                <svg viewBox="0 0 400 200">
+                    <defs>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1f2630" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                    <text x="10" y="20" fill="#555" font-size="10">Herman Interactive Chart</text>
+                    <g id="zone-layer"></g>
+                    <path id="anim-path" d="" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <g id="labels"></g>
+                    
+                    <rect id="button-bg" x="${btnX}" y="${btnY}" width="110" height="30" rx="5" fill="#d4af37" style="cursor:pointer;" onclick="animateStep('${type}')"/>
+                    <text x="${btnX + 55}" y="${btnY + 20}" fill="#000" font-size="12" font-weight="bold" text-anchor="middle" style="pointer-events:none;">CLICK TO PLAY</text>
+                </svg>
+            `;
+        }
+
+        window.animateStep = function(type) {
+            const path = document.getElementById('anim-path');
+            const labels = document.getElementById('labels');
+            const zoneLayer = document.getElementById('zone-layer');
+            chartStep++;
+            let d = "";
+            let htmlLabels = "";
+            let zoneHtml = "";
+
+            if (type === 'bullish') {
+                // Bullish iFVG Logic:
+                // Gap: 100 to 130.
+                
+                if(chartStep === 1) { 
+                    htmlLabels=`
+                        <line x1="50" y1="50" x2="50" y2="100" class="candle-wick"/>
+                        <rect x="40" y="60" width="20" height="30" class="candle-down"/>
+                        <text x="50" y="40" fill="#fff" font-size="10">C1 (Low)</text>`;
+                    
+                    zoneHtml = `<rect x="80" y="100" width="200" height="30" fill="rgba(255, 61, 0, 0.2)" stroke="#ff3d00" stroke-dasharray="2" />
+                                <text x="90" y="95" fill="#ff3d00" font-size="9">BEARISH FVG</text>`;
+                }
+                else if(chartStep === 2) { 
+                    htmlLabels=`
+                        <line x1="50" y1="50" x2="50" y2="100" class="candle-wick"/>
+                        <rect x="40" y="60" width="20" height="30" class="candle-down"/>
+                        
+                        <line x1="90" y1="90" x2="90" y2="140" class="candle-wick"/>
+                        <rect x="80" y="100" width="20" height="30" class="candle-down"/>
+                        
+                        <line x1="130" y1="130" x2="130" y2="170" class="candle-wick"/>
+                        <rect x="120" y="140" width="20" height="20" class="candle-down"/>
+                        
+                        <text x="130" y="180" fill="#ff3d00" font-size="10">Gap Created</text>`;
+                    
+                    zoneHtml = `<rect x="80" y="100" width="200" height="30" fill="rgba(255, 61, 0, 0.2)" stroke="#ff3d00" stroke-dasharray="2" />`;
+                }
+                else if(chartStep === 3) { 
+                    htmlLabels=`
+                        <line x1="50" y1="50" x2="50" y2="100" class="candle-wick"/> <rect x="40" y="60" width="20" height="30" class="candle-down"/>
+                        <line x1="90" y1="90" x2="90" y2="140" class="candle-wick"/> <rect x="80" y="100" width="20" height="30" class="candle-down"/>
+                        <line x1="130" y1="130" x2="130" y2="170" class="candle-wick"/> <rect x="120" y="140" width="20" height="20" class="candle-down"/>
+                        
+                        <line x1="170" y1="160" x2="170" y2="70" class="candle-wick"/>
+                        <rect x="160" y="80" width="20" height="80" class="candle-up"/>
+                        
+                        <text x="180" y="70" fill="#00c853" font-weight="bold" font-size="10">CLOSE ABOVE GAP</text>`;
+                    
+                    zoneHtml = `<rect x="80" y="100" width="300" height="30" fill="rgba(0, 200, 83, 0.2)" stroke="#00c853" />
+                                <text x="250" y="95" fill="#00c853" font-size="9">INVERSION ZONE</text>`;
+                }
+                else { 
+                    htmlLabels=`
+                        <line x1="50" y1="50" x2="50" y2="100" class="candle-wick"/> <rect x="40" y="60" width="20" height="30" class="candle-down"/>
+                        <line x1="90" y1="90" x2="90" y2="140" class="candle-wick"/> <rect x="80" y="100" width="20" height="30" class="candle-down"/>
+                        <line x1="130" y1="130" x2="130" y2="170" class="candle-wick"/> <rect x="120" y="140" width="20" height="20" class="candle-down"/>
+                        <line x1="170" y1="160" x2="170" y2="70" class="candle-wick"/> <rect x="160" y="80" width="20" height="80" class="candle-up"/>
+                        
+                        <line x1="210" y1="80" x2="210" y2="110" class="candle-wick"/>
+                        <rect x="200" y="80" width="20" height="20" class="candle-down"/>
+                        
+                        <circle cx="210" cy="110" r="5" fill="#d4af37"/><text x="220" y="125" fill="#d4af37" font-weight="bold">LOOK FOR ENTRY</text>`;
+                    
+                    chartStep=0;
+                    zoneHtml = `<rect x="80" y="100" width="300" height="30" fill="rgba(0, 200, 83, 0.2)" stroke="#00c853" />`;
+                }
+            } 
+            else { // Bearish (Corrected to mirror Bullish)
+                // C1 High: 150.
+                // C3 Low: 120. 
+                // Gap: 120 to 150.
+                
+                if(chartStep === 1) { 
+                    htmlLabels=`
+                        <line x1="50" y1="180" x2="50" y2="150" class="candle-wick"/>
+                        <rect x="40" y="160" width="20" height="20" class="candle-up"/>
+                        <text x="50" y="190" fill="#fff" font-size="10">C1 (High)</text>`;
+                    
+                    zoneHtml = `<rect x="80" y="120" width="200" height="30" fill="rgba(0, 200, 83, 0.2)" stroke="#00c853" stroke-dasharray="2" />
+                                <text x="90" y="115" fill="#00c853" font-size="9">BULLISH FVG</text>`;
+                }
+                else if(chartStep === 2) { 
+                    htmlLabels=`
+                        <line x1="50" y1="180" x2="50" y2="150" class="candle-wick"/> <rect x="40" y="160" width="20" height="20" class="candle-up"/>
+                        
+                        <line x1="90" y1="150" x2="90" y2="90" class="candle-wick"/> <rect x="80" y="100" width="20" height="50" class="candle-up"/>
+                        
+                        <line x1="130" y1="120" x2="130" y2="60" class="candle-wick"/> <rect x="120" y="70" width="20" height="40" class="candle-up"/>
+                        
+                        <text x="130" y="50" fill="#00c853" font-size="10">Gap Created</text>`;
+                    
+                    zoneHtml = `<rect x="80" y="120" width="200" height="30" fill="rgba(0, 200, 83, 0.2)" stroke="#00c853" stroke-dasharray="2" />`;
+                }
+                else if(chartStep === 3) { 
+                    // C4: Red Candle Closes BELOW 150 (Gap Bottom)
+                    // Open 60, Close 160.
+                    htmlLabels=`
+                        <line x1="50" y1="180" x2="50" y2="150" class="candle-wick"/> <rect x="40" y="160" width="20" height="20" class="candle-up"/>
+                        <line x1="90" y1="150" x2="90" y2="90" class="candle-wick"/> <rect x="80" y="100" width="20" height="50" class="candle-up"/>
+                        <line x1="130" y1="120" x2="130" y2="60" class="candle-wick"/> <rect x="120" y="70" width="20" height="40" class="candle-up"/>
+                        
+                        <line x1="170" y1="60" x2="170" y2="170" class="candle-wick"/> <rect x="160" y="70" width="20" height="90" class="candle-down"/>
+                        
+                        <text x="180" y="185" fill="#ff3d00" font-weight="bold" font-size="10">CLOSE BELOW GAP</text>`;
+                    
+                    zoneHtml = `<rect x="80" y="120" width="300" height="30" fill="rgba(255, 61, 0, 0.2)" stroke="#ff3d00" />
+                                <text x="250" y="115" fill="#ff3d00" font-size="9">INVERSION ZONE</text>`;
+                }
+                else { 
+                    htmlLabels=`
+                        <line x1="50" y1="180" x2="50" y2="150" class="candle-wick"/> <rect x="40" y="160" width="20" height="20" class="candle-up"/>
+                        <line x1="90" y1="150" x2="90" y2="90" class="candle-wick"/> <rect x="80" y="100" width="20" height="50" class="candle-up"/>
+                        <line x1="130" y1="120" x2="130" y2="60" class="candle-wick"/> <rect x="120" y="70" width="20" height="40" class="candle-up"/>
+                        <line x1="170" y1="60" x2="170" y2="170" class="candle-wick"/> <rect x="160" y="70" width="20" height="90" class="candle-down"/>
+                        
+                        <line x1="210" y1="170" x2="210" y2="140" class="candle-wick"/> <rect x="200" y="150" width="20" height="20" class="candle-up"/>
+                        
+                        <circle cx="210" cy="140" r="5" fill="#d4af37"/><text x="220" y="135" fill="#d4af37" font-weight="bold">LOOK FOR ENTRY</text>`;
+                    
+                    chartStep=0;
+                    zoneHtml = `<rect x="80" y="120" width="300" height="30" fill="rgba(255, 61, 0, 0.2)" stroke="#ff3d00" />`;
+                }
+            }
+
+            labels.innerHTML = htmlLabels;
+            if(zoneHtml) zoneLayer.innerHTML = zoneHtml;
+        };
+
+        init();
+    </script>
+</body>
+</html>
