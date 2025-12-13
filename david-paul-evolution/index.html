@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading | Evolution Bio-Lab</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Bio-Cybernetic Theme */
+            --bg-void: #030305;
+            --bg-cell: #0e0e14;
+            --dna-red: #ff3366;    /* Raw Instinct/Error */
+            --dna-blue: #00f0ff;   /* Logic/Tech */
+            --dna-gold: #fbbf24;   /* Realization */
+            --dna-green: #10b981;  /* Evolution/Herman */
+            --text-core: #f8fafc;
+            --text-dim: #64748b;
+            --font-display: 'Segoe UI', 'Roboto Mono', monospace;
+        }
+
+        * { box-sizing: border-box; transition: all 0.2s ease; }
+
+        body {
+            background-color: var(--bg-void);
+            color: var(--text-core);
+            font-family: 'Inter', system-ui, sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(255, 51, 102, 0.05) 0%, transparent 20%),
+                radial-gradient(circle at 90% 90%, rgba(0, 240, 255, 0.05) 0%, transparent 20%);
+        }
+
+        /* --- HUD --- */
+        .hud {
+            height: 70px;
+            background: rgba(14, 14, 20, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; justify-content: space-between; align-items: center; padding: 0 30px;
+            z-index: 100;
+        }
+
+        .brand {
+            font-family: var(--font-display);
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: white;
+            cursor: pointer;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .brand i { color: var(--dna-red); animation: pulse 2s infinite; }
+        .brand span { color: var(--dna-blue); }
+
+        .stats { display: flex; gap: 40px; }
+        .stat-box { text-align: right; }
+        .stat-label { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+        .stat-val { font-family: var(--font-display); font-size: 1.2rem; color: var(--dna-blue); font-weight: bold; }
+
+        .dna-bar-container { width: 200px; height: 6px; background: #222; border-radius: 3px; overflow: hidden; margin-top: 5px; }
+        .dna-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--dna-red), var(--dna-blue), var(--dna-green)); box-shadow: 0 0 10px var(--dna-blue); }
+
+        /* --- LAYOUT --- */
+        .layout { display: flex; height: calc(100vh - 70px); }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px; background: var(--bg-cell); border-right: 1px solid rgba(255,255,255,0.05);
+            display: flex; flex-direction: column; overflow-y: auto;
+        }
+        .nav-item {
+            padding: 16px 20px; cursor: pointer; color: var(--text-dim); border-left: 3px solid transparent;
+            font-size: 0.85rem; display: flex; align-items: center; gap: 12px; font-weight: 600;
+            font-family: var(--font-display); text-transform: uppercase;
+        }
+        .nav-item:hover { background: rgba(255,255,255,0.03); color: white; }
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.05), transparent);
+            border-left-color: var(--dna-blue); color: var(--dna-blue);
+        }
+        .nav-item.completed { color: var(--dna-green); }
+        .nav-item.completed i { color: var(--dna-green); }
+
+        /* --- VIEWPORT --- */
+        .viewport {
+            flex: 1; padding: 50px; overflow-y: auto; position: relative;
+            background: radial-gradient(circle at center, rgba(0, 240, 255, 0.02) 0%, transparent 60%);
+        }
+
+        .module { max-width: 900px; margin: 0 auto; display: none; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .module.active { display: block; }
+
+        @keyframes slideUp {
+            0% { opacity: 0; transform: translateY(30px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+        h1 { font-size: 2.2rem; margin: 0 0 15px 0; color: white; letter-spacing: -1px; }
+        h2 { font-family: var(--font-display); color: var(--dna-red); font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 25px; display: flex; align-items: center; gap: 10px; }
+        h2::before { content: '/// SEQ_'; opacity: 0.5; color: var(--dna-blue); }
+        p { line-height: 1.8; color: var(--text-dim); font-size: 1.05rem; margin-bottom: 30px; }
+
+        /* --- WIDGETS --- */
+        .widget-box {
+            background: rgba(20, 20, 26, 0.6); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px; padding: 40px; position: relative; overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        }
+        
+        .quote-box {
+            border-left: 3px solid var(--dna-gold); background: rgba(251, 191, 36, 0.05);
+            padding: 20px; margin-bottom: 25px; color: #fbbf24; font-style: italic; font-family: serif;
+            position: relative;
+        }
+        .quote-author {
+            display: block; text-align: right; font-size: 0.8rem; font-family: var(--font-display);
+            margin-top: 10px; font-style: normal; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .btn-main {
+            background: transparent; border: 1px solid var(--dna-blue); color: var(--dna-blue);
+            padding: 12px 30px; font-family: var(--font-display); font-weight: bold; cursor: pointer;
+            border-radius: 2px; text-transform: uppercase; letter-spacing: 1px; position: relative; overflow: hidden;
+        }
+        .btn-main:hover { background: var(--dna-blue); color: #000; box-shadow: 0 0 20px rgba(0, 240, 255, 0.4); }
+
+        .btn-next {
+            float: right; margin-top: 30px; background: var(--dna-green); color: #000; border: none;
+            padding: 15px 40px; border-radius: 2px; font-weight: bold; font-size: 0.9rem; font-family: var(--font-display);
+            cursor: pointer; display: flex; align-items: center; gap: 10px; text-transform: uppercase;
+        }
+        .btn-next:hover { transform: translateX(5px); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+
+        .herman-anchor {
+            margin-top: 40px; background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, transparent 100%);
+            border-left: 4px solid var(--dna-green); padding: 20px;
+            display: flex; gap: 20px; align-items: flex-start;
+        }
+        .herman-anchor i { color: var(--dna-green); font-size: 1.5rem; margin-top: 5px; }
+        .herman-anchor strong { display: block; color: var(--dna-green); font-family: var(--font-display); margin-bottom: 5px; letter-spacing: 1px; font-size: 0.8rem; }
+
+        /* --- MODULE SPECIFIC --- */
+        
+        /* Mod 1: The Lure */
+        .dollar-rain { font-size: 2rem; color: var(--dna-green); animation: fall 1s infinite; display: inline-block; }
+        @keyframes fall { 0% { transform: translateY(0); opacity:1; } 100% { transform: translateY(20px); opacity:0; } }
+
+        /* Mod 2: Blind Luck */
+        .slot-container { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
+        .slot-box { width: 60px; height: 80px; border: 1px solid #333; display: flex; align-items: center; justify-content: center; font-size: 2rem; background: #000; }
+
+        /* Mod 3: The Crash */
+        .crash-chart { width: 100%; height: 100px; border-bottom: 1px solid #333; position: relative; overflow: hidden; }
+        .crash-line { position: absolute; top: 10px; left: 0; width: 0%; height: 2px; background: var(--dna-green); transition: width 0.5s; }
+        .crash-line.crashed { background: var(--dna-red); top: 90%; transition: top 0.5s cubic-bezier(0.6, -0.28, 0.735, 0.045); }
+
+        /* Mod 5: The Bias/Target (UPDATED) */
+        .chart-cleaner { position: relative; height: 180px; border: 1px solid #333; overflow: hidden; background: #0b0b10; display: flex; align-items: center; justify-content: center; }
+        .noise-layer { position: absolute; top:0; left:0; width:100%; height:100%; background: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMTAwIj48cGF0aCBkPSJNMTAgMTBMOTAgOTAiIHN0cm9rZT0icmdiYSgyNTUsIDI1NSwgMjU1LCAwLjEpIi8+PC9zdmc+'); opacity: 0.5; transition: opacity 1s; }
+        .target-magnet { font-size: 3rem; color: var(--dna-gold); opacity: 0; transform: scale(0.5); transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0 20px var(--dna-gold); text-align: center; }
+        .target-magnet span { font-size: 0.8rem; display: block; color: var(--text-dim); font-family: var(--font-display); margin-top: 5px; }
+
+        /* Mod 6: The Pivot */
+        .brain-switch { display: flex; justify-content: space-between; border: 1px solid #333; padding: 20px; cursor: pointer; }
+        .brain-switch:hover { border-color: var(--dna-blue); }
+        
+        /* Mod 9: Emotional Wave (UPDATED) */
+        .wave-container { height: 100px; width: 100%; background: #050508; position: relative; overflow: hidden; border: 1px solid #222; border-radius: 4px; display: flex; align-items: center; }
+        .wave-path { fill: none; stroke: var(--dna-red); stroke-width: 2; transition: stroke 2s; }
+        
+        /* Mod 10: Auto-Pilot */
+        .pilot-circle { width: 100px; height: 100px; border: 4px solid #333; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #333; transition: 0.5s; }
+        .pilot-circle.active { border-color: var(--dna-green); color: var(--dna-green); box-shadow: 0 0 30px var(--dna-green); }
+
+    </style>
+</head>
+<body>
+
+<div class="hud">
+    <div class="brand" onclick="goToStep(0)"><i class="fas fa-dna"></i> HERMAN<span>EVOLUTION</span></div>
+    <div class="stats">
+        <div class="stat-box">
+            <div class="stat-label">Evolution XP</div>
+            <div class="stat-val" id="xp-display">0</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Mutation Progress</div>
+            <div class="dna-bar-container"><div class="dna-bar-fill" id="dna-bar"></div></div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="nav-item active" id="nav-0" onclick="goToStep(0)">1. The Lure</div>
+        <div class="nav-item" id="nav-1" onclick="goToStep(1)">2. Unconscious Incompetence</div>
+        <div class="nav-item" id="nav-2" onclick="goToStep(2)">3. The Bankruptcy</div>
+        <div class="nav-item" id="nav-3" onclick="goToStep(3)">4. Conscious Incompetence</div>
+        <div class="nav-item" id="nav-4" onclick="goToStep(4)">5. The Bias & Target</div>
+        <div class="nav-item" id="nav-5" onclick="goToStep(5)">6. The Pivot (Eureka)</div>
+        <div class="nav-item" id="nav-6" onclick="goToStep(6)">7. Risk Acceptance</div>
+        <div class="nav-item" id="nav-7" onclick="goToStep(7)">8. Conscious Competence</div>
+        <div class="nav-item" id="nav-8" onclick="goToStep(8)">9. Emotional Detachment</div>
+        <div class="nav-item" id="nav-9" onclick="goToStep(9)">10. Unconscious Competence</div>
+    </div>
+
+    <div class="viewport" id="viewport">
+
+        <div class="module active" id="mod-0">
+            <h2>Stage 1: The Trap</h2>
+            <h1>The Lure</h1>
+            <div class="quote-box">
+                "We are drawn to the market like moths to a flame, blinded by the promise of easy money."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>You enter the market seeing only the upside. You are not a trader yet; you are a dreamer.</p>
+            
+            <div class="widget-box" style="text-align:center;">
+                <div style="margin-bottom:20px;">
+                    <i class="fas fa-magnet" style="font-size:3rem; color:var(--dna-red);"></i>
+                </div>
+                <button class="btn-main" onclick="clickLure()">CLICK FOR FREE MONEY</button>
+                <div id="lure-msg" style="margin-top:20px; color:var(--dna-green); font-weight:bold;"></div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    The market lures you in to take your money. Herman Trading protects you from the Lure by showing you the raw probability data immediately, killing the fantasy before it kills your account.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-1">
+            <h2>Stage 2: Blindness</h2>
+            <h1>Unconscious Incompetence</h1>
+            <div class="quote-box">
+                "You don't know that you don't know. You make money by accident and assume it is skill. This is the most dangerous phase."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>This is the "Beginner's Luck" phase. You are gambling, but you think you are analyzing.</p>
+            
+            <div class="widget-box" style="text-align:center;">
+                <div class="slot-container">
+                    <div class="slot-box" id="s1">?</div>
+                    <div class="slot-box" id="s2">?</div>
+                    <div class="slot-box" id="s3">?</div>
+                </div>
+                <button class="btn-main" onclick="spinSlots()">PLACE TRADE (GUESS)</button>
+                <p id="slot-res" style="margin-top:15px; min-height:1.2em; color:var(--dna-green);"></p>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-dice"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    Beginner's luck is dangerous. Herman Trading eliminates luck. We force you to trade based on 10 years of backtested structure, not a "hunch".
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-2">
+            <h2>Stage 3: The Pain</h2>
+            <h1>The Bankruptcy / Crash</h1>
+            <div class="quote-box">
+                "If you bet too big, the cluster of losses will wipe you out. It is a mathematical certainty."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>The luck runs out. The account bleeds. This is where 90% of people quit.</p>
+            
+            <div class="widget-box">
+                <h3>Account Balance Simulator</h3>
+                <p style="text-align:right;">Equity: <span id="eq-val" style="color:var(--dna-green);">$10,000</span></p>
+                <div class="crash-chart">
+                    <div class="crash-line" id="crash-line" style="width:100%;"></div>
+                </div>
+                <button class="btn-main" style="margin-top:20px; border-color:var(--dna-red); color:var(--dna-red);" onclick="triggerCrash()">HOLD LOSING TRADE</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-skull-crossbones"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    You don't have to crash. Herman Trading users avoid this stage entirely because our Risk Management tools calculate your maximum loss *before* you enter.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-3">
+            <h2>Stage 4: The Realization</h2>
+            <h1>Conscious Incompetence</h1>
+            <div class="quote-box">
+                "You now realize that you know nothing. The ego is broken. The search for knowledge begins."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>You stop gambling and start studying. But you are still losing because you are overwhelmed.</p>
+            
+            <div class="widget-box">
+                <h3>Choose your path:</h3>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <button class="btn-main" onclick="alert('Useless noise.')">Watch CNBC</button>
+                    <button class="btn-main" onclick="alert('Too much lag.')">Read Textbooks</button>
+                    <button class="btn-main" onclick="alert('Scams.')">Buy 'Secret' E-book</button>
+                    <button class="btn-main" style="border-color:var(--dna-green); color:var(--dna-green);" onclick="addXP(50); alert('Correct path.')">Study Market Structure</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-book-reader"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    The search for knowledge takes years. Herman Trading condenses this into data. We don't give you a textbook; we give you the answers derived from millions of candles.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-4">
+            <h2>Stage 5: The Clarity</h2>
+            <h1>The Bias & Target</h1>
+            <div class="quote-box">
+                "You do not need a hundred indicators. You only need to know: Where is the price likely heading? What is the Bias? What is the Target?"
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>Stop looking at RSI divergence and Bollinger bands. Start looking for the Magnet (Liquidity).</p>
+            
+            <div class="widget-box">
+                <div class="chart-cleaner" id="cleaner-box">
+                    <div class="noise-layer" id="noise"></div>
+                    <div class="target-magnet" id="magnet">
+                        <i class="fas fa-crosshairs"></i>
+                        <span>TARGET: 4250.00</span>
+                    </div>
+                </div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button class="btn-main" onclick="clearNoise()">CLEAR INDICATORS & FIND BIAS</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-location-arrow"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    Herman Trading defines the "Daily Bias" and "Key Target" before the market opens. We tell you the 'Where', you just need to manage the 'How'.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-5">
+            <h2>Stage 6: The Eureka Moment</h2>
+            <h1>The Pivot (Probabilistic Thinking)</h1>
+            <div class="quote-box">
+                "The shift happens when you accept that you cannot predict the future, you can only manage odds. It's a coin toss with an edge."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>You stop trying to be right. You start trying to be a casino.</p>
+            
+            <div class="widget-box">
+                <div class="brain-switch" onclick="switchBrain(this)">
+                    <div style="font-size:1.5rem; color:var(--dna-red);">PREDICTION MINDSET</div>
+                    <div><i class="fas fa-arrow-right"></i></div>
+                    <div style="font-size:1.5rem; color:#333;">PROBABILITY MINDSET</div>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-balance-scale"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    It's hard to think in probabilities without data. Herman Trading GIVES you the probabilities (e.g., "68% chance of High of Day hold"). We make the pivot easy.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-6">
+            <h2>Stage 7: Survival</h2>
+            <h1>Risk Acceptance</h1>
+            <div class="quote-box">
+                "You realize that your number one job is not to make money, but to protect your chips so you can play tomorrow."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            
+            <div class="widget-box">
+                <h3>Risk Calculator</h3>
+                <input type="range" min="1" max="100" value="100" oninput="updateRisk(this.value)" style="width:100%; accent-color:var(--dna-blue);">
+                <p>Account Risk: <span id="risk-display" style="color:var(--dna-red);">10% (Suicide)</span></p>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-shield-alt"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    Herman Trading is built on a defensive core. Our system flags any trade that exceeds 1-2% risk, acting as your automated Risk Manager.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-7">
+            <h2>Stage 8: The Grind</h2>
+            <h1>Conscious Competence</h1>
+            <div class="quote-box">
+                "You are making money, but it is hard work. You must focus intensely to follow your rules. You are not yet on autopilot."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>You are profitable, but if you lose focus for one second, you slip back. This is the hardest stage.</p>
+            
+            <div class="widget-box">
+                <h3>Discipline Check</h3>
+                <button class="btn-main" onclick="checkTask(this)">Check Trend</button>
+                <button class="btn-main" onclick="checkTask(this)">Check Level</button>
+                <button class="btn-main" onclick="checkTask(this)">Check News</button>
+                <button class="btn-main" onclick="checkTask(this)">Wait for Close</button>
+                <p id="task-msg" style="margin-top:15px; color:var(--text-dim);">Tasks remaining...</p>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-cogs"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    The Grind causes burnout. Herman Trading automates the checklist. We provide the bias and levels, reducing your cognitive load by 80%.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-8">
+            <h2>Stage 9: The Void</h2>
+            <h1>Emotional Detachment</h1>
+            <div class="quote-box">
+                "Winning does not excite you. Losing does not hurt you. The chemical reaction in the pituitary gland has stopped."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            <p>You must stabilize your emotional baseline. Chaos destroys profits.</p>
+            
+            <div class="widget-box">
+                <h3>Emotional Pulse Stabilizer</h3>
+                <div class="wave-container">
+                    <svg width="100%" height="100%" viewBox="0 0 500 100" preserveAspectRatio="none">
+                        <path id="pulse-path" class="wave-path" d="M0,50 Q25,0 50,50 T100,50 T150,50 T200,50 T250,50 T300,50 T350,50 T400,50 T450,50 T500,50" />
+                    </svg>
+                </div>
+                <div style="text-align:center; margin-top:20px;">
+                    <button class="btn-main" onclick="stabilizePulse()">CALM THE MIND</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-robot"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    True detachment comes from trust. You can only detach if you trust the system implicitly. Herman Trading's 10-year backtest gives you that trust.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">Evolve <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-9">
+            <h2>Stage 10: The Cyborg</h2>
+            <h1>Unconscious Competence</h1>
+            <div class="quote-box">
+                "You drive the car without thinking about the pedals. You trade the market without thinking about the fear. You are in Flow."
+                <span class="quote-author">— Dr. David Paul</span>
+            </div>
+            
+            <div class="widget-box" style="text-align:center;">
+                <div class="pilot-circle" id="pilot">AUTO<br>PILOT</div>
+                <button class="btn-main" style="margin-top:20px;" onclick="activatePilot()">ENGAGE MASTERY</button>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-rocket"></i>
+                <div>
+                    <strong>Herman Accelerator</strong>
+                    <br>
+                    Evolution XP: <span id="final-xp" style="color:var(--dna-green); font-weight:bold;">0</span>
+                    <br><br>
+                    Don't spend 10 years trying to evolve. Use the data that has already evolved.
+                    <br><br>
+                    <a href="https://hermantrading.pro" target="_blank" style="color:var(--dna-green); text-decoration:none; font-weight:bold; border:1px solid var(--dna-green); padding:10px;">ACCESS HERMAN DATA</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    let xp = 0;
+    const totalSteps = 10;
+    let stepCompleted = new Array(totalSteps).fill(false);
+    let taskCount = 0;
+
+    // --- NAVIGATION ---
+    function goToStep(index) {
+        document.getElementById(`mod-${currentStep}`).classList.remove('active');
+        document.getElementById(`nav-${currentStep}`).classList.remove('active');
+        
+        currentStep = index;
+        
+        document.getElementById(`mod-${currentStep}`).classList.add('active');
+        document.getElementById(`nav-${currentStep}`).classList.add('active');
+        document.getElementById('viewport').scrollTop = 0;
+
+        if (currentStep === totalSteps - 1) { 
+             document.getElementById('final-xp').innerText = xp;
+        }
+    }
+
+    function nextMod() {
+        if (!stepCompleted[currentStep]) {
+            xp += 100;
+            stepCompleted[currentStep] = true;
+            document.getElementById(`nav-${currentStep}`).classList.add('completed');
+            updateHUD();
+        }
+        
+        if(currentStep < totalSteps - 1) {
+            goToStep(currentStep + 1);
+        } else {
+            goToStep(currentStep);
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('xp-display').innerText = xp;
+        let pct = (xp / 1000) * 100;
+        document.getElementById('dna-bar').style.width = pct + "%";
+    }
+
+    function addXP(amount) {
+        xp += amount;
+        updateHUD();
+    }
+
+    // --- INTERACTIONS ---
+
+    // Mod 1
+    function clickLure() {
+        document.getElementById('lure-msg').innerHTML = "YOU CAUGHT A WIN.<br>DOPAMINE RELEASED.<br>NOW YOU ARE HOOKED.";
+        addXP(10);
+    }
+
+    // Mod 2
+    function spinSlots() {
+        document.getElementById('s1').innerText = "🍒";
+        document.getElementById('s2').innerText = "🍒";
+        document.getElementById('s3').innerText = "🍋";
+        document.getElementById('slot-res').innerText = "WIN! (Pure Luck). You think you are a genius.";
+        addXP(10);
+    }
+
+    // Mod 3
+    function triggerCrash() {
+        document.getElementById('crash-line').classList.add('crashed');
+        document.getElementById('eq-val').innerText = "$0 (REKT)";
+        document.getElementById('eq-val').style.color = "var(--dna-red)";
+    }
+
+    // Mod 5: Clear Noise
+    function clearNoise() {
+        const noise = document.getElementById('noise');
+        const magnet = document.getElementById('magnet');
+        
+        noise.style.opacity = "0";
+        setTimeout(() => {
+            magnet.style.opacity = "1";
+            magnet.style.transform = "scale(1)";
+        }, 300);
+        
+        addXP(50);
+    }
+
+    // Mod 6
+    function switchBrain(el) {
+        el.innerHTML = '<div style="font-size:1.5rem; color:#333;">PREDICTION MINDSET</div><div><i class="fas fa-check"></i></div><div style="font-size:1.5rem; color:var(--dna-blue);">PROBABILITY MINDSET</div>';
+        el.style.borderColor = "var(--dna-blue)";
+        addXP(50);
+    }
+
+    // Mod 7
+    function updateRisk(val) {
+        const d = document.getElementById('risk-display');
+        if(val > 2) {
+            d.innerText = val + "% (Gambling)";
+            d.style.color = "var(--dna-red)";
+        } else {
+            d.innerText = val + "% (Survival Mode)";
+            d.style.color = "var(--dna-green)";
+        }
+    }
+
+    // Mod 8
+    function checkTask(btn) {
+        btn.style.borderColor = "var(--dna-green)";
+        btn.style.color = "var(--dna-green)";
+        taskCount++;
+        if(taskCount >= 4) {
+            document.getElementById('task-msg').innerText = "DISCIPLINE MAINTAINED.";
+            document.getElementById('task-msg').style.color = "var(--dna-green)";
+            addXP(20);
+        }
+    }
+
+    // Mod 9: Stabilize Pulse
+    function stabilizePulse() {
+        const path = document.getElementById('pulse-path');
+        // Chaotic wave
+        let chaotic = "M0,50 L20,10 L40,90 L60,20 L80,80 L100,30 L120,70 L140,10 L160,90 L180,50 L200,50";
+        // Smooth sine wave
+        let smooth = "M0,50 Q50,0 100,50 T200,50 T300,50 T400,50 T500,50";
+        
+        path.setAttribute('d', chaotic);
+        
+        setTimeout(() => {
+            path.style.transition = "all 2s ease-in-out";
+            path.setAttribute('d', smooth);
+            path.style.stroke = "var(--dna-green)";
+            path.style.strokeWidth = "4";
+        }, 100);
+        addXP(50);
+    }
+
+    // Mod 10
+    function activatePilot() {
+        document.getElementById('pilot').classList.add('active');
+        addXP(100);
+    }
+
+</script>
+
+</body>
+</html>
