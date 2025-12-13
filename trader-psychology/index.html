@@ -1,1 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading | Psychology Academy</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #05080f;
+            --panel-bg: #0f1522;
+            --panel-light: #182135;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+        }
 
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- TOP BAR (GAMIFICATION) --- */
+        .top-bar {
+            background: rgba(15, 21, 34, 0.95);
+            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+            z-index: 100;
+        }
+
+        .brand {
+            font-weight: 800;
+            letter-spacing: 1px;
+            font-size: 1.2rem;
+            color: white;
+        }
+        .brand span { color: var(--accent-blue); }
+
+        .stats-container {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .stat-box {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+
+        .stat-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; }
+        .stat-value { font-weight: bold; font-size: 1.1rem; color: var(--accent-green); font-family: 'Courier New', monospace; }
+
+        .progress-track {
+            width: 200px;
+            height: 8px;
+            background: #1e293b;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+            width: 0%;
+        }
+
+        /* --- MAIN LAYOUT --- */
+        .layout {
+            display: flex;
+            height: calc(100vh - 70px);
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 260px;
+            background: var(--panel-bg);
+            border-right: 1px solid rgba(255,255,255,0.05);
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 15px 25px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-item:hover { background: rgba(255,255,255,0.02); color: white; }
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border-left-color: var(--accent-blue);
+        }
+        .nav-item.locked { opacity: 0.4; pointer-events: none; }
+        .nav-item i { font-size: 0.8rem; }
+
+        /* --- CONTENT AREA --- */
+        .content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+            background: radial-gradient(circle at top right, #131b2e 0%, #05080f 40%);
+        }
+
+        .lesson-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: none;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .lesson-container.active { display: block; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 { font-size: 2.2rem; margin-bottom: 10px; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        h2 { color: var(--accent-blue); font-size: 1.1rem; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 1px; }
+        p { line-height: 1.8; color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 20px; }
+
+        /* --- INTERACTIVE WIDGETS --- */
+        .interactive-box {
+            background: var(--panel-light);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        /* Flip Cards for Truths */
+        .truth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .flip-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--accent-blue);
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+        .flip-card.revealed { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
+
+        /* Simulation Grid */
+        .sim-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; margin: 20px 0; }
+        .sim-dot { height: 12px; border-radius: 2px; background: #333; }
+        .sim-dot.win { background: var(--accent-green); box-shadow: 0 0 5px var(--accent-green); }
+        .sim-dot.loss { background: var(--accent-red); opacity: 0.6; }
+
+        /* The Herman Insight (Brand Anchor) */
+        .herman-anchor {
+            border-left: 4px solid var(--accent-green);
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 8, 15, 0) 100%);
+            padding: 20px;
+            margin-top: 30px;
+            position: relative;
+        }
+        .herman-anchor::before {
+            content: 'HERMAN DATA INSIGHT';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            background: var(--bg-dark);
+            color: var(--accent-green);
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            font-weight: bold;
+            border: 1px solid var(--accent-green);
+        }
+
+        /* --- FOOTER NAVIGATION --- */
+        .footer-nav {
+            margin-top: 50px;
+            display: flex;
+            justify-content: flex-end;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        button.primary-btn {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        button.primary-btn:hover { background: #2563eb; transform: translateX(5px); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+
+        /* Specific styles for widgets */
+        .slider-container { width: 100%; margin: 20px 0; }
+        input[type="range"] { width: 100%; accent-color: var(--accent-blue); }
+        
+        .zone-checklist label { display: block; margin: 15px 0; cursor: pointer; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.03); }
+        .zone-checklist input { margin-right: 15px; transform: scale(1.5); }
+        .zone-checklist label:hover { background: rgba(255,255,255,0.05); }
+
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <div class="brand">HERMAN <span>TRADING</span></div>
+    <div class="stats-container">
+        <div class="stat-box">
+            <div class="stat-label">Mental Capital (XP)</div>
+            <div class="stat-value" id="xp-display">0 XP</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">Zone Readiness</div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="layout">
+    <div class="sidebar">
+        <div class="nav-item active" id="nav-0"><i class="fas fa-brain"></i> 1. The Missing Link</div>
+        <div class="nav-item" id="nav-1"><i class="fas fa-list-ol"></i> 2. The 5 Truths</div>
+        <div class="nav-item" id="nav-2"><i class="fas fa-chart-pie"></i> 3. Defining The Edge</div>
+        <div class="nav-item" id="nav-3"><i class="fas fa-random"></i> 4. Random Distribution</div>
+        <div class="nav-item" id="nav-4"><i class="fas fa-balance-scale"></i> 5. Market Neutrality</div>
+        <div class="nav-item" id="nav-5"><i class="fas fa-shield-alt"></i> 6. Accepting Risk</div>
+        <div class="nav-item" id="nav-6"><i class="fas fa-ghost"></i> 7. Eliminating Fear</div>
+        <div class="nav-item" id="nav-7"><i class="fas fa-water"></i> 8. Opportunity Flow</div>
+        <div class="nav-item" id="nav-8"><i class="fas fa-user-lock"></i> 9. Self-Discipline</div>
+        <div class="nav-item" id="nav-9"><i class="fas fa-check-circle"></i> 10. The Zone</div>
+    </div>
+
+    <div class="content" id="main-area">
+        
+        <div class="lesson-container active" id="lesson-0">
+            <h2>Module 1: Diagnosis</h2>
+            <h1>The Gap Between Analysis & Execution</h1>
+            <p>You can be a master analyst and still be a losing trader. Mark Douglas calls this "The Gap." Why do smart people lose money?</p>
+            
+            <div class="interactive-box">
+                <h3><i class="fas fa-sliders-h"></i> Interactive Diagnostic</h3>
+                <p>Adjust the slider. How much time do you spend looking for "perfect setups" vs working on your mind?</p>
+                <input type="range" min="0" max="100" value="90" id="slider-1" oninput="updateSlider1(this.value)">
+                <p>Focus on Strategy: <span id="val-strat" style="color:var(--accent-blue)">90%</span> | Focus on Mind: <span id="val-mind" style="color:var(--accent-red)">10%</span></p>
+                <div id="slider-msg" style="margin-top:15px; font-style:italic; height: 40px;">Most traders stay here and fail.</div>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                Don't bridge the gap with willpower. Bridge it with <b>Automation</b>. Our 10 years of backtested data removes the need for you to be a "perfect analyst". The math does the analysis; you just execute.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: The 5 Truths <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-1">
+            <h2>Module 2: Foundation</h2>
+            <h1>The 5 Fundamental Truths</h1>
+            <p>To think in probabilities, you must memorize these truths. Click each card to internalize it.</p>
+            
+            <div class="interactive-box">
+                <div class="truth-grid">
+                    <div class="flip-card" onclick="revealCard(this)">Anything can happen.</div>
+                    <div class="flip-card" onclick="revealCard(this)">You don't need to know what happens next.</div>
+                    <div class="flip-card" onclick="revealCard(this)">Wins/Losses are random.</div>
+                    <div class="flip-card" onclick="revealCard(this)">An Edge is just probability.</div>
+                    <div class="flip-card" onclick="revealCard(this)">Every moment is unique.</div>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                "Anything can happen" is chaos. "In 2018, this setup had a 68% win rate" is order. Herman Trading turns the 5 Truths into a business model.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Understanding Edge <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-2">
+            <h2>Module 3: The Casino Model</h2>
+            <h1>Defining Your Edge</h1>
+            <p>An Edge is not a guarantee. It's a slightly weighted coin.</p>
+            
+            <div class="interactive-box" style="text-align: center;">
+                <h3><i class="fas fa-coins"></i> The Probability Coin</h3>
+                <p>Click to flip a coin weighted 60% in your favor.</p>
+                <div id="coin-result" style="font-size: 3rem; margin: 20px;">🪙</div>
+                <button class="primary-btn" style="width: auto; margin: 0 auto; padding: 10px 20px;" onclick="flipCoin()">FLIP COIN</button>
+                <p id="coin-stats" style="margin-top: 10px; color: var(--text-secondary);">Wins: 0 | Losses: 0</p>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                You just flipped a digital coin. In real trading, how do you KNOW your coin is weighted 60%? You don't... unless you have our <b>Herman Trading Historical Database</b>. Without data, you are just gambling.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Random Distribution <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-3">
+            <h2>Module 4: The Silent Killer</h2>
+            <h1>Random Distribution</h1>
+            <p>Even with an edge, losses come in clusters (streaks). This is where 90% of traders quit.</p>
+            
+            <div class="interactive-box">
+                <h3><i class="fas fa-border-all"></i> 100 Trade Simulator (60% Win Rate)</h3>
+                <button class="primary-btn" style="font-size: 0.8rem; padding: 8px 16px;" onclick="generateGrid()">Generate Sequence</button>
+                <div class="sim-grid" id="sim-grid"></div>
+                <div id="sim-insight" style="min-height: 40px;"></div>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                See that red streak of 5 losses? Would you panic? Our system has survived streaks like that in 2015, 2019, and 2022. We don't panic because we know the green streak is mathematically inevitable.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Market Neutrality <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-4">
+            <h2>Module 5: Perspective</h2>
+            <h1>Market Neutrality</h1>
+            <p>The market is not your enemy. It is just data. Pain comes from your interpretation, not the price.</p>
+            
+            <div class="interactive-box">
+                <h3><i class="fas fa-glasses"></i> The Re-framer</h3>
+                <p>Click the negative thought to reframe it into a professional thought.</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="primary-btn" style="background: #1e293b;" onclick="alert('REFRAME: I just paid for information.')">"I lost money!"</button>
+                    <button class="primary-btn" style="background: #1e293b;" onclick="alert('REFRAME: The market is offering high volatility.')">" The market is crazy!"</button>
+                    <button class="primary-btn" style="background: #1e293b;" onclick="alert('REFRAME: The setup did not materialize.')">"They hunted my stop!"</button>
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                Algorithms are perfectly neutral. By adopting the Herman Trading quantitative approach, you remove "enemy" from your vocabulary.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Accepting Risk <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-5">
+            <h2>Module 6: The Iron Rule</h2>
+            <h1>Truly Accepting Risk</h1>
+            <p>Accepting risk means being at peace with the worst-case scenario before you enter.</p>
+            
+            <div class="interactive-box">
+                <h3><i class="fas fa-chart-line"></i> Recovery Calculator</h3>
+                <p>See why small losses are okay, but big losses (emotional trading) are fatal.</p>
+                <p>Loss: <span id="loss-val" style="color:var(--accent-red)">10%</span> requires <span id="gain-val" style="color:var(--accent-green)">11%</span> gain to recover.</p>
+                <input type="range" min="1" max="90" value="10" oninput="calcRisk(this.value)">
+                <div id="risk-warning" style="margin-top:10px; color: var(--accent-red);"></div>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                We cap risk per trade rigidly. Why? Because our 10-year backtest shows that survival is the #1 priority. Herman Trading isn't about getting rich quick; it's about not dying poor.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Eliminating Fear <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-6">
+            <h2>Module 7: Emotional Control</h2>
+            <h1>Eliminating Fear</h1>
+            <p>Fear causes 95% of mistakes. Fear comes from not trusting yourself.</p>
+            
+            <div class="interactive-box" style="text-align: center;">
+                <h3><i class="fas fa-bomb"></i> The Fear Source</h3>
+                <p>Click the button to destroy the source of fear.</p>
+                <button class="primary-btn" style="background: var(--accent-red);" onclick="this.style.display='none'; document.getElementById('fear-msg').style.display='block'; addXP(100);">DESTROY FEAR</button>
+                <div id="fear-msg" style="display:none; margin-top: 20px; font-size: 1.2rem; color: var(--accent-blue);">
+                    Fear is destroyed by <strong>COMPETENCE</strong>.
+                </div>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                You cannot "meditate" fear away if you don't know if your strategy works. You destroy fear by looking at the Herman Trading Performance Report. Competence = Confidence.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Opportunity Flow <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-7">
+            <h2>Module 8: Abundance</h2>
+            <h1>The Opportunity Flow</h1>
+            <p>Don't chase. The market is an endless river. There is always another trade.</p>
+            
+            <div class="interactive-box" style="overflow: hidden; white-space: nowrap; position: relative; height: 60px;">
+                <div id="ticker" style="position: absolute; animation: scroll 10s linear infinite; display: flex; gap: 40px; color: var(--accent-green); font-family: monospace; font-size: 1.2rem;">
+                    <span>+120 PIPS</span> <span>BTC LONG</span> <span>GOLD SETUP</span> <span>NASDAQ BREAKOUT</span> <span>EURUSD SHORT</span> <span>+5R TRADE</span>
+                </div>
+            </div>
+            <style>@keyframes scroll { 0% { left: 100%; } 100% { left: -100%; } }</style>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                FOMO (Fear Of Missing Out) is for amateurs. Our database shows over 15,000 valid setups in the last decade. Missed one? Good. Wait for the next high-probability setup.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: Self Discipline <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-8">
+            <h2>Module 9: The Structure</h2>
+            <h1>Self-Discipline</h1>
+            <p>You are the boss. You are also the employee. The boss must write the rules.</p>
+            
+            <div class="interactive-box">
+                <h3><i class="fas fa-file-contract"></i> The Trader's Contract</h3>
+                <p>I hereby agree to follow my rules, define my risk, and accept the outcome.</p>
+                <input type="text" placeholder="Type your name to sign..." style="padding: 10px; background: #0b0f19; border: 1px solid #333; color: white; width: 60%; margin-right: 10px;">
+                <button class="primary-btn" style="display: inline-block; padding: 10px 20px;" onclick="alert('Contract Signed. Breach of contract results in financial loss.')">Sign</button>
+            </div>
+
+            <div class="herman-anchor">
+                <strong>The Herman Solution:</strong>
+                Discipline is hard. Automated signals are easy. Use Herman Trading tools to outsource your discipline to the algorithm.
+            </div>
+
+            <div class="footer-nav">
+                <button class="primary-btn" onclick="nextLesson()">Next: THE ZONE <i class="fas fa-arrow-right"></i></button>
+            </div>
+        </div>
+
+        <div class="lesson-container" id="lesson-9">
+            <h2>Module 10: Mastery</h2>
+            <h1>Entering The Zone</h1>
+            <p>The Zone is a state of mind where you act without hesitation, fear, or hope. You just... execute.</p>
+            
+            <div class="interactive-box">
+                <h3><i class="fas fa-plane-departure"></i> Pre-Flight Check</h3>
+                <div class="zone-checklist">
+                    <label><input type="checkbox" class="z-check"> I have accepted the risk.</label>
+                    <label><input type="checkbox" class="z-check"> I am not trying to predict, only execute.</label>
+                    <label><input type="checkbox" class="z-check"> I rely on my Edge (Stats).</label>
+                    <label><input type="checkbox" class="z-check"> I am emotionally detached.</label>
+                </div>
+                <button class="primary-btn" style="width: 100%; margin-top: 20px; justify-content: center;" onclick="finishCourse()">ENTER THE ZONE</button>
+            </div>
+
+            <div class="herman-anchor" id="final-anchor" style="display:none;">
+                <h3 style="color: var(--accent-green); margin-top: 0;">CONGRATULATIONS.</h3>
+                You have the mindset. Now you need the weapon. <br><br>
+                <a href="https://hermantrading.pro" target="_blank" style="color: white; background: var(--accent-green); padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">GET THE HERMAN SYSTEM</a>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let currentLesson = 0;
+    let xp = 0;
+    const totalLessons = 10;
+    
+    // SFX (simulated via console for now, visual feedback provided)
+    
+    function updateStats() {
+        document.getElementById('xp-display').innerText = xp + " XP";
+        let pct = Math.round(((currentLesson) / totalLessons) * 100);
+        document.getElementById('progress-bar').style.width = pct + "%";
+    }
+
+    function addXP(amount) {
+        xp += amount;
+        updateStats();
+        // Visual flash of top bar
+        document.querySelector('.top-bar').style.borderColor = '#10b981';
+        setTimeout(() => document.querySelector('.top-bar').style.borderColor = 'rgba(59, 130, 246, 0.2)', 300);
+    }
+
+    function nextLesson() {
+        addXP(100);
+        
+        // Hide current
+        document.getElementById(`lesson-${currentLesson}`).classList.remove('active');
+        document.getElementById(`nav-${currentLesson}`).classList.remove('active');
+        
+        currentLesson++;
+        
+        if (currentLesson < totalLessons) {
+            // Show next
+            document.getElementById(`lesson-${currentLesson}`).classList.add('active');
+            document.getElementById(`nav-${currentLesson}`).classList.add('active');
+            // Scroll to top
+            document.getElementById('main-area').scrollTop = 0;
+            updateStats();
+        }
+    }
+
+    // --- Module Specific Logic ---
+
+    // Module 1 Slider
+    function updateSlider1(val) {
+        document.getElementById('val-strat').innerText = val + "%";
+        document.getElementById('val-mind').innerText = (100-val) + "%";
+        if (val < 50) {
+            document.getElementById('slider-msg').innerText = "Better... You are starting to understand.";
+            document.getElementById('slider-msg').style.color = "var(--accent-green)";
+        } else {
+            document.getElementById('slider-msg').innerText = "Most traders stay here and fail.";
+            document.getElementById('slider-msg').style.color = "var(--text-secondary)";
+        }
+    }
+
+    // Module 2 Cards
+    function revealCard(el) {
+        if (!el.classList.contains('revealed')) {
+            el.classList.add('revealed');
+            addXP(20);
+        }
+    }
+
+    // Module 3 Coin
+    function flipCoin() {
+        let win = Math.random() < 0.6;
+        let res = document.getElementById('coin-result');
+        let stats = document.getElementById('coin-stats');
+        
+        res.style.transform = "rotateY(360deg)";
+        setTimeout(() => {
+            res.style.transform = "rotateY(0deg)";
+            res.innerText = win ? "✅" : "❌";
+            
+            // Simple stats tracking in text
+            let txt = stats.innerText;
+            let w = parseInt(txt.split('Wins: ')[1]) + (win ? 1 : 0);
+            let l = parseInt(txt.split('Losses: ')[1]) + (win ? 0 : 1);
+            stats.innerText = `Wins: ${w} | Losses: ${l}`;
+        }, 300);
+    }
+
+    // Module 4 Grid
+    function generateGrid() {
+        const grid = document.getElementById('sim-grid');
+        grid.innerHTML = '';
+        let streak = 0;
+        let maxStreak = 0;
+        
+        for(let i=0; i<100; i++) {
+            let win = Math.random() < 0.6;
+            let dot = document.createElement('div');
+            dot.className = 'sim-dot ' + (win ? 'win' : 'loss');
+            grid.appendChild(dot);
+            
+            if(!win) { streak++; } else { streak=0; }
+            if(streak > maxStreak) maxStreak = streak;
+        }
+        
+        document.getElementById('sim-insight').innerHTML = `Generated! Max losing streak: <strong style="color:var(--accent-red)">${maxStreak} trades</strong>. <br>Without conviction, you would quit at trade #${Math.floor(Math.random()*20)+10}.`;
+        addXP(50);
+    }
+
+    // Module 6 Risk
+    function calcRisk(val) {
+        let loss = parseInt(val);
+        let needed = (100 / (100 - loss) - 1) * 100;
+        document.getElementById('loss-val').innerText = loss + "%";
+        document.getElementById('gain-val').innerText = needed.toFixed(1) + "%";
+        
+        if(loss > 20) {
+            document.getElementById('risk-warning').innerText = "WARNING: Mathematical recovery becomes exponentially harder.";
+        } else {
+            document.getElementById('risk-warning').innerText = "";
+        }
+    }
+
+    // Final Check
+    function finishCourse() {
+        let checks = document.querySelectorAll('.z-check');
+        let all = true;
+        checks.forEach(c => { if(!c.checked) all = false; });
+        
+        if(all) {
+            addXP(500);
+            document.getElementById('final-anchor').style.display = 'block';
+            document.getElementById('progress-bar').style.width = "100%";
+            // Celebrate
+            confettiEffect(); 
+        } else {
+            alert("You are not honest with yourself yet. Check the boxes.");
+        }
+    }
+
+    function confettiEffect() {
+        // Simple visual trigger
+        document.body.style.animation = "shake 0.5s";
+    }
+
+    // Init
+    updateStats();
+</script>
+
+</body>
+</html>
