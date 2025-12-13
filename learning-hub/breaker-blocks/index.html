@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading Hub | Institutional Breakers v9.0</title>
+    <style>
+        :root {
+            --bg-dark: #0b0e11;
+            --bg-panel: #151a21;
+            --text-main: #e0e0e0;
+            --text-dim: #949aa5;
+            --accent-gold: #d4af37;
+            --accent-gold-glow: rgba(212, 175, 55, 0.2);
+            --accent-blue: #00bcd4;
+            --success: #00c853;
+            --danger: #ff3d00;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid #2a323c;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--accent-gold);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 1px solid #2a323c;
+            padding-bottom: 20px;
+        }
+
+        .brand span { color: #fff; }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar-bg {
+            height: 4px;
+            background: #2a323c;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--accent-gold);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+        .progress-text {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        .nav-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .nav-item {
+            padding: 12px 15px;
+            margin-bottom: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-item:hover { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
+        .nav-item.active {
+            background-color: rgba(212, 175, 55, 0.1);
+            color: var(--accent-gold);
+            border-left: 3px solid var(--accent-gold);
+            font-weight: 600;
+        }
+        .nav-item.completed { text-decoration: none; }
+        .nav-item.completed::after { content: '✓'; margin-left: auto; color: var(--success); font-size: 0.8rem; }
+
+        .cta-box {
+            margin-top: auto;
+            background: linear-gradient(180deg, #1a2029, #0f1216);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            text-align: center;
+        }
+        .cta-btn {
+            display: block;
+            background: var(--accent-gold);
+            color: #000;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 4px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .cta-btn:hover { transform: translateY(-2px); }
+
+        /* --- Main Content --- */
+        .main {
+            flex-grow: 1;
+            padding: 40px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .content-wrapper {
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.4s ease;
+        }
+
+        h1 { font-size: 2.2rem; margin: 0 0 10px 0; color: #fff; }
+        .subtitle { color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 25px; font-weight: 400; }
+        p { line-height: 1.6; color: #c0c4cc; margin-bottom: 20px; font-size: 1rem; }
+
+        /* --- Visuals & Charts --- */
+        .visual-container {
+            background: #0f1216;
+            border: 1px solid #2a323c;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            height: 350px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        svg { width: 100%; height: 100%; overflow: visible; }
+        
+        .candle-up { fill: #00c853; stroke: #00c853; stroke-width: 1; opacity: 0.9; }
+        .candle-down { fill: #ff3d00; stroke: #ff3d00; stroke-width: 1; opacity: 0.9; }
+        .candle-wick { stroke: #555; stroke-width: 1; }
+        
+        .btn-control {
+            background: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 8px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-control:hover { background: var(--accent-gold); color: #000; }
+
+        .herman-note {
+            border-left: 3px solid var(--accent-gold);
+            background: rgba(212, 175, 55, 0.05);
+            padding: 15px 20px;
+            font-size: 0.95rem;
+            margin-top: 20px;
+            border-radius: 0 6px 6px 0;
+        }
+        .herman-note strong { color: var(--accent-gold); display: block; margin-bottom: 5px; font-size: 0.8rem; text-transform: uppercase; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">Herman <span>Trading</span></div>
+        
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0% Completed</div>
+        </div>
+
+        <ul class="nav-list" id="nav-list">
+            </ul>
+
+        <div class="cta-box">
+            <div style="color:var(--text-dim); font-size:0.8rem;">Master the markets with us</div>
+            <a href="https://whop.com/herman-macro-edge-premium" target="_blank" class="cta-btn">Join Premium Discord</a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <div id="content-area" class="content-wrapper">
+            </div>
+    </main>
+
+    <script>
+        // --- DATA STORE ---
+        const modules = [
+            {
+                title: "1. The Interbank Logic",
+                subtitle: "Mitigation: Why Price Returns",
+                content: `<p>Price moves are engineered. In a Bullish Scenario, Smart Money pushes price down (Red Candles) to take liquidity. This creates a "Trap".</p><p>When they reverse aggressively (Green Candles), they leave their own short positions in drawdown. They <strong>must return</strong> to the "scene of the crime" (The Breaker) to close those shorts at breakeven before flying higher.</p>`,
+                note: "The 'Breaker' is usually the last series of candles (for bullish scenario) before the stop hunt.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="0" y1="50" x2="500" y2="50" stroke="#222" />
+                        <line x1="0" y1="150" x2="500" y2="150" stroke="#222" />
+
+                        <rect x="20" y="185" width="200" height="40" fill="rgba(255, 61, 0, 0.05)" stroke="#ff3d00" stroke-width="1" stroke-dasharray="3" rx="4"/>
+                        <text x="30" y="210" fill="#949aa5" font-size="9" letter-spacing="1">SELL SIDE LIQUIDITY</text>
+
+                        <line x1="50" y1="180" x2="50" y2="120" class="candle-wick"/> <rect x="40" y="140" width="20" height="40" class="candle-up"/>
+                        <line x1="80" y1="140" x2="80" y2="80" class="candle-wick"/> <rect x="70" y="100" width="20" height="40" class="candle-up"/> <line x1="110" y1="100" x2="110" y2="160" class="candle-wick"/> <rect x="100" y="100" width="20" height="40" class="candle-down"/>
+                        
+                        <line x1="140" y1="140" x2="140" y2="215" class="candle-wick" stroke="#fff" stroke-width="2"/> <rect x="130" y="140" width="20" height="60" class="candle-down"/> 
+                        
+                        <text x="135" y="235" fill="#ff3d00" font-size="12" font-weight="bold" text-anchor="middle" opacity="0.8">×</text>
+                        <text x="135" y="246" fill="#949aa5" font-size="8" text-anchor="middle">STOPS PURGED</text>
+
+                        <line x1="170" y1="220" x2="170" y2="100" class="candle-wick"/> <rect x="160" y="120" width="20" height="80" class="candle-up"/>
+                        <line x1="200" y1="120" x2="200" y2="20" class="candle-wick"/> <rect x="190" y="40" width="20" height="80" class="candle-up"/> <line x1="230" y1="40" x2="230" y2="90" class="candle-wick"/> <rect x="220" y="40" width="20" height="30" class="candle-down"/>
+                        <line x1="260" y1="70" x2="260" y2="110" class="candle-wick"/> <rect x="250" y="70" width="20" height="40" class="candle-down"/> <rect x="70" y="100" width="20" height="40" fill="none" stroke="#d4af37" stroke-width="2"/>
+                        <rect x="90" y="100" width="400" height="40" fill="rgba(212, 175, 55, 0.15)" stroke="none"/>
+                        <text x="300" y="125" fill="#d4af37" font-weight="bold" font-size="12">MITIGATION ZONE</text>
+
+                        <path d="M 260,110 L 300,50" stroke="#00c853" stroke-width="3" marker-end="url(#arrow)" />
+                    </svg>
+                `
+            },
+            {
+                title: "2. Bullish Breaker Anatomy",
+                subtitle: "Low -> High -> Lower Low -> Higher High",
+                content: `<p>This is your bread and butter buy setup. We need to see a manipulation of the lows (Liquidity Grab) followed by a violent break of structure to the upside.</p>`,
+                note: "Use the button to simulate the price action live.",
+                isInteractive: true,
+                type: 'bullish',
+                renderVisual: (id) => `<div id="chart-bullish" style="width:100%;height:100%;"></div>` 
+            },
+            {
+                title: "3. Bearish Breaker Anatomy",
+                subtitle: "High -> Low -> Higher High -> Lower Low",
+                content: `<p>The inverse logic. We look for a "False Breakout" (Higher High) that traps retail breakout traders. When price crashes back down (Lower Low), the trap is sprung.</p>`,
+                note: "If the move down is slow and choppy, it's not a Breaker. We need speed.",
+                isInteractive: true,
+                type: 'bearish',
+                renderVisual: (id) => `<div id="chart-bearish" style="width:100%;height:100%;"></div>`
+            },
+            {
+                title: "4. The Unicorn Model",
+                subtitle: "Breaker + FVG (Imbalance)",
+                content: `<p>The highest probability setup. A <strong>Unicorn</strong> appears when a Fair Value Gap (FVG) aligns perfectly with the Breaker Block.</p><p>We wait for price to dip INTO the gap, which sits right on top of the Breaker, and then fly.</p>`,
+                note: "Look at the visual: The FVG (Blue) sits right on top of the Breaker (Gold). Overlap = Power.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="80" y1="130" x2="80" y2="90" class="candle-wick"/> <rect x="70" y="100" width="20" height="30" class="candle-up"/>
+                        <line x1="110" y1="100" x2="110" y2="150" class="candle-wick"/> <rect x="100" y="100" width="20" height="40" class="candle-down"/>
+                        <line x1="140" y1="140" x2="140" y2="190" class="candle-wick"/> <rect x="130" y="140" width="20" height="40" class="candle-down"/>
+
+                        <line x1="170" y1="180" x2="170" y2="120" class="candle-wick"/> <rect x="160" y="130" width="20" height="40" class="candle-up"/>
+                        <line x1="200" y1="130" x2="200" y2="50" class="candle-wick"/> <rect x="190" y="60" width="20" height="70" class="candle-up"/>
+                        <line x1="230" y1="60" x2="230" y2="20" class="candle-wick"/> <rect x="220" y="30" width="20" height="30" class="candle-up"/>
+
+                        <rect x="70" y="100" width="400" height="30" fill="rgba(212, 175, 55, 0.15)" stroke="none"/>
+                        <line x1="70" y1="100" x2="470" y2="100" stroke="#d4af37" stroke-dasharray="2"/>
+                        <text x="350" y="95" fill="#d4af37" font-size="10" font-weight="bold">BREAKER HIGH</text>
+
+                        <rect x="210" y="90" width="200" height="30" fill="rgba(0, 188, 212, 0.2)" stroke="#00bcd4" stroke-dasharray="4"/>
+                        <text x="350" y="115" fill="#00bcd4" font-size="10" font-weight="bold">FVG (IMBALANCE)</text>
+
+                        <line x1="260" y1="30" x2="260" y2="80" class="candle-wick"/> <rect x="250" y="30" width="20" height="40" class="candle-down"/>
+                        <line x1="290" y1="70" x2="290" y2="110" class="candle-wick"/> <rect x="280" y="70" width="20" height="30" class="candle-down"/> <circle cx="290" cy="100" r="5" fill="#00c853" stroke="#fff"/>
+                        <text x="220" y="160" fill="#00c853" font-weight="bold">UNICORN ENTRY</text>
+                        <path d="M 290,100 L 250,150" stroke="#00c853" stroke-width="1"/>
+                        
+                        <path d="M 300,100 L 450,20" stroke="#00c853" stroke-width="2" marker-end="url(#arrow)" />
+
+                    </svg>
+                `
+            },
+            {
+                title: "5. Identifying the Candle",
+                subtitle: "Context is King",
+                content: `<p>You cannot spot a breaker in isolation. You need the sequence: <strong>High -> Low -> Lower Low -> Higher High</strong> (for bullish).</p><p>The visual below shows the full wave structure. In this case, we mark the <strong>Last 3 Up-Close Candles</strong> before the drop as our Breaker Block zone.</p>`,
+                note: "We mark the BODY of these candles and extend it across the chart.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <rect x="10" y="180" width="15" height="30" class="candle-up"/>
+                        
+                        <rect x="35" y="140" width="15" height="30" class="candle-up"/> <rect x="60" y="110" width="15" height="30" class="candle-up"/> <rect x="85" y="90" width="15" height="30" class="candle-up"/> <rect x="30" y="85" width="75" height="90" fill="none" stroke="#d4af37" stroke-width="3" rx="4"/>
+                        <text x="35" y="80" fill="#d4af37" font-weight="bold" font-size="10">LAST 3 UP-CLOSE</text>
+                        
+                        <rect x="110" y="110" width="15" height="30" class="candle-down"/>
+                        <rect x="140" y="150" width="15" height="40" class="candle-down"/>
+                        <rect x="170" y="200" width="15" height="30" class="candle-down"/>
+
+                        <rect x="200" y="180" width="15" height="40" class="candle-up"/>
+                        <rect x="230" y="120" width="15" height="50" class="candle-up"/>
+                        <rect x="260" y="50" width="15" height="60" class="candle-up"/>
+
+                        <rect x="85" y="90" width="360" height="30" fill="rgba(212, 175, 55, 0.1)" stroke="none"/>
+                        <line x1="85" y1="90" x2="450" y2="90" stroke="#d4af37" stroke-dasharray="2"/>
+                        <line x1="85" y1="120" x2="450" y2="120" stroke="#d4af37" stroke-dasharray="2"/>
+
+                        <rect x="350" y="70" width="15" height="40" class="candle-down"/>
+                        <rect x="380" y="90" width="15" height="30" class="candle-down"/>
+                        <text x="380" y="150" fill="#fff" font-size="10">Price respects the zone</text>
+                    </svg>
+                `
+            },
+            {
+                title: "6. Stop Loss Placement",
+                subtitle: "Risk: Aggressive vs Conservative",
+                content: `<p><strong>Aggressive:</strong> Below the Breaker Candle itself. Better Risk:Reward, but higher chance of getting wicked out.</p><p><strong>Conservative:</strong> Below the Swing Low (Liquidity Grab). Safer, but smaller position size required.</p>`,
+                note: "Herman's Edge: Aggressive SL goes strictly below the Breaker Candle/Zone. Conservative SL goes below the Low that swept liquidity (the 'Stop Hunt' low).",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <rect x="20" y="150" width="15" height="20" class="candle-up"/>
+                        <rect x="50" y="90" width="15" height="30" class="candle-up"/> 
+                        <text x="45" y="80" fill="#d4af37" font-size="9" font-weight="bold">BREAKER</text>
+                        <line x1="57" y1="85" x2="57" y2="90" stroke="#d4af37" stroke-width="1"/>
+
+                        <rect x="80" y="100" width="15" height="30" class="candle-down"/>
+                        <rect x="110" y="160" width="15" height="30" class="candle-down"/> <rect x="140" y="140" width="15" height="50" class="candle-up"/>
+                        <rect x="170" y="60" width="15" height="70" class="candle-up"/>
+
+                        <rect x="65" y="90" width="400" height="30" fill="rgba(212, 175, 55, 0.1)" stroke="none"/>
+
+                        <line x1="110" y1="195" x2="400" y2="195" stroke="#00bcd4" stroke-width="2"/>
+                        <text x="405" y="200" fill="#00bcd4" font-size="10">Conservative SL (Sweep Low)</text>
+
+                        <line x1="50" y1="125" x2="400" y2="125" stroke="#d4af37" stroke-width="2" stroke-dasharray="4"/>
+                        <text x="405" y="130" fill="#d4af37" font-size="10">Aggressive SL (Breaker)</text>
+
+                        <text x="200" y="230" fill="#ff3d00" font-size="10">Aggressive offers tighter risk</text>
+                    </svg>
+                `
+            },
+            {
+                title: "7. Targets & Projections",
+                subtitle: "The Full Roadmap",
+                content: `<p>Here is the full lifecycle of the trade.</p><ol><li>Identify Manipulation Leg (High to Low).</li><li>Wait for Break.</li><li><strong>Wait for Retest (Trade Entry) at the Breaker.</strong></li><li>Target 2.0 Standard Deviations.</li></ol>`,
+                note: "Notice how we don't chase the candles. We let them come back to us.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <rect x="0" y="150" width="500" height="2" fill="#333"/>
+                        <text x="10" y="145" fill="#777" font-size="10">Breaker Level</text>
+
+                        <path d="M 50,150 L 100,200" stroke="#ff3d00" stroke-width="2" /> 
+                        <text x="40" y="180" fill="#ff3d00" font-size="10">Manipulation</text>
+                        
+                        <path d="M 100,200 L 200,80" stroke="#00c853" stroke-width="2" />
+                        <text x="140" y="120" fill="#00c853" font-size="10">Displacement</text>
+
+                        <path d="M 200,80 L 250,150" stroke="#d4af37" stroke-width="2" stroke-dasharray="4"/>
+                        <circle cx="250" cy="150" r="6" fill="#d4af37" stroke="#fff"/>
+                        <text x="260" y="165" fill="#d4af37" font-weight="bold">TRADE ENTRY</text>
+
+                        <path d="M 250,150 L 400,20" stroke="#00bcd4" stroke-width="3" marker-end="url(#arrow-blue)"/>
+                        
+                        <line x1="300" y1="50" x2="450" y2="50" stroke="#00c853" stroke-dasharray="2"/>
+                        <text x="455" y="55" fill="#00c853" font-size="10">2.0 SD (TP)</text>
+
+                        <defs><marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#00bcd4" /></marker></defs>
+                    </svg>
+                `
+            },
+            {
+                title: "8. Multi-Timeframe Alignment",
+                subtitle: "Fractal Entries",
+                content: `<p>A perfect trade setup aligns the Higher Timeframe (HTF) structure with a Lower Timeframe (LTF) entry.</p><p>In the visual, see how the LTF trade entry happens exactly at the <strong>Internal Breaker</strong> level within the larger structure.</p>`,
+                note: "Zoom out to zoom in.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 400 200">
+                        <path d="M 0,200 L 100,100 L 200,200 L 400,0" stroke="#333" stroke-width="10" fill="none" opacity="0.3"/>
+                        <text x="10" y="20" fill="#333" font-weight="bold">HTF EXPANSION</text>
+                        
+                        <rect x="180" y="130" width="10" height="20" class="candle-up" /> <rect x="200" y="160" width="10" height="20" class="candle-down" /> <path d="M 200,180 L 250,80" stroke="#00c853" stroke-width="1" fill="none"/> <line x1="180" y1="130" x2="300" y2="130" stroke="#d4af37" stroke-dasharray="2"/>
+                        <text x="150" y="125" fill="#d4af37" font-size="9">Internal Breaker</text>
+                        
+                        <path d="M 250,80 L 280,130" stroke="#fff" stroke-width="1" fill="none"/> <circle cx="280" cy="130" r="4" fill="#d4af37"/>
+                        <text x="290" y="130" fill="#fff" font-size="10" font-weight="bold">LOOK FOR AN ENTRY AT BREAKER LEVEL</text>
+                        
+                        <path d="M 280,130 L 380,20" stroke="#00bcd4" stroke-width="2" marker-end="url(#arrow-blue)"/>
+                    </svg>
+                `
+            },
+            {
+                title: "9. Breaker vs Order Block",
+                subtitle: "Know the Difference",
+                content: `<p><strong>Order Block:</strong> Price respects the block and bounces immediately.</p><p><strong>Breaker Block:</strong> Price <em>breaks</em> the block, then uses the other side as support. It is a reversal pattern, not a continuation pattern.</p>`,
+                note: "Order Block = Trend Continuation. Breaker = Trend Shift.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 400 200">
+                        <line x1="200" y1="0" x2="200" y2="200" stroke="#333" stroke-width="1" />
+                        <text x="50" y="30" fill="#00c853" font-weight="bold">ORDER BLOCK</text>
+                        <rect x="20" y="100" width="160" height="20" fill="rgba(0,200,83,0.2)" />
+                        <path d="M 20,50 L 50,100 L 100,60" stroke="#fff" stroke-width="2" fill="none" />
+                        <text x="20" y="140" fill="#777" font-size="10">Respects Support</text>
+
+                        <text x="250" y="30" fill="#d4af37" font-weight="bold">BREAKER</text>
+                        <rect x="220" y="100" width="160" height="20" fill="rgba(212,175,55,0.2)" />
+                        <path d="M 220,80 L 250,150 L 350,40 L 380,100 L 400,60" stroke="#fff" stroke-width="2" fill="none" />
+                        <text x="220" y="180" fill="#777" font-size="10">Breaks Through -> Retests Back</text>
+                    </svg>
+                `
+            },
+            {
+                title: "10. Execution Protocol",
+                subtitle: "Join the Herman Trading Hub",
+                content: `<p>You have the knowledge. Now you need the execution.</p><p>In the <strong>Herman Macro Edge</strong>, we identify these levels every morning before the session starts. Don't trade alone.</p>`,
+                note: "See you on the inside.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 400 200">
+                        <rect x="0" y="0" width="400" height="200" fill="#000" />
+                        <text x="200" y="80" fill="#d4af37" font-size="30" text-anchor="middle" font-weight="bold">HERMAN</text>
+                        <text x="200" y="110" fill="#fff" font-size="16" text-anchor="middle" letter-spacing="4">TRADING HUB</text>
+                        <rect x="150" y="140" width="100" height="2" fill="#d4af37" />
+                        <text x="200" y="170" fill="#00bcd4" font-size="12" text-anchor="middle">Click below to start</text>
+                    </svg>
+                `
+            }
+        ];
+
+        // --- STATE ---
+        let currentIndex = 0;
+        let chartStep = 0;
+
+        // --- DOM ---
+        const navList = document.getElementById('nav-list');
+        const contentArea = document.getElementById('content-area');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        // --- INIT ---
+        function init() {
+            renderNav();
+            loadModule(0);
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderNav() {
+            navList.innerHTML = '';
+            modules.forEach((mod, idx) => {
+                const li = document.createElement('li');
+                li.className = `nav-item ${idx === currentIndex ? 'active' : ''} ${idx < currentIndex ? 'completed' : ''}`;
+                li.innerText = mod.title;
+                li.onclick = () => loadModule(idx);
+                navList.appendChild(li);
+            });
+            const pct = Math.round(((currentIndex + 1) / modules.length) * 100);
+            progressFill.style.width = `${pct}%`;
+            progressText.innerText = `${pct}% Completed`;
+        }
+
+        function loadModule(index) {
+            currentIndex = index;
+            const data = modules[index];
+            
+            let html = `
+                <h1>${data.title}</h1>
+                <div class="subtitle">${data.subtitle}</div>
+                <div class="visual-container">${data.renderVisual(index)}</div>
+                ${data.content}
+                <div class="herman-note">
+                    <strong>Herman's Edge</strong>
+                    "${data.note}"
+                </div>
+            `;
+
+            html += `<div style="display:flex; justify-content:space-between; margin-top:40px;">`;
+            if (index > 0) html += `<button class="btn-control" onclick="loadModule(${index - 1})">&larr; Previous</button>`;
+            else html += `<div></div>`;
+            
+            if (index < modules.length - 1) html += `<button class="btn-control" onclick="loadModule(${index + 1})">Next Module &rarr;</button>`;
+            else html += `<a href="https://whop.com/herman-macro-edge-premium" target="_blank" class="btn-control" style="text-decoration:none; border-color:#00bcd4; color:#00bcd4;">Finish Course</a>`;
+            html += `</div>`;
+
+            contentArea.innerHTML = html;
+            renderNav();
+
+            if (data.isInteractive) {
+                initInteractiveChart(data.type);
+            }
+        }
+
+        function initInteractiveChart(type) {
+            const containerId = type === 'bullish' ? 'chart-bullish' : 'chart-bearish';
+            const container = document.getElementById(containerId);
+            chartStep = 0; 
+            
+            // Logic for Button Position
+            const btnX = 280;
+            const btnY = type === 'bullish' ? 160 : 10;
+
+            container.innerHTML = `
+                <svg viewBox="0 0 400 200">
+                    <defs>
+                        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1f2630" stroke-width="1"/>
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#grid)" />
+                    <text x="10" y="20" fill="#555" font-size="10">Herman Interactive Chart</text>
+                    <g id="zone-layer"></g> <path id="anim-path" d="" fill="none" stroke="#e0e0e0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    <g id="labels"></g>
+                    
+                    <rect id="button-bg" x="${btnX}" y="${btnY}" width="110" height="30" rx="5" fill="#d4af37" style="cursor:pointer;" onclick="animateStep('${type}')"/>
+                    <text x="${btnX + 55}" y="${btnY + 20}" fill="#000" font-size="12" font-weight="bold" text-anchor="middle" style="pointer-events:none;">CLICK TO PLAY</text>
+                </svg>
+            `;
+        }
+
+        window.animateStep = function(type) {
+            const path = document.getElementById('anim-path');
+            const labels = document.getElementById('labels');
+            const zoneLayer = document.getElementById('zone-layer');
+            chartStep++;
+            let d = "";
+            let htmlLabels = "";
+            let zoneHtml = "";
+
+            if (type === 'bullish') {
+                // High is at y=60, x=80
+                if(chartStep === 1) { 
+                    d="M 20,120 L 80,60"; 
+                    htmlLabels=`<text x="20" y="140" fill="#fff" font-size="10">Low</text><text x="80" y="50" fill="#fff" font-size="10">High</text>`; 
+                }
+                else if(chartStep === 2) { 
+                    d="M 20,120 L 80,60 L 150,160"; 
+                    htmlLabels=`<text x="150" y="180" fill="#ff3d00" font-size="10">Lower Low (Trap)</text>`; 
+                }
+                else if(chartStep === 3) { 
+                    d="M 20,120 L 80,60 L 150,160 L 250,20"; 
+                    htmlLabels=`<text x="250" y="15" fill="#00c853" font-size="10">Higher High (Break)</text>`; 
+                    // Draw Zone at Breaker High (y=60)
+                    zoneHtml = `<rect x="80" y="50" width="320" height="20" fill="rgba(212, 175, 55, 0.2)" stroke="none" />
+                                <text x="90" y="45" fill="#d4af37" font-size="9">BREAKER ZONE</text>`;
+                }
+                else { 
+                    d="M 20,120 L 80,60 L 150,160 L 250,20 L 320,60 L 380,10"; 
+                    htmlLabels=`<circle cx="320" cy="60" r="5" fill="#d4af37"/><text x="280" y="85" fill="#d4af37" font-weight="bold">LOOK FOR ENTRY</text>`; 
+                    chartStep=0;
+                    zoneHtml = `<rect x="80" y="50" width="320" height="20" fill="rgba(212, 175, 55, 0.2)" stroke="none" />`; // Keep zone
+                }
+            } 
+            else { // Bearish
+                // Low is at y=140, x=80
+                if(chartStep === 1) { 
+                    d="M 20,80 L 80,140"; 
+                    htmlLabels=`<text x="20" y="70" fill="#fff" font-size="10">High</text><text x="80" y="160" fill="#fff" font-size="10">Low</text>`; 
+                }
+                else if(chartStep === 2) { 
+                    d="M 20,80 L 80,140 L 150,40"; 
+                    htmlLabels=`<text x="150" y="30" fill="#ff3d00" font-size="10">Higher High (Trap)</text>`; 
+                }
+                else if(chartStep === 3) { 
+                    d="M 20,80 L 80,140 L 150,40 L 250,180"; 
+                    htmlLabels=`<text x="250" y="190" fill="#00c853" font-size="10">Lower Low (Break)</text>`; 
+                    // Draw Zone at Breaker Low (y=140)
+                    zoneHtml = `<rect x="80" y="130" width="320" height="20" fill="rgba(212, 175, 55, 0.2)" stroke="none" />
+                                <text x="90" y="125" fill="#d4af37" font-size="9">BREAKER ZONE</text>`;
+                }
+                else { 
+                    d="M 20,80 L 80,140 L 150,40 L 250,180 L 320,140 L 380,190"; 
+                    htmlLabels=`<circle cx="320" cy="140" r="5" fill="#d4af37"/><text x="280" y="125" fill="#d4af37" font-weight="bold">LOOK FOR ENTRY</text>`; 
+                    chartStep=0;
+                    zoneHtml = `<rect x="80" y="130" width="320" height="20" fill="rgba(212, 175, 55, 0.2)" stroke="none" />`; // Keep zone
+                }
+            }
+
+            path.setAttribute('d', d);
+            
+            if(chartStep === 1) {
+                labels.innerHTML = htmlLabels;
+                zoneLayer.innerHTML = ""; // Clear zone on reset/start
+            } else {
+                labels.innerHTML += htmlLabels;
+                if(zoneHtml) zoneLayer.innerHTML = zoneHtml;
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
