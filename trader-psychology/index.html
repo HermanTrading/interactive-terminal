@@ -3,27 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Herman Trading | Psychology Academy</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Mental Game Engineer | Herman Trading Ecosystem</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
             --bg-dark: #05080f;
-            --panel-bg: #0f1522;
-            --panel-light: #182135;
-            --text-primary: #e2e8f0;
-            --text-secondary: #94a3b8;
-            --accent-blue: #3b82f6;
-            --accent-glow: rgba(59, 130, 246, 0.4);
-            --accent-green: #10b981;
-            --accent-red: #ef4444;
-            --font-main: 'Inter', system-ui, -apple-system, sans-serif;
+            --panel-bg: #0f1623;
+            --sidebar-bg: #090d16;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --neon-blue: #3b82f6; /* Logic/Structure */
+            --neon-green: #10b981; /* Growth/Profit */
+            --neon-red: #ef4444;   /* Tilt/Risk */
+            --neon-amber: #f59e0b; /* Warning */
+            --glass-border: rgba(255, 255, 255, 0.06);
+            --font-tech: 'JetBrains Mono', 'Courier New', monospace;
+            --font-main: 'Inter', system-ui, sans-serif;
         }
 
-        * { box-sizing: border-box; transition: all 0.3s ease; }
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
 
         body {
             background-color: var(--bg-dark);
-            color: var(--text-primary);
+            color: var(--text-main);
             font-family: var(--font-main);
             margin: 0;
             height: 100vh;
@@ -32,214 +34,252 @@
             overflow: hidden;
         }
 
-        /* --- TOP BAR (GAMIFICATION) --- */
-        .top-bar {
-            background: rgba(15, 21, 34, 0.95);
-            border-bottom: 1px solid rgba(59, 130, 246, 0.2);
-            padding: 15px 30px;
+        /* --- HUD TOP BAR --- */
+        .hud-top {
+            background: rgba(15, 22, 35, 0.95);
+            border-bottom: 1px solid var(--glass-border);
+            height: 65px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 70px;
+            padding: 0 30px;
             z-index: 100;
         }
 
-        .brand {
+        .brand-logo {
+            font-family: var(--font-tech);
             font-weight: 800;
-            letter-spacing: 1px;
             font-size: 1.2rem;
+            letter-spacing: 1px;
             color: white;
-        }
-        .brand span { color: var(--accent-blue); }
-
-        .stats-container {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-
-        .stat-box {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-        }
-
-        .stat-label { font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; }
-        .stat-value { font-weight: bold; font-size: 1.1rem; color: var(--accent-green); font-family: 'Courier New', monospace; }
-
-        .progress-track {
-            width: 200px;
-            height: 8px;
-            background: #1e293b;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
-            width: 0%;
-        }
-
-        /* --- MAIN LAYOUT --- */
-        .layout {
-            display: flex;
-            height: calc(100vh - 70px);
-        }
-
-        /* --- SIDEBAR --- */
-        .sidebar {
-            width: 260px;
-            background: var(--panel-bg);
-            border-right: 1px solid rgba(255,255,255,0.05);
-            padding: 20px 0;
-            overflow-y: auto;
-        }
-
-        .nav-item {
-            padding: 15px 25px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            border-left: 3px solid transparent;
-            font-size: 0.9rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .nav-item:hover { background: rgba(255,255,255,0.02); color: white; }
-        .nav-item.active {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-blue);
-            border-left-color: var(--accent-blue);
-        }
-        .nav-item.locked { opacity: 0.4; pointer-events: none; }
-        .nav-item i { font-size: 0.8rem; }
-
-        /* --- CONTENT AREA --- */
-        .content {
-            flex: 1;
-            padding: 40px;
-            overflow-y: auto;
-            position: relative;
-            background: radial-gradient(circle at top right, #131b2e 0%, #05080f 40%);
-        }
-
-        .lesson-container {
-            max-width: 900px;
-            margin: 0 auto;
-            display: none;
-            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .lesson-container.active { display: block; }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        h1 { font-size: 2.2rem; margin-bottom: 10px; background: linear-gradient(90deg, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        h2 { color: var(--accent-blue); font-size: 1.1rem; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 1px; }
-        p { line-height: 1.8; color: var(--text-secondary); font-size: 1.05rem; margin-bottom: 20px; }
-
-        /* --- INTERACTIVE WIDGETS --- */
-        .interactive-box {
-            background: var(--panel-light);
-            border: 1px solid rgba(255,255,255,0.05);
-            border-radius: 12px;
-            padding: 30px;
-            margin: 30px 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        /* Flip Cards for Truths */
-        .truth-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
-        .flip-card {
-            background: var(--bg-dark);
-            border: 1px solid var(--accent-blue);
-            padding: 20px;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            height: 150px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            perspective: 1000px;
-        }
-        .flip-card.revealed { background: var(--accent-blue); color: white; border-color: var(--accent-blue); }
-
-        /* Simulation Grid */
-        .sim-grid { display: grid; grid-template-columns: repeat(20, 1fr); gap: 4px; margin: 20px 0; }
-        .sim-dot { height: 12px; border-radius: 2px; background: #333; }
-        .sim-dot.win { background: var(--accent-green); box-shadow: 0 0 5px var(--accent-green); }
-        .sim-dot.loss { background: var(--accent-red); opacity: 0.6; }
-
-        /* The Herman Insight (Brand Anchor) */
-        .herman-anchor {
-            border-left: 4px solid var(--accent-green);
-            background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, rgba(5, 8, 15, 0) 100%);
-            padding: 20px;
-            margin-top: 30px;
-            position: relative;
-        }
-        .herman-anchor::before {
-            content: 'HERMAN DATA INSIGHT';
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            background: var(--bg-dark);
-            color: var(--accent-green);
-            font-size: 0.7rem;
-            padding: 2px 8px;
-            font-weight: bold;
-            border: 1px solid var(--accent-green);
-        }
-
-        /* --- FOOTER NAVIGATION --- */
-        .footer-nav {
-            margin-top: 50px;
-            display: flex;
-            justify-content: flex-end;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.05);
-        }
-
-        button.primary-btn {
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        button.primary-btn:hover { background: #2563eb; transform: translateX(5px); box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+        .brand-logo span { color: var(--neon-blue); }
+        .version-tag { font-size: 0.6rem; background: var(--glass-border); padding: 2px 6px; border-radius: 4px; color: var(--text-muted); }
 
-        /* Specific styles for widgets */
-        .slider-container { width: 100%; margin: 20px 0; }
-        input[type="range"] { width: 100%; accent-color: var(--accent-blue); }
+        .game-stats { display: flex; gap: 40px; align-items: center; }
+
+        .stat-box { display: flex; flex-direction: column; align-items: flex-end; }
+        .stat-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-family: var(--font-tech); font-weight: bold; color: var(--neon-green); font-size: 1.1rem; }
+
+        .progress-track {
+            width: 150px;
+            height: 4px;
+            background: #1f2937;
+            border-radius: 2px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        .progress-fill { height: 100%; background: var(--neon-blue); width: 0%; box-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+
+        /* --- LAYOUT --- */
+        .main-layout { display: flex; height: calc(100vh - 65px); }
+
+        /* --- SIDEBAR NAV --- */
+        .sidebar {
+            width: 260px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+        .nav-btn {
+            padding: 14px 25px;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover { background: rgba(255,255,255,0.02); color: white; }
+        .nav-btn.active {
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+            color: var(--neon-blue);
+            border-left-color: var(--neon-blue);
+        }
         
-        .zone-checklist label { display: block; margin: 15px 0; cursor: pointer; padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.03); }
-        .zone-checklist input { margin-right: 15px; transform: scale(1.5); }
-        .zone-checklist label:hover { background: rgba(255,255,255,0.05); }
+        /* --- VIEWPORT --- */
+        .viewport {
+            flex: 1;
+            padding: 50px;
+            overflow-y: auto;
+            background: radial-gradient(circle at top right, #1a2336 0%, #05080f 40%);
+            position: relative;
+        }
+
+        .module {
+            max-width: 900px;
+            margin: 0 auto;
+            display: none;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+        .module.active { display: block; animation: slideIn 0.5s forwards cubic-bezier(0.2, 0.8, 0.2, 1); }
+
+        @keyframes slideIn { to { opacity: 1; transform: translateY(0); } }
+
+        h1 { font-size: 2.2rem; margin: 0 0 10px 0; color: white; letter-spacing: -0.5px; }
+        h2 { font-family: var(--font-tech); font-size: 0.85rem; color: var(--neon-blue); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; }
+        p { line-height: 1.7; color: var(--text-muted); margin-bottom: 25px; font-size: 1.05rem; max-width: 90%; }
+
+        /* --- WIDGET CONTAINER --- */
+        .tech-box {
+            background: rgba(15, 22, 35, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            position: relative;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        /* --- THE HERMAN ANCHOR (BRANDING) --- */
+        .herman-anchor {
+            border-left: 3px solid var(--neon-green);
+            background: linear-gradient(90deg, rgba(16, 185, 129, 0.08) 0%, transparent 100%);
+            padding: 20px 25px;
+            margin-top: 40px;
+            border-radius: 0 8px 8px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .herman-anchor i { color: var(--neon-green); font-size: 1.2rem; margin-top: 4px; }
+        .herman-anchor strong { color: var(--neon-green); display: block; margin-bottom: 5px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* --- BUTTONS --- */
+        .btn-action {
+            background: transparent;
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: var(--font-tech);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+        }
+        .btn-action:hover { background: var(--neon-blue); color: white; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+
+        .btn-next {
+            background: var(--neon-green);
+            color: #05080f;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            float: right;
+            margin-top: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+        }
+        .btn-next:hover { transform: translateY(-2px); box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+
+        /* --- STEP 2: INCHWORM VISUALIZATION (NEW) --- */
+        .distribution-container {
+            height: 200px;
+            position: relative;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0) 100%);
+            border-bottom: 2px solid #333;
+            margin-top: 30px;
+            overflow: hidden;
+        }
+
+        .bell-curve-group {
+            position: absolute;
+            bottom: 0;
+            left: 10%;
+            width: 80%;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            transition: transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .curve-section { height: 100%; position: relative; }
+        
+        /* C-Game (Bad) */
+        .c-game { 
+            width: 25%; 
+            background: linear-gradient(180deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.4) 100%);
+            border-top: 2px dashed var(--neon-red);
+            border-right: 1px dotted rgba(255,255,255,0.1);
+            display: flex; justify-content: center; align-items: center;
+        }
+        
+        /* B-Game (Average) */
+        .b-game { 
+            width: 50%; 
+            background: linear-gradient(180deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.4) 100%);
+            border-top: 4px solid var(--neon-blue);
+            border-radius: 50% 50% 0 0 / 60% 60% 0 0;
+            z-index: 2;
+        }
+
+        /* A-Game (Potential) */
+        .a-game { 
+            width: 25%; 
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.4) 100%);
+            border-top: 2px dashed var(--neon-green);
+            border-left: 1px dotted rgba(255,255,255,0.1);
+        }
+
+        .label-float {
+            position: absolute;
+            top: 50%;
+            font-family: var(--font-tech);
+            font-size: 0.75rem;
+            color: white;
+            opacity: 0.7;
+        }
+
+        /* Animation States */
+        .bell-curve-group.shifted { transform: translateX(20%); }
+        .c-game.eliminated { width: 0%; opacity: 0; border: none; }
+        .b-game.expanded { width: 60%; border-color: var(--neon-green); }
+
+        /* --- OTHER WIDGETS --- */
+        input, select { background: #0b1019; border: 1px solid #333; color: white; padding: 12px; border-radius: 6px; width: 100%; margin-bottom: 10px; font-family: var(--font-main); }
+        input:focus, select:focus { outline: none; border-color: var(--neon-blue); }
+
+        .tilt-meter-box { height: 20px; background: #1f2937; border-radius: 10px; overflow: hidden; margin: 20px 0; position: relative; }
+        .tilt-fill { height: 100%; width: 0%; background: var(--neon-green); transition: width 0.5s, background 0.5s; }
+
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .card-opt { background: #1a2336; padding: 20px; border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; cursor: pointer; text-align: center; }
+        .card-opt:hover { border-color: var(--neon-blue); background: rgba(59, 130, 246, 0.05); }
+        .card-opt.selected { border-color: var(--neon-green); background: rgba(16, 185, 129, 0.1); color: var(--neon-green); }
 
     </style>
 </head>
 <body>
 
-<div class="top-bar">
-    <div class="brand">HERMAN <span>TRADING</span></div>
-    <div class="stats-container">
+<div class="hud-top">
+    <div class="brand-logo">
+        HERMAN<span>TRADING</span> <div class="version-tag">PSYCH v2.4</div>
+    </div>
+    <div class="game-stats">
         <div class="stat-box">
-            <div class="stat-label">Mental Capital (XP)</div>
-            <div class="stat-value" id="xp-display">0 XP</div>
+            <div class="stat-label">Mental Equity (XP)</div>
+            <div class="stat-value" id="xp-val">0</div>
         </div>
         <div class="stat-box">
-            <div class="stat-label">Zone Readiness</div>
+            <div class="stat-label">Course Progress</div>
             <div class="progress-track">
                 <div class="progress-fill" id="progress-bar"></div>
             </div>
@@ -247,251 +287,312 @@
     </div>
 </div>
 
-<div class="layout">
+<div class="main-layout">
     <div class="sidebar">
-        <div class="nav-item active" id="nav-0"><i class="fas fa-brain"></i> 1. The Missing Link</div>
-        <div class="nav-item" id="nav-1"><i class="fas fa-list-ol"></i> 2. The 5 Truths</div>
-        <div class="nav-item" id="nav-2"><i class="fas fa-chart-pie"></i> 3. Defining The Edge</div>
-        <div class="nav-item" id="nav-3"><i class="fas fa-random"></i> 4. Random Distribution</div>
-        <div class="nav-item" id="nav-4"><i class="fas fa-balance-scale"></i> 5. Market Neutrality</div>
-        <div class="nav-item" id="nav-5"><i class="fas fa-shield-alt"></i> 6. Accepting Risk</div>
-        <div class="nav-item" id="nav-6"><i class="fas fa-ghost"></i> 7. Eliminating Fear</div>
-        <div class="nav-item" id="nav-7"><i class="fas fa-water"></i> 8. Opportunity Flow</div>
-        <div class="nav-item" id="nav-8"><i class="fas fa-user-lock"></i> 9. Self-Discipline</div>
-        <div class="nav-item" id="nav-9"><i class="fas fa-check-circle"></i> 10. The Zone</div>
+        <div class="nav-btn active" id="btn-0"><i class="fas fa-file-medical-alt"></i> 1. Mental Hand History</div>
+        <div class="nav-btn" id="btn-1"><i class="fas fa-chart-area"></i> 2. The Inchworm</div>
+        <div class="nav-btn" id="btn-2"><i class="fas fa-hand-holding-usd"></i> 3. Decoding Greed</div>
+        <div class="nav-btn" id="btn-3"><i class="fas fa-shield-alt"></i> 4. Decoding Fear</div>
+        <div class="nav-btn" id="btn-4"><i class="fas fa-fire-extinguisher"></i> 5. The Tilt Profile</div>
+        <div class="nav-btn" id="btn-5"><i class="fas fa-balance-scale"></i> 6. Confidence</div>
+        <div class="nav-btn" id="btn-6"><i class="fas fa-microchip"></i> 7. Logic Injection</div>
+        <div class="nav-btn" id="btn-7"><i class="fas fa-trophy"></i> 8. A-Game Structure</div>
+        <div class="nav-btn" id="btn-8"><i class="fas fa-running"></i> 9. Strategic Warm-up</div>
+        <div class="nav-btn" id="btn-9"><i class="fas fa-check-double"></i> 10. Cool-down</div>
     </div>
 
-    <div class="content" id="main-area">
-        
-        <div class="lesson-container active" id="lesson-0">
-            <h2>Module 1: Diagnosis</h2>
-            <h1>The Gap Between Analysis & Execution</h1>
-            <p>You can be a master analyst and still be a losing trader. Mark Douglas calls this "The Gap." Why do smart people lose money?</p>
+    <div class="viewport" id="viewport">
+
+        <div class="module active" id="mod-0">
+            <h2>Diagnostic Tool</h2>
+            <h1>1. The Mental Hand History</h1>
+            <p>Jared Tendler argues: "Emotions are not the problem. Emotions are DATA." Just as you analyze price action, you must analyze your emotional reaction.</p>
             
-            <div class="interactive-box">
-                <h3><i class="fas fa-sliders-h"></i> Interactive Diagnostic</h3>
-                <p>Adjust the slider. How much time do you spend looking for "perfect setups" vs working on your mind?</p>
-                <input type="range" min="0" max="100" value="90" id="slider-1" oninput="updateSlider1(this.value)">
-                <p>Focus on Strategy: <span id="val-strat" style="color:var(--accent-blue)">90%</span> | Focus on Mind: <span id="val-mind" style="color:var(--accent-red)">10%</span></p>
-                <div id="slider-msg" style="margin-top:15px; font-style:italic; height: 40px;">Most traders stay here and fail.</div>
+            <div class="tech-box">
+                <h3 style="color:var(--neon-blue); margin-top:0;">📝 Root Cause Analyzer</h3>
+                <label style="font-size:0.8rem; color:var(--text-muted);">Select recent trading error:</label>
+                <select id="error-select">
+                    <option>Exited too early (Fear of losing profits)</option>
+                    <option>Moved Stop Loss (Refusal to accept risk)</option>
+                    <option>Forced a trade (Boredom/Impatience)</option>
+                    <option>Revenge Trading (Anger)</option>
+                </select>
+                <label style="font-size:0.8rem; color:var(--text-muted);">What was the thought 5 seconds prior?</label>
+                <input type="text" placeholder="e.g., 'I can't take another loss today...'">
+                <button class="btn-action" style="width:100%" onclick="logAction(this)">LOG TO DATABASE</button>
             </div>
 
             <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                Don't bridge the gap with willpower. Bridge it with <b>Automation</b>. Our 10 years of backtested data removes the need for you to be a "perfect analyst". The math does the analysis; you just execute.
+                <i class="fas fa-database"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    It's impossible to analyze errors if you don't know if your strategy works. 
+                    <b>Herman Trading</b> separates "Human Error" from "System Error" by providing 10 years of validated data. Without data, every loss feels like a personal failure.
+                </div>
             </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: The 5 Truths <i class="fas fa-arrow-right"></i></button>
-            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: The Inchworm <i class="fas fa-arrow-right"></i></button>
         </div>
 
-        <div class="lesson-container" id="lesson-1">
-            <h2>Module 2: Foundation</h2>
-            <h1>The 5 Fundamental Truths</h1>
-            <p>To think in probabilities, you must memorize these truths. Click each card to internalize it.</p>
+        <div class="module" id="mod-1">
+            <h2>Bell Curve Theory</h2>
+            <h1>2. The Inchworm Concept</h1>
+            <p>To move forward, you don't need a better "A-Game" (Best days). You need to eliminate your "C-Game" (Worst mistakes). By chopping off the left side of your distribution curve, the <b>entire average shifts to the right</b>.</p>
             
-            <div class="interactive-box">
-                <div class="truth-grid">
-                    <div class="flip-card" onclick="revealCard(this)">Anything can happen.</div>
-                    <div class="flip-card" onclick="revealCard(this)">You don't need to know what happens next.</div>
-                    <div class="flip-card" onclick="revealCard(this)">Wins/Losses are random.</div>
-                    <div class="flip-card" onclick="revealCard(this)">An Edge is just probability.</div>
-                    <div class="flip-card" onclick="revealCard(this)">Every moment is unique.</div>
+            <div class="tech-box">
+                <h3 style="text-align: center; margin-bottom: 30px;">Your Performance Distribution</h3>
+                
+                <div class="distribution-container">
+                    <div class="bell-curve-group" id="bell-curve">
+                        <div class="curve-section c-game" id="c-section">
+                            <span class="label-float">C-GAME<br>(Mistakes)</span>
+                        </div>
+                        <div class="curve-section b-game" id="b-section">
+                            <span class="label-float" style="width:100%; text-align:center;">B-GAME<br>(Average)</span>
+                        </div>
+                        <div class="curve-section a-game">
+                            <span class="label-float">A-GAME<br>(Potential)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 25px; display: flex; gap: 10px; align-items: center; justify-content: center;">
+                    <select id="c-game-fix" style="width: auto; margin: 0;">
+                        <option>Eliminate: FOMO Entry</option>
+                        <option>Eliminate: Widening Stops</option>
+                        <option>Eliminate: Over-leveraging</option>
+                    </select>
+                    <button class="btn-action" style="background: var(--neon-red); color: white; border: none;" onclick="chopCGame()">CHOP OFF C-GAME</button>
+                </div>
+                <p id="inchworm-msg" style="text-align: center; margin-top: 15px; height: 20px; color: var(--neon-green); font-weight: bold;"></p>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-chart-line"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    Your "C-Game" usually stems from guessing. When you guess, you panic. 
+                    <b>Herman Trading Data</b> eliminates the guesswork. We effectively chop off the left side of your bell curve instantly by providing a rule-based system.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Decoding Greed <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-2">
+            <h2>Emotion Decoding</h2>
+            <h1>3. Deconstructing Greed</h1>
+            <p>Greed is often a failure to distinguish between what you *want* and what you have *earned* the right to expect.</p>
+            
+            <div class="tech-box">
+                <h3>⚖️ The Expectation Scale</h3>
+                <p>Select the statement that resonates with you right now:</p>
+                <div class="grid-cards">
+                    <div class="card-opt" onclick="selectCard(this, 'greed')">"I need to double my account this month."</div>
+                    <div class="card-opt" onclick="selectCard(this, 'greed')">"I trust the slow compound effect."</div>
+                    <div class="card-opt" onclick="selectCard(this, 'greed')">"I need to make back yesterday's loss."</div>
+                </div>
+                <div id="greed-feedback" style="margin-top:20px; font-weight:bold; color: var(--neon-blue);"></div>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-percentage"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    Greed dies when you see the 10-year equity curve. Real trading has flat periods. HermanTrading.pro shows you the reality of drawdowns so you don't try to force profits when the market is flat.
+                </div>
+            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Decoding Fear <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-3">
+            <h2>Emotion Decoding</h2>
+            <h1>4. Deconstructing Fear</h1>
+            <p>Fear acts as a warning signal. It says: "I don't know what's going to happen, and I don't trust my ability to handle it."</p>
+
+            <div class="tech-box">
+                <div style="text-align: center; padding: 20px;">
+                    <i class="fas fa-biohazard" style="font-size: 3rem; color: var(--neon-amber); margin-bottom: 20px;"></i>
+                    <p>Rate your confidence in your edge right now:</p>
+                    <input type="range" min="0" max="100" value="20" style="width: 80%;" oninput="updateFear(this.value)">
+                    <h3 id="fear-display" style="color: var(--neon-red); margin-top: 10px;">LEVEL: HIGH (Guessing)</h3>
                 </div>
             </div>
 
             <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                "Anything can happen" is chaos. "In 2018, this setup had a 68% win rate" is order. Herman Trading turns the 5 Truths into a business model.
+                <i class="fas fa-lock"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    You are afraid because you are walking in the dark. 
+                    <b>Herman Trading</b> turns on the lights. When you know a setup has worked 6,400 times in the last decade, fear is replaced by execution.
+                </div>
             </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Understanding Edge <i class="fas fa-arrow-right"></i></button>
-            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Tilt Profile <i class="fas fa-arrow-right"></i></button>
         </div>
 
-        <div class="lesson-container" id="lesson-2">
-            <h2>Module 3: The Casino Model</h2>
-            <h1>Defining Your Edge</h1>
-            <p>An Edge is not a guarantee. It's a slightly weighted coin.</p>
+        <div class="module" id="mod-4">
+            <h2>System Failure</h2>
+            <h1>5. The Tilt Profile</h1>
+            <p>Tilt isn't just "rage." It's the accumulation of frustration over time, like pressure in a boiler.</p>
             
-            <div class="interactive-box" style="text-align: center;">
-                <h3><i class="fas fa-coins"></i> The Probability Coin</h3>
-                <p>Click to flip a coin weighted 60% in your favor.</p>
-                <div id="coin-result" style="font-size: 3rem; margin: 20px;">🪙</div>
-                <button class="primary-btn" style="width: auto; margin: 0 auto; padding: 10px 20px;" onclick="flipCoin()">FLIP COIN</button>
-                <p id="coin-stats" style="margin-top: 10px; color: var(--text-secondary);">Wins: 0 | Losses: 0</p>
+            <div class="tech-box">
+                <h3>🔥 Tilt Accumulator</h3>
+                <p>Add current stressors to check your mental state:</p>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom: 20px;">
+                    <button class="btn-action" onclick="addTilt(15)">Bad Sleep (+15%)</button>
+                    <button class="btn-action" onclick="addTilt(25)">Early Loss (+25%)</button>
+                    <button class="btn-action" onclick="addTilt(20)">Missed Trade (+20%)</button>
+                    <button class="btn-action" onclick="addTilt(40)">Breached Rules (+40%)</button>
+                </div>
+                
+                <div class="tilt-meter-box">
+                    <div class="tilt-fill" id="tilt-bar"></div>
+                </div>
+                <div id="tilt-status" style="text-align: right; font-family: var(--font-tech); color: var(--neon-green);">SYSTEM STABLE</div>
             </div>
 
             <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                You just flipped a digital coin. In real trading, how do you KNOW your coin is weighted 60%? You don't... unless you have our <b>Herman Trading Historical Database</b>. Without data, you are just gambling.
+                <i class="fas fa-server"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    Algorithms don't tilt. They don't have egos.
+                    If your Tilt Meter hits 50%, stop trading. Let the <b>Herman System</b> guide your next decision, not your adrenaline.
+                </div>
             </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Random Distribution <i class="fas fa-arrow-right"></i></button>
-            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Confidence <i class="fas fa-arrow-right"></i></button>
         </div>
 
-        <div class="lesson-container" id="lesson-3">
-            <h2>Module 4: The Silent Killer</h2>
-            <h1>Random Distribution</h1>
-            <p>Even with an edge, losses come in clusters (streaks). This is where 90% of traders quit.</p>
-            
-            <div class="interactive-box">
-                <h3><i class="fas fa-border-all"></i> 100 Trade Simulator (60% Win Rate)</h3>
-                <button class="primary-btn" style="font-size: 0.8rem; padding: 8px 16px;" onclick="generateGrid()">Generate Sequence</button>
-                <div class="sim-grid" id="sim-grid"></div>
-                <div id="sim-insight" style="min-height: 40px;"></div>
+        <div class="module" id="mod-5">
+            <h2>Calibration</h2>
+            <h1>6. Confidence Calibration</h1>
+            <p>Confidence must be calibrated to competence. Overconfidence leads to recklessness. Underconfidence leads to hesitation.</p>
+
+            <div class="tech-box">
+                <div style="display:flex; justify-content:space-between; text-align:center;">
+                    <div style="flex:1; border-right:1px solid #333; padding:10px;">
+                        <h4 style="color:var(--neon-red)">Under-Confidence</h4>
+                        <span style="font-size:0.8rem; color:#aaa;">Hesitation. Moving stops to breakeven too soon.</span>
+                    </div>
+                    <div style="flex:1; border-right:1px solid #333; padding:10px;">
+                        <h4 style="color:var(--neon-green)">CALIBRATED</h4>
+                        <span style="font-size:0.8rem; color:#aaa;">Execution matches the plan. No emotion.</span>
+                    </div>
+                    <div style="flex:1; padding:10px;">
+                        <h4 style="color:var(--neon-amber)">Over-Confidence</h4>
+                        <span style="font-size:0.8rem; color:#aaa;">Ignoring risk. Adding to losers. "I can't lose."</span>
+                    </div>
+                </div>
+                <button class="btn-action" style="width:100%; margin-top:20px;" onclick="alert('Calibration requires hard evidence.')">CALIBRATE NOW</button>
             </div>
 
             <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                See that red streak of 5 losses? Would you panic? Our system has survived streaks like that in 2015, 2019, and 2022. We don't panic because we know the green streak is mathematically inevitable.
+                <i class="fas fa-weight-hanging"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    True confidence comes from "Probabilistic Thinking". 
+                    Herman Trading users are confident not because they are "winners", but because they have the statistics of 15,000 trades backing them up.
+                </div>
             </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Market Neutrality <i class="fas fa-arrow-right"></i></button>
-            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Logic Injection <i class="fas fa-arrow-right"></i></button>
         </div>
 
-        <div class="lesson-container" id="lesson-4">
-            <h2>Module 5: Perspective</h2>
-            <h1>Market Neutrality</h1>
-            <p>The market is not your enemy. It is just data. Pain comes from your interpretation, not the price.</p>
-            
-            <div class="interactive-box">
-                <h3><i class="fas fa-glasses"></i> The Re-framer</h3>
-                <p>Click the negative thought to reframe it into a professional thought.</p>
-                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="primary-btn" style="background: #1e293b;" onclick="alert('REFRAME: I just paid for information.')">"I lost money!"</button>
-                    <button class="primary-btn" style="background: #1e293b;" onclick="alert('REFRAME: The market is offering high volatility.')">" The market is crazy!"</button>
-                    <button class="primary-btn" style="background: #1e293b;" onclick="alert('REFRAME: The setup did not materialize.')">"They hunted my stop!"</button>
+        <div class="module" id="mod-6">
+            <h2>Real-time Fix</h2>
+            <h1>7. The Logic Injection</h1>
+            <p>When the emotional brain takes over, the logical brain shuts down. You need a pre-written "script" (Logic Injection) to force your brain back online.</p>
+
+            <div class="tech-box">
+                <h3>💉 Select your Injection:</h3>
+                <div class="grid-cards">
+                    <div class="card-opt" onclick="selectCard(this, 'logic')">"The market is neutral. This is just data."</div>
+                    <div class="card-opt" onclick="selectCard(this, 'logic')">"My edge plays out over 20 trades, not one."</div>
+                    <div class="card-opt" onclick="selectCard(this, 'logic')">"This fear is just a signal to check my plan."</div>
                 </div>
             </div>
 
             <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                Algorithms are perfectly neutral. By adopting the Herman Trading quantitative approach, you remove "enemy" from your vocabulary.
-            </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Accepting Risk <i class="fas fa-arrow-right"></i></button>
-            </div>
-        </div>
-
-        <div class="lesson-container" id="lesson-5">
-            <h2>Module 6: The Iron Rule</h2>
-            <h1>Truly Accepting Risk</h1>
-            <p>Accepting risk means being at peace with the worst-case scenario before you enter.</p>
-            
-            <div class="interactive-box">
-                <h3><i class="fas fa-chart-line"></i> Recovery Calculator</h3>
-                <p>See why small losses are okay, but big losses (emotional trading) are fatal.</p>
-                <p>Loss: <span id="loss-val" style="color:var(--accent-red)">10%</span> requires <span id="gain-val" style="color:var(--accent-green)">11%</span> gain to recover.</p>
-                <input type="range" min="1" max="90" value="10" oninput="calcRisk(this.value)">
-                <div id="risk-warning" style="margin-top:10px; color: var(--accent-red);"></div>
-            </div>
-
-            <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                We cap risk per trade rigidly. Why? Because our 10-year backtest shows that survival is the #1 priority. Herman Trading isn't about getting rich quick; it's about not dying poor.
-            </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Eliminating Fear <i class="fas fa-arrow-right"></i></button>
-            </div>
-        </div>
-
-        <div class="lesson-container" id="lesson-6">
-            <h2>Module 7: Emotional Control</h2>
-            <h1>Eliminating Fear</h1>
-            <p>Fear causes 95% of mistakes. Fear comes from not trusting yourself.</p>
-            
-            <div class="interactive-box" style="text-align: center;">
-                <h3><i class="fas fa-bomb"></i> The Fear Source</h3>
-                <p>Click the button to destroy the source of fear.</p>
-                <button class="primary-btn" style="background: var(--accent-red);" onclick="this.style.display='none'; document.getElementById('fear-msg').style.display='block'; addXP(100);">DESTROY FEAR</button>
-                <div id="fear-msg" style="display:none; margin-top: 20px; font-size: 1.2rem; color: var(--accent-blue);">
-                    Fear is destroyed by <strong>COMPETENCE</strong>.
+                <i class="fas fa-syringe"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    The most powerful logic injection is: 
+                    <i>"This setup has a 62% win rate over 10 years."</i>
+                    Without the data from HermanTrading.pro, your logic injection is just an affirmation. With data, it's a fact.
                 </div>
             </div>
-
-            <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                You cannot "meditate" fear away if you don't know if your strategy works. You destroy fear by looking at the Herman Trading Performance Report. Competence = Confidence.
-            </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Opportunity Flow <i class="fas fa-arrow-right"></i></button>
-            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: A-Game Structure <i class="fas fa-arrow-right"></i></button>
         </div>
 
-        <div class="lesson-container" id="lesson-7">
-            <h2>Module 8: Abundance</h2>
-            <h1>The Opportunity Flow</h1>
-            <p>Don't chase. The market is an endless river. There is always another trade.</p>
-            
-            <div class="interactive-box" style="overflow: hidden; white-space: nowrap; position: relative; height: 60px;">
-                <div id="ticker" style="position: absolute; animation: scroll 10s linear infinite; display: flex; gap: 40px; color: var(--accent-green); font-family: monospace; font-size: 1.2rem;">
-                    <span>+120 PIPS</span> <span>BTC LONG</span> <span>GOLD SETUP</span> <span>NASDAQ BREAKOUT</span> <span>EURUSD SHORT</span> <span>+5R TRADE</span>
+        <div class="module" id="mod-7">
+            <h2>Performance Mapping</h2>
+            <h1>8. Mapping Your A-Game</h1>
+            <p>You cannot force yourself into the "Zone". But you can create the conditions for it to happen.</p>
+
+            <div class="tech-box">
+                <h3>A-Game Checklist</h3>
+                <label style="display: block; padding: 10px; background: rgba(0,0,0,0.2); margin-bottom: 5px; cursor: pointer;">
+                    <input type="checkbox" style="width: auto; margin-right: 10px;"> I am fully rested.
+                </label>
+                <label style="display: block; padding: 10px; background: rgba(0,0,0,0.2); margin-bottom: 5px; cursor: pointer;">
+                    <input type="checkbox" style="width: auto; margin-right: 10px;"> I accept the risk of this specific trade.
+                </label>
+                <label style="display: block; padding: 10px; background: rgba(0,0,0,0.2); margin-bottom: 5px; cursor: pointer;">
+                    <input type="checkbox" style="width: auto; margin-right: 10px;"> I have no external distractions.
+                </label>
+            </div>
+
+            <div class="herman-anchor">
+                <i class="fas fa-crown"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    A-Game is effortless execution. We built Herman Trading to be your "External A-Game". Even if you are tired, the data remains sharp. Lean on our infrastructure.
                 </div>
             </div>
-            <style>@keyframes scroll { 0% { left: 100%; } 100% { left: -100%; } }</style>
-
-            <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                FOMO (Fear Of Missing Out) is for amateurs. Our database shows over 15,000 valid setups in the last decade. Missed one? Good. Wait for the next high-probability setup.
-            </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: Self Discipline <i class="fas fa-arrow-right"></i></button>
-            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Warm-up <i class="fas fa-arrow-right"></i></button>
         </div>
 
-        <div class="lesson-container" id="lesson-8">
-            <h2>Module 9: The Structure</h2>
-            <h1>Self-Discipline</h1>
-            <p>You are the boss. You are also the employee. The boss must write the rules.</p>
-            
-            <div class="interactive-box">
-                <h3><i class="fas fa-file-contract"></i> The Trader's Contract</h3>
-                <p>I hereby agree to follow my rules, define my risk, and accept the outcome.</p>
-                <input type="text" placeholder="Type your name to sign..." style="padding: 10px; background: #0b0f19; border: 1px solid #333; color: white; width: 60%; margin-right: 10px;">
-                <button class="primary-btn" style="display: inline-block; padding: 10px 20px;" onclick="alert('Contract Signed. Breach of contract results in financial loss.')">Sign</button>
+        <div class="module" id="mod-8">
+            <h2>Preparation</h2>
+            <h1>9. The Strategic Warm-up</h1>
+            <p>Athletes warm up. Traders usually just open the chart and click. This is why you lose.</p>
+
+            <div class="tech-box" style="text-align: center;">
+                <h3><i class="fas fa-stopwatch"></i> 2-Minute Mental Boot Sequence</h3>
+                <button class="btn-action" id="warmup-btn" onclick="runWarmup()">INITIATE SEQUENCE</button>
+                <div id="warmup-display" style="font-family: var(--font-tech); font-size: 1.5rem; color: var(--neon-blue); margin-top: 20px; height: 30px;"></div>
             </div>
 
             <div class="herman-anchor">
-                <strong>The Herman Solution:</strong>
-                Discipline is hard. Automated signals are easy. Use Herman Trading tools to outsource your discipline to the algorithm.
-            </div>
-
-            <div class="footer-nav">
-                <button class="primary-btn" onclick="nextLesson()">Next: THE ZONE <i class="fas fa-arrow-right"></i></button>
-            </div>
-        </div>
-
-        <div class="lesson-container" id="lesson-9">
-            <h2>Module 10: Mastery</h2>
-            <h1>Entering The Zone</h1>
-            <p>The Zone is a state of mind where you act without hesitation, fear, or hope. You just... execute.</p>
-            
-            <div class="interactive-box">
-                <h3><i class="fas fa-plane-departure"></i> Pre-Flight Check</h3>
-                <div class="zone-checklist">
-                    <label><input type="checkbox" class="z-check"> I have accepted the risk.</label>
-                    <label><input type="checkbox" class="z-check"> I am not trying to predict, only execute.</label>
-                    <label><input type="checkbox" class="z-check"> I rely on my Edge (Stats).</label>
-                    <label><input type="checkbox" class="z-check"> I am emotionally detached.</label>
+                <i class="fas fa-coffee"></i>
+                <div>
+                    <strong>Herman Data Anchor</strong>
+                    Part of your warm-up should be checking the "Herman Daily Bias". Knowing the statistical probability of the day's range gives you a massive mental head start.
                 </div>
-                <button class="primary-btn" style="width: 100%; margin-top: 20px; justify-content: center;" onclick="finishCourse()">ENTER THE ZONE</button>
+            </div>
+            <button class="btn-next" onclick="nextMod()">NEXT: Cool-down <i class="fas fa-arrow-right"></i></button>
+        </div>
+
+        <div class="module" id="mod-9">
+            <h2>Integration</h2>
+            <h1>10. The Cool-down</h1>
+            <p>The trading day isn't over when you close the charts. It's over when you've processed the data.</p>
+
+            <div class="tech-box" style="text-align: center; padding: 40px;">
+                <h3 style="color: var(--neon-green);">TRAINING COMPLETE</h3>
+                <p>Mental XP Earned: <span id="final-xp" style="font-weight: bold; color: white;">1000</span></p>
+                <p>You now have the framework of Jared Tendler. Now you need the engine.</p>
+                
+                <a href="https://whop.com/herman-macro-edge-premium" target="_blank" style="text-decoration: none;">
+                    <button class="btn-action" style="background: var(--neon-blue); color: #000; font-size: 1rem; padding: 15px 30px; margin-top: 20px;">
+                        GET HERMAN TRADING DATA
+                    </button>
+                </a>
             </div>
 
-            <div class="herman-anchor" id="final-anchor" style="display:none;">
-                <h3 style="color: var(--accent-green); margin-top: 0;">CONGRATULATIONS.</h3>
-                You have the mindset. Now you need the weapon. <br><br>
-                <a href="https://hermantrading.pro" target="_blank" style="color: white; background: var(--accent-green); padding: 10px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">GET THE HERMAN SYSTEM</a>
+            <div class="herman-anchor">
+                <i class="fas fa-rocket"></i>
+                <div>
+                    <strong>Final Insight</strong>
+                    Psychology is software. Strategy is hardware.
+                    Even the best psychology (Tendler) won't run on a broken strategy. Upgrade your hardware at HermanTrading.pro.
+                </div>
             </div>
         </div>
 
@@ -499,172 +600,179 @@
 </div>
 
 <script>
-    let currentLesson = 0;
+    let currentStep = 0;
     let xp = 0;
-    const totalLessons = 10;
-    
-    // SFX (simulated via console for now, visual feedback provided)
-    
+    let tilt = 0;
+    const totalSteps = 10;
+
+    function nextMod() {
+        // Add XP
+        xp += 100;
+        updateStats();
+
+        // UI Transition
+        document.getElementById(`mod-${currentStep}`).classList.remove('active');
+        document.getElementById(`btn-${currentStep}`).classList.remove('active');
+        
+        currentStep++;
+        
+        if (currentStep < totalSteps) {
+            document.getElementById(`mod-${currentStep}`).classList.add('active');
+            document.getElementById(`btn-${currentStep}`).classList.add('active');
+            document.getElementById('viewport').scrollTop = 0;
+        } else {
+            document.getElementById('final-xp').innerText = xp;
+        }
+    }
+
+    // --- FUNCTION: JUMP TO STEP VIA SIDEBAR ---
+    function jumpToStep(index) {
+        // Remove active class from CURRENT
+        document.getElementById(`mod-${currentStep}`).classList.remove('active');
+        document.getElementById(`btn-${currentStep}`).classList.remove('active');
+
+        // Update Index
+        currentStep = index;
+
+        // Add active class to NEW
+        document.getElementById(`mod-${currentStep}`).classList.add('active');
+        document.getElementById(`btn-${currentStep}`).classList.add('active');
+
+        // Update Stats Bar
+        updateStats();
+        
+        // Reset Scroll
+        document.getElementById('viewport').scrollTop = 0;
+    }
+
+    // Assign listeners to nav buttons
+    for (let i = 0; i < totalSteps; i++) {
+        const btn = document.getElementById(`btn-${i}`);
+        if(btn) {
+            btn.addEventListener('click', () => jumpToStep(i));
+        }
+    }
+    // ----------------------------------------------
+
     function updateStats() {
-        document.getElementById('xp-display').innerText = xp + " XP";
-        let pct = Math.round(((currentLesson) / totalLessons) * 100);
-        document.getElementById('progress-bar').style.width = pct + "%";
+        document.getElementById('xp-val').innerText = xp;
+        document.getElementById('progress-bar').style.width = ((currentStep + 1) / totalSteps * 100) + "%";
     }
 
-    function addXP(amount) {
-        xp += amount;
-        updateStats();
-        // Visual flash of top bar
-        document.querySelector('.top-bar').style.borderColor = '#10b981';
-        setTimeout(() => document.querySelector('.top-bar').style.borderColor = 'rgba(59, 130, 246, 0.2)', 300);
+    // --- MODULE 1 LOGIC ---
+    function logAction(btn) {
+        btn.innerText = "LOGGED TO DATABASE";
+        btn.style.background = "var(--neon-green)";
+        btn.style.color = "black";
+        setTimeout(() => nextMod(), 1000);
     }
 
-    function nextLesson() {
-        addXP(100);
+    // --- MODULE 2 LOGIC (THE BELL CURVE SHIFT) ---
+    function chopCGame() {
+        const cSection = document.getElementById('c-section');
+        const bSection = document.getElementById('b-section');
+        const group = document.getElementById('bell-curve');
+        const msg = document.getElementById('inchworm-msg');
+
+        // 1. Eliminate C-Game (Shrink it)
+        cSection.classList.add('eliminated');
         
-        // Hide current
-        document.getElementById(`lesson-${currentLesson}`).classList.remove('active');
-        document.getElementById(`nav-${currentLesson}`).classList.remove('active');
-        
-        currentLesson++;
-        
-        if (currentLesson < totalLessons) {
-            // Show next
-            document.getElementById(`lesson-${currentLesson}`).classList.add('active');
-            document.getElementById(`nav-${currentLesson}`).classList.add('active');
-            // Scroll to top
-            document.getElementById('main-area').scrollTop = 0;
-            updateStats();
+        // 2. Expand B-Game (Improve average)
+        bSection.classList.add('expanded');
+
+        // 3. Shift entire curve right
+        group.classList.add('shifted');
+
+        msg.innerText = "C-Game Eliminated. Average Performance Shifted Right.";
+    }
+
+    // --- MODULE 3 & 7 LOGIC (CARDS) ---
+    function selectCard(el, type) {
+        // Deselect siblings
+        el.parentNode.querySelectorAll('.card-opt').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+
+        if(type === 'greed') {
+            document.getElementById('greed-feedback').innerText = "Analysis: Verify this expectation against historical data.";
         }
     }
 
-    // --- NEW FUNCTIONALITY: JUMP TO LESSON VIA SIDEBAR ---
-    function jumpToLesson(index) {
-        // Remove active class from CURRENT lesson and nav
-        document.getElementById(`lesson-${currentLesson}`).classList.remove('active');
-        document.getElementById(`nav-${currentLesson}`).classList.remove('active');
-
-        // Update index
-        currentLesson = index;
-
-        // Add active class to NEW lesson and nav
-        document.getElementById(`lesson-${currentLesson}`).classList.add('active');
-        document.getElementById(`nav-${currentLesson}`).classList.add('active');
-
-        // Reset scroll and update UI
-        document.getElementById('main-area').scrollTop = 0;
-        updateStats();
-    }
-
-    // Add event listeners to all nav items
-    for (let i = 0; i < totalLessons; i++) {
-        document.getElementById(`nav-${i}`).addEventListener('click', function() {
-            jumpToLesson(i);
-        });
-    }
-    // -----------------------------------------------------
-
-    // --- Module Specific Logic ---
-
-    // Module 1 Slider
-    function updateSlider1(val) {
-        document.getElementById('val-strat').innerText = val + "%";
-        document.getElementById('val-mind').innerText = (100-val) + "%";
-        if (val < 50) {
-            document.getElementById('slider-msg').innerText = "Better... You are starting to understand.";
-            document.getElementById('slider-msg').style.color = "var(--accent-green)";
+    // --- MODULE 4 LOGIC (SLIDER) ---
+    function updateFear(val) {
+        const display = document.getElementById('fear-display');
+        if (val < 30) {
+            display.innerText = "LEVEL: HIGH (Guessing / Gambling)";
+            display.style.color = "var(--neon-red)";
+        } else if (val < 70) {
+            display.innerText = "LEVEL: MODERATE (Uncertainty)";
+            display.style.color = "var(--neon-amber)";
         } else {
-            document.getElementById('slider-msg').innerText = "Most traders stay here and fail.";
-            document.getElementById('slider-msg').style.color = "var(--text-secondary)";
+            display.innerText = "LEVEL: LOW (Data-Driven Execution)";
+            display.style.color = "var(--neon-green)";
         }
     }
 
-    // Module 2 Cards
-    function revealCard(el) {
-        if (!el.classList.contains('revealed')) {
-            el.classList.add('revealed');
-            addXP(20);
-        }
-    }
-
-    // Module 3 Coin
-    function flipCoin() {
-        let win = Math.random() < 0.6;
-        let res = document.getElementById('coin-result');
-        let stats = document.getElementById('coin-stats');
+    // --- MODULE 5 LOGIC (TILT) ---
+    function addTilt(val) {
+        tilt += val;
+        if (tilt > 100) tilt = 100;
         
-        res.style.transform = "rotateY(360deg)";
-        setTimeout(() => {
-            res.style.transform = "rotateY(0deg)";
-            res.innerText = win ? "✅" : "❌";
-            
-            // Simple stats tracking in text
-            let txt = stats.innerText;
-            let w = parseInt(txt.split('Wins: ')[1]) + (win ? 1 : 0);
-            let l = parseInt(txt.split('Losses: ')[1]) + (win ? 0 : 1);
-            stats.innerText = `Wins: ${w} | Losses: ${l}`;
-        }, 300);
-    }
-
-    // Module 4 Grid
-    function generateGrid() {
-        const grid = document.getElementById('sim-grid');
-        grid.innerHTML = '';
-        let streak = 0;
-        let maxStreak = 0;
+        const bar = document.getElementById('tilt-bar');
+        const status = document.getElementById('tilt-status');
         
-        for(let i=0; i<100; i++) {
-            let win = Math.random() < 0.6;
-            let dot = document.createElement('div');
-            dot.className = 'sim-dot ' + (win ? 'win' : 'loss');
-            grid.appendChild(dot);
-            
-            if(!win) { streak++; } else { streak=0; }
-            if(streak > maxStreak) maxStreak = streak;
-        }
+        bar.style.width = tilt + "%";
         
-        document.getElementById('sim-insight').innerHTML = `Generated! Max losing streak: <strong style="color:var(--accent-red)">${maxStreak} trades</strong>. <br>Without conviction, you would quit at trade #${Math.floor(Math.random()*20)+10}.`;
-        addXP(50);
-    }
-
-    // Module 6 Risk
-    function calcRisk(val) {
-        let loss = parseInt(val);
-        let needed = (100 / (100 - loss) - 1) * 100;
-        document.getElementById('loss-val').innerText = loss + "%";
-        document.getElementById('gain-val').innerText = needed.toFixed(1) + "%";
-        
-        if(loss > 20) {
-            document.getElementById('risk-warning').innerText = "WARNING: Mathematical recovery becomes exponentially harder.";
+        if (tilt < 30) {
+            bar.style.background = "var(--neon-green)";
+            status.innerText = "SYSTEM STABLE";
+            status.style.color = "var(--neon-green)";
+        } else if (tilt < 70) {
+            bar.style.background = "var(--neon-amber)";
+            status.innerText = "WARNING: STRESS ACCUMULATION";
+            status.style.color = "var(--neon-amber)";
         } else {
-            document.getElementById('risk-warning').innerText = "";
+            bar.style.background = "var(--neon-red)";
+            status.innerText = "CRITICAL FAILURE IMMINENT - STOP TRADING";
+            status.style.color = "var(--neon-red)";
+            // Shake effect
+            document.querySelector('.tilt-meter-box').style.animation = "shake 0.5s";
         }
     }
 
-    // Final Check
-    function finishCourse() {
-        let checks = document.querySelectorAll('.z-check');
-        let all = true;
-        checks.forEach(c => { if(!c.checked) all = false; });
+    // --- MODULE 9 LOGIC (WARMUP) ---
+    function runWarmup() {
+        const words = ["BREATHE...", "VISUALIZE RISK...", "CHECK HERMAN DATA...", "READY."];
+        const display = document.getElementById('warmup-display');
+        const btn = document.getElementById('warmup-btn');
+        btn.disabled = true;
         
-        if(all) {
-            addXP(500);
-            document.getElementById('final-anchor').style.display = 'block';
-            document.getElementById('progress-bar').style.width = "100%";
-            // Celebrate
-            confettiEffect(); 
-        } else {
-            alert("You are not honest with yourself yet. Check the boxes.");
+        let i = 0;
+        let interval = setInterval(() => {
+            if (i < words.length) {
+                display.innerText = words[i];
+                i++;
+            } else {
+                clearInterval(interval);
+                btn.innerText = "SEQUENCE COMPLETE";
+                btn.style.borderColor = "var(--neon-green)";
+                btn.style.color = "var(--neon-green)";
+            }
+        }, 800);
+    }
+
+    // Add CSS for shake animation
+    const style = document.createElement('style');
+    style.innerHTML = `
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
         }
-    }
+    `;
+    document.head.appendChild(style);
 
-    function confettiEffect() {
-        // Simple visual trigger
-        document.body.style.animation = "shake 0.5s";
-    }
-
-    // Init
-    updateStats();
 </script>
 
 </body>
