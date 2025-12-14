@@ -1,0 +1,1114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Herman Trading | Daily Bias Mastery</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,600&family=Roboto+Mono&family=Cinzel:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- CORE APP STYLES (FROM ORIGINAL MAIN.HTML) --- */
+        :root {
+            --bg-dark: #0b0e11;
+            --bg-panel: #151a21;
+            --text-main: #e0e0e0;
+            --text-dim: #949aa5;
+            --accent-gold: #d4af37;
+            --accent-gold-glow: rgba(212, 175, 55, 0.15);
+            --accent-blue: #00bcd4;
+            --success: #00c853;
+            --danger: #ff3d00;
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 320px;
+            background-color: var(--bg-panel);
+            border-right: 1px solid #2a323c;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 4px 0 20px rgba(0,0,0,0.4);
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 25px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-align: center;
+            border-bottom: 1px solid #2a323c;
+            padding-bottom: 20px;
+        }
+
+        .brand span { color: var(--accent-gold); }
+
+        .progress-container { margin-bottom: 20px; }
+        .progress-bar-bg { height: 4px; background: #2a323c; border-radius: 2px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: var(--accent-gold); width: 0%; transition: width 0.4s ease; }
+        .progress-text { font-size: 0.75rem; color: var(--text-dim); margin-top: 5px; text-align: right; }
+
+        .nav-list { list-style: none; padding: 0; margin: 0; flex-grow: 1; overflow-y: auto; }
+        .nav-item {
+            padding: 12px 15px; margin-bottom: 5px; border-radius: 6px; cursor: pointer;
+            font-size: 0.9rem; color: var(--text-dim); transition: all 0.2s;
+            border-left: 3px solid transparent; display: flex; align-items: center;
+        }
+        .nav-item:hover { background-color: rgba(255,255,255,0.03); color: var(--text-main); }
+        .nav-item.active {
+            background-color: rgba(212, 175, 55, 0.1); color: var(--accent-gold);
+            border-left: 3px solid var(--accent-gold); font-weight: 600;
+        }
+        .nav-item.completed { text-decoration: none; }
+        .nav-item.completed::after { content: '✓'; margin-left: auto; color: var(--success); font-size: 0.8rem; }
+
+        .cta-box {
+            margin-top: auto; background: linear-gradient(180deg, #1a2029, #0f1216);
+            padding: 20px; border-radius: 8px; border: 1px solid #333; text-align: center;
+        }
+        .cta-btn {
+            display: block; background: var(--accent-gold); color: #000; text-decoration: none;
+            padding: 10px; border-radius: 4px; font-weight: 700; font-size: 0.85rem;
+            margin-top: 10px; transition: transform 0.2s;
+        }
+        .cta-btn:hover { transform: translateY(-2px); }
+        .credits { margin-top: 15px; font-size: 0.65rem; color: var(--text-dim); text-align: center; opacity: 0.6; letter-spacing: 0.5px; }
+
+        /* --- Main Content --- */
+        .main { flex-grow: 1; padding: 40px; overflow-y: auto; position: relative; }
+        .content-wrapper { max-width: 900px; margin: 0 auto; animation: fadeIn 0.4s ease; }
+
+        h1 { font-size: 2.2rem; margin: 0 0 10px 0; color: #fff; }
+        .subtitle { color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 25px; font-weight: 400; }
+        p { line-height: 1.6; color: #c0c4cc; margin-bottom: 20px; font-size: 1rem; }
+
+        /* --- Visuals & Charts (Original) --- */
+        .visual-container {
+            background: #0f1216; border: 1px solid #2a323c; border-radius: 10px;
+            padding: 20px; margin: 30px 0; height: 350px; 
+            display: flex; align-items: center; justify-content: center; position: relative;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+        svg { width: 100%; height: 100%; overflow: visible; }
+        
+        .candle-up { fill: #00c853; stroke: #00c853; stroke-width: 1; opacity: 0.9; }
+        .candle-down { fill: #ff3d00; stroke: #ff3d00; stroke-width: 1; opacity: 0.9; }
+        .candle-wick { stroke: #555; stroke-width: 1.5; stroke-linecap: round; }
+        .candle-neutral { fill: #555; stroke: #777; stroke-width: 1; opacity: 0.5; }
+        .level-line { stroke-width: 1; stroke-dasharray: 4; }
+
+        .btn-control {
+            background: transparent; border: 1px solid var(--accent-gold); color: var(--accent-gold);
+            padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;
+            transition: all 0.3s; margin-top: 10px;
+        }
+        .btn-control:hover { background: var(--accent-gold); color: #000; }
+
+        .herman-note {
+            border-left: 3px solid var(--accent-gold); background: rgba(212, 175, 55, 0.05);
+            padding: 15px 20px; font-size: 0.95rem; margin-top: 20px; border-radius: 0 6px 6px 0;
+        }
+        .herman-note strong { color: var(--accent-gold); display: block; margin-bottom: 5px; font-size: 0.8rem; text-transform: uppercase; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ========================================
+           GAME MODULE STYLES (INTEGRATED) 
+           ========================================
+        */
+        .game-wrapper {
+            --game-bg-card: #ffffff;
+            --game-text-primary: #111827;
+            --game-text-secondary: #6b7280;
+            --game-candle-green: #10b981; 
+            --game-candle-green-stroke: #047857;
+            --game-candle-red: #ef4444; 
+            --game-candle-red-stroke: #b91c1c;
+            --game-level-high: #2563eb;
+            --game-level-low: #9333ea;
+            --game-gold: #f59e0b;
+            --game-border-light: #e5e7eb;
+            
+            background-color: var(--game-bg-card);
+            color: var(--game-text-primary);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            margin-top: 20px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .game-wrapper .header {
+            padding: 1.5rem 2.5rem;
+            border-bottom: 1px solid var(--game-border-light);
+            background: linear-gradient(to bottom, #fff, #fcfcfc);
+        }
+
+        .game-wrapper .hub-label {
+            font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--game-text-secondary); font-weight: 600; margin-bottom: 0.5rem;
+            display: flex; justify-content: space-between;
+        }
+
+        .game-wrapper .header-main { display: flex; justify-content: space-between; align-items: center; }
+        
+        .game-wrapper .brand h1 {
+            font-family: 'Playfair Display', serif; font-size: 1.8rem; margin: 0;
+            color: #1f2937; letter-spacing: -0.5px;
+        }
+        .game-wrapper .attribution { font-size: 0.9rem; color: var(--game-text-secondary); }
+
+        .game-wrapper .stats-bar { display: flex; gap: 15px; margin-top: 5px; }
+        .game-wrapper .stat-pill {
+            font-family: 'Inter', monospace; font-size: 0.8rem; padding: 6px 12px;
+            border-radius: 8px; background: #f3f4f6; color: var(--game-text-primary);
+            border: 1px solid var(--game-border-light); display: flex; align-items: center; gap: 6px;
+        }
+        .game-wrapper .stat-pill.streak { color: #b45309; background: rgba(180, 83, 9, 0.05); border-color: rgba(180, 83, 9, 0.2); }
+
+        .game-wrapper .chart-wrapper {
+            position: relative;
+            height: 400px;
+            background-color: #ffffff;
+            background-image: 
+                linear-gradient(var(--game-border-light) 1px, transparent 1px),
+                linear-gradient(90deg, var(--game-border-light) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .game-wrapper .controls { padding: 2.5rem; background-color: #ffffff; }
+        .game-wrapper .prompt { font-family: 'Playfair Display', serif; font-size: 1.25rem; color: #374151; margin-bottom: 2rem; text-align: center; }
+
+        .game-wrapper .btn-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; max-width: 800px; margin: 0 auto; }
+
+        .game-wrapper button.game-btn {
+            padding: 20px; background: #ffffff;
+            border: 1px solid var(--game-border-light); border-radius: 12px;
+            cursor: pointer; transition: all 0.2s ease;
+            position: relative; overflow: hidden;
+        }
+        .game-wrapper button.game-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .game-wrapper button.game-btn h3 { margin: 0 0 5px 0; font-size: 1.1rem; font-weight: 600; color: #1f2937; }
+        .game-wrapper button.game-btn span { font-size: 0.75rem; color: var(--game-text-secondary); display:block; }
+
+        /* --- UPDATED BUTTON STYLES (Tinted) --- */
+        .game-wrapper .btn-bull {
+            background-color: rgba(16, 185, 129, 0.03); /* Slight Green Tint */
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+        .game-wrapper .btn-bull:hover { 
+            border-color: var(--game-candle-green-stroke); 
+            background-color: rgba(16, 185, 129, 0.1); /* Stronger on hover */
+        }
+        .game-wrapper .btn-bull h3 { color: var(--game-candle-green-stroke); }
+
+        .game-wrapper .btn-bear {
+            background-color: rgba(239, 68, 68, 0.03); /* Slight Red Tint */
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+        .game-wrapper .btn-bear:hover { 
+            border-color: var(--game-candle-red-stroke); 
+            background-color: rgba(239, 68, 68, 0.1); /* Stronger on hover */
+        }
+        .game-wrapper .btn-bear h3 { color: var(--game-candle-red-stroke); }
+
+        .game-wrapper .btn-neut:hover { border-color: #4b5563; background-color: #f3f4f6; }
+        .game-wrapper .btn-neut h3 { color: #4b5563; }
+
+        .game-wrapper .overlay {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px);
+            padding: 2.5rem; border-top: 1px solid var(--game-border-light);
+            transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex; flex-direction: column; gap: 1rem;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+        .game-wrapper .overlay.visible { transform: translateY(0); }
+        .game-wrapper .feedback-header { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; }
+        .game-wrapper .feedback-text { font-size: 0.95rem; color: #4b5563; line-height: 1.6; border-left: 2px solid var(--game-border-light); padding-left: 1rem; }
+        
+        .game-wrapper .next-btn {
+            align-self: flex-start; margin-top: 10px; background-color: #111827; color: white;
+            border: none; padding: 14px 32px; border-radius: 8px; font-weight: 500; cursor: pointer;
+        }
+        .game-wrapper .next-btn:hover { background-color: #000; }
+
+        .toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;
+        }
+        .achievement {
+            background: #fff; padding: 12px 20px; border-radius: 50px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5); border: 2px solid var(--accent-gold);
+            display: flex; align-items: center; gap: 10px; min-width: 250px;
+            animation: slideIn 0.5s forwards, fadeOut 0.5s 3.5s forwards;
+            pointer-events: auto;
+        }
+        .ach-icon { font-size: 1.5rem; }
+        .ach-text { display: flex; flex-direction: column; }
+        .ach-title { font-size: 0.7rem; font-weight: 700; color: var(--accent-gold); text-transform: uppercase; }
+        .ach-name { font-size: 0.9rem; font-weight: 600; color: #000; }
+
+        @keyframes slideIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        .completion-screen { text-align: center; padding: 4rem; display: none; }
+        .final-badges { display: flex; justify-content: center; gap: 10px; margin: 20px 0; flex-wrap: wrap; }
+        .badge { background: #fff7ed; color: #9a3412; padding: 5px 15px; border-radius: 20px; border: 1px solid #fed7aa; font-size: 0.8rem; font-weight: 600; }
+
+        @media (max-width: 600px) {
+            .game-wrapper .btn-group { grid-template-columns: 1fr; }
+        }
+
+        /* --- CERTIFICATE STYLES --- */
+        .cert-container {
+            position: relative;
+            background-color: #fffcf5; /* Parchmentish */
+            padding: 40px;
+            border: 1px solid #e0e0e0;
+            max-width: 750px;
+            margin: 0 auto;
+            color: #1a1a1a;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .cert-border {
+            border: 5px double var(--accent-gold);
+            padding: 30px;
+            position: relative;
+            text-align: center;
+        }
+        .cert-header {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            color: #1a1a1a;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .cert-subheader {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #666;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--accent-gold);
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        .cert-body {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .cert-highlight {
+            font-weight: 700;
+            color: #1a1a1a;
+            font-size: 1.5rem;
+            display: block;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        .cert-score-box {
+            background: rgba(212, 175, 55, 0.1);
+            border: 1px solid var(--accent-gold);
+            padding: 15px 30px;
+            display: inline-block;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .cert-score-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #666;
+            display: block;
+            font-family: 'Inter', sans-serif;
+        }
+        .cert-score-val {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            color: #b45309;
+            font-weight: 700;
+        }
+        .cert-footer {
+            margin-top: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 40px;
+        }
+        .cert-sig-block {
+            text-align: center;
+        }
+        .cert-sig-line {
+            width: 200px;
+            height: 1px;
+            background: #333;
+            margin: 0 auto 10px auto;
+        }
+        .cert-sig-text {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            color: var(--accent-gold);
+        }
+        .cert-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #888;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* --- UPDATED REALISTIC WAX SEAL --- */
+        .cert-seal {
+            width: 90px;
+            height: 90px;
+            /* Imperfect Circle Shape */
+            border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%;
+            
+            /* Realistic Red Wax Gradient */
+            background: radial-gradient(circle at 30% 30%, #d32f2f, #8e0000);
+            
+            /* Complex Shadows for Depth and Irregularity */
+            box-shadow: 
+                inset 0 2px 5px rgba(255, 255, 255, 0.2), /* Top shine */
+                inset 0 -5px 10px rgba(0, 0, 0, 0.3), /* Bottom dark */
+                3px 3px 6px rgba(0,0,0,0.3); /* Drop shadow */
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #610000; /* Dark engraved look */
+            font-family: 'Cinzel', serif;
+            font-weight: 900;
+            font-size: 2rem;
+            letter-spacing: 2px;
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.2), -1px -1px 0 rgba(0,0,0,0.3); /* Embossed Text Effect */
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+        
+        /* Inner Ring Indentation */
+        .cert-seal::after {
+            content: '';
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            border-radius: 50%;
+            border: 2px solid rgba(0,0,0,0.15);
+            box-shadow: inset 1px 1px 2px rgba(0,0,0,0.2), 1px 1px 1px rgba(255,255,255,0.1);
+        }
+
+        /* Wax Drips/Oozing Effect using Pseudo-element */
+        .cert-seal::before {
+            content: '';
+            position: absolute;
+            top: -5px; left: -5px; right: -5px; bottom: -5px;
+            z-index: -1;
+            border-radius: 50% 40% 60% 50%;
+            background: #b71c1c;
+            box-shadow: 
+                /* Blobs of wax dripping */
+                -12px 0 0 -5px #b71c1c,
+                12px 4px 0 -4px #b71c1c,
+                0 12px 0 -5px #b71c1c,
+                -8px 8px 0 -3px #b71c1c,
+                5px -10px 0 -4px #b71c1c;
+            filter: blur(0.5px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="brand">Daily <span>Bias</span></div>
+        
+        <div class="progress-container">
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">0% Completed</div>
+        </div>
+
+        <ul class="nav-list" id="nav-list">
+        </ul>
+
+        <div class="cta-box">
+            <div style="color:var(--text-dim); font-size:0.8rem;">Master the Daily Bias.</div>
+            <a href="https://whop.com/herman-macro-edge-premium" target="_blank" class="cta-btn">Join Premium Discord</a>
+        </div>
+
+        <div class="credits">
+            Credits: ICT, TTrades & The MMXM Trader
+        </div>
+    </aside>
+
+    <main class="main">
+        <div class="toast-container" id="toast-area"></div>
+        <div id="content-area" class="content-wrapper">
+        </div>
+    </main>
+
+    <script>
+        // --- DATA STORE (MODULES) ---
+        const modules = [
+            {
+                title: "1. The Foundation: PDH & PDL",
+                subtitle: "The Easiest Way to Frame Bias",
+                content: `<p>The core concept is simple: Unless price consolidates, it MUST take out either the <strong>Previous Day High (PDH)</strong> or the <strong>Previous Day Low (PDL)</strong>.</p><p>We use these levels to answer one question: <em>Where is the Draw on Liquidity?</em></p>`,
+                note: "Before looking at any indicators, ask yourself: Is price more likely to reach PDH or PDL?",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="0" y1="50" x2="500" y2="50" stroke="#222" />
+                        <line x1="0" y1="200" x2="500" y2="200" stroke="#222" />
+                        <text x="60" y="40" fill="#555" font-size="9">2 DAYS AGO</text>
+                        <line x1="60" y1="120" x2="60" y2="180" class="candle-wick"/>
+                        <rect x="50" y="130" width="20" height="40" class="candle-up"/> <text x="140" y="40" fill="#777" font-size="10">PREVIOUS DAY</text>
+                        <line x1="140" y1="60" x2="140" y2="140" class="candle-wick"/> 
+                        <rect x="130" y="80" width="20" height="50" class="candle-up"/> 
+                        <line x1="140" y1="60" x2="450" y2="60" stroke="#00c853" stroke-dasharray="4"/>
+                        <text x="460" y="65" fill="#00c853" font-size="10">PDH</text>
+                        <line x1="140" y1="140" x2="450" y2="140" stroke="#ff3d00" stroke-dasharray="4"/>
+                        <text x="460" y="145" fill="#ff3d00" font-size="10">PDL</text>
+                        <text x="250" y="40" fill="#d4af37" font-size="10">TODAY</text>
+                        <line x1="220" y1="80" x2="300" y2="80" stroke="#d4af37" stroke-width="1" stroke-dasharray="2"/>
+                        <text x="310" y="85" fill="#d4af37" font-size="10">OPEN</text>
+                        <text x="250" y="120" fill="#d4af37" font-size="30" text-anchor="middle" font-weight="bold">?</text>
+                    </svg>
+                `
+            },
+            {
+                title: "2. Draw on Liquidity (Trending)",
+                subtitle: "Bias: Continuation",
+                content: `<p>If the market is trending upwards, our bias is that price will reach for the <strong>Previous Day High (PDH)</strong>.</p><p>Conversely, if trending down, we expect price to take out the <strong>Previous Day Low (PDL)</strong>.</p>`,
+                note: "In a trend, old highs/lows are targets, not resistance/support.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="100" y1="120" x2="100" y2="190" class="candle-wick"/>
+                        <rect x="90" y="130" width="20" height="50" class="candle-up"/>
+                        <line x1="140" y1="70" x2="140" y2="140" class="candle-wick"/>
+                        <rect x="130" y="80" width="20" height="50" class="candle-up"/>
+                        <line x1="180" y1="40" x2="180" y2="90" class="candle-wick" stroke="#d4af37"/>
+                        <rect x="170" y="50" width="20" height="30" fill="none" stroke="#d4af37"/>
+                        <path d="M 150,70 L 180,40" stroke="#d4af37" stroke-width="2" marker-end="url(#arrow)"/>
+                        <text x="220" y="60" fill="#d4af37" font-size="10">Targeting Previous Highs</text>
+                        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d4af37" /></marker></defs>
+                    </svg>
+                `
+            },
+            {
+                title: "3. Failure to Displace (Reversal)",
+                subtitle: "The Sweep Setup",
+                content: `<p>This is critical. If price reaches PDH or PDL but <strong>fails to displace</strong> (closes back inside the range), we frame a Reversal.</p><p><strong>Target:</strong> We aim for the <strong>Low of the Reversal Candle</strong> itself (Low Hanging Fruit). It's a high probability target before potentially reaching for PDL.</p>`,
+                note: "Sweep High + Close Inside = Short Term Bearish. Target the Wick Low first.",
+                isInteractive: true,
+                type: 'reversal',
+                renderVisual: (id) => `<div id="chart-reversal" style="width:100%;height:100%;"></div>`
+            },
+            {
+                title: "4. Displacement (Continuation)",
+                subtitle: "Breakout Confirmation",
+                content: `<p>If price sweeps a level and the candle body <strong>CLOSES OUTSIDE</strong> the previous range, this is displacement.</p><p>This signals strength. We look for continuation.</p><p><strong>Target:</strong> We aim for the <strong>High of the Displacement Candle</strong> as the immediate draw.</p>`,
+                note: "A close outside PDH = Bullish Bias. Target the new High.",
+                isInteractive: true,
+                type: 'continuation',
+                renderVisual: (id) => `<div id="chart-continuation" style="width:100%;height:100%;"></div>`
+            },
+            {
+                title: "5. Anticipating the Next Candle",
+                subtitle: "The OHLC / OLHC Model",
+                content: `<p>When the bias is confirmed (e.g., after a Sweep of Highs), we can anticipate the anatomy of the upcoming Daily Candle.</p><p>For a Bearish Day (Sell), we expect: <strong>Open -> High (Manipulation) -> Low (Expansion) -> Close</strong>.</p><p>We wait for price to manipulate ABOVE the opening price to catch the high of the day before the drop.</p>`,
+                note: "We don't chase price. We wait for the Manipulation (The Wick) to form first.",
+                isInteractive: true,
+                type: 'nextcandle',
+                renderVisual: (id) => `<div id="chart-nextcandle" style="width:100%;height:100%;"></div>`
+            },
+            {
+                title: "6. Scenario: The Outside Bar",
+                subtitle: "Sweep & Reverse",
+                content: `<p>A powerful bullish setup. Price first sweeps the <strong>PDL</strong> (Liquidity Grab) but cannot close below.</p><p>It then reverses completely and closes <strong>ABOVE the PDH</strong>.</p><p><strong>Result:</strong> Strongly Bullish Bias. Expect expansion.</p>`,
+                note: "Sweep Low + Break High = Massive Strength.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <line x1="50" y1="80" x2="450" y2="80" stroke="#00c853" stroke-dasharray="2"/> <text x="10" y="85" fill="#00c853" font-size="8">PDH</text>
+                        <line x1="50" y1="180" x2="450" y2="180" stroke="#ff3d00" stroke-dasharray="2"/> <text x="10" y="185" fill="#ff3d00" font-size="8">PDL</text>
+                        <line x1="100" y1="80" x2="100" y2="180" class="candle-wick"/>
+                        <rect x="90" y="120" width="20" height="20" class="candle-down"/>
+                        <line x1="150" y1="60" x2="150" y2="190" class="candle-wick"/>
+                        <rect x="140" y="60" width="20" height="80" class="candle-up"/> <text x="150" y="205" fill="#ff3d00" font-size="9">1. SWEEP LOW</text>
+                        <text x="150" y="50" fill="#00c853" font-size="9">2. CLOSE ABOVE HIGH</text>
+                    </svg>
+                `
+            },
+            {
+                title: "7. The Decision Matrix",
+                subtitle: "Logic Flowchart",
+                content: `<p>Use this decision tree to determine your bias instantly based on Previous Day's price action.</p><p>This visual guide simplifies the process: Did we break the range? Did we close outside? The answer determines your direction.</p>`,
+                note: "Memorize this visual pattern.",
+                renderVisual: (id) => `
+                    <svg viewBox="0 0 500 250">
+                        <rect x="200" y="10" width="100" height="40" fill="#333" stroke="#d4af37" rx="5"/>
+                        <text x="250" y="35" fill="#fff" font-size="10" font-weight="bold" text-anchor="middle">PREVIOUS DAY</text>
+                        <path d="M 250,50 L 150,100" stroke="#555" stroke-width="2"/>
+                        <path d="M 250,50 L 350,100" stroke="#555" stroke-width="2"/>
+                        <rect x="100" y="100" width="100" height="40" fill="#1f2630" stroke="#00c853"/>
+                        <text x="150" y="120" fill="#00c853" font-size="9" text-anchor="middle">BODY CLOSE</text>
+                        <text x="150" y="132" fill="#00c853" font-size="9" text-anchor="middle">OUTSIDE RANGE</text>
+                        <rect x="300" y="100" width="100" height="40" fill="#1f2630" stroke="#ff3d00"/>
+                        <text x="350" y="120" fill="#ff3d00" font-size="9" text-anchor="middle">SWEEP LEVEL</text>
+                        <text x="350" y="132" fill="#ff3d00" font-size="9" text-anchor="middle">& CLOSE INSIDE</text>
+                        <path d="M 150,140 L 150,180" stroke="#00c853" stroke-width="2" marker-end="url(#arrow-green)"/>
+                        <path d="M 350,140 L 350,180" stroke="#ff3d00" stroke-width="2" marker-end="url(#arrow-red)"/>
+                        <rect x="100" y="180" width="100" height="40" fill="rgba(0, 200, 83, 0.2)" stroke="#00c853" rx="5"/>
+                        <text x="150" y="200" fill="#00c853" font-weight="bold" font-size="9" text-anchor="middle">ANTICIPATE</text>
+                        <text x="150" y="212" fill="#00c853" font-weight="bold" font-size="9" text-anchor="middle">CONTINUATION</text>
+                        <rect x="300" y="180" width="100" height="40" fill="rgba(255, 61, 0, 0.2)" stroke="#ff3d00" rx="5"/>
+                        <text x="350" y="200" fill="#ff3d00" font-weight="bold" font-size="9" text-anchor="middle">ANTICIPATE</text>
+                        <text x="350" y="212" fill="#ff3d00" font-weight="bold" font-size="9" text-anchor="middle">REVERSAL</text>
+                        <defs>
+                            <marker id="arrow-green" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#00c853" /></marker>
+                            <marker id="arrow-red" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#ff3d00" /></marker>
+                        </defs>
+                    </svg>
+                `
+            },
+            {
+                title: "8. The Test: Daily Flow Game",
+                subtitle: "Put your knowledge to the test",
+                content: `
+                    <div class="game-wrapper" id="game-container">
+                        <div class="header">
+                            <div class="hub-label">
+                                <span>Daily Bias Course</span>
+                                <span id="game-progress-text">Scenario 1 / 20</span>
+                            </div>
+                            <div class="header-main">
+                                <div class="brand">
+                                    <h1>Daily Flow</h1>
+                                    <div class="attribution">Analyze Monday/Tuesday to Predict Wednesday</div>
+                                </div>
+                                <div class="stats-bar">
+                                    <div class="stat-pill streak">🔥 <span id="streak-val">0</span> Streak</div>
+                                    <div class="stat-pill">🎯 <span id="acc-val">0%</span> Win Rate</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="game-view">
+                            <div class="chart-wrapper">
+                                <svg viewBox="0 0 900 400" preserveAspectRatio="none">
+                                    <g id="levels-layer"></g>
+                                    <g id="candles-layer"></g>
+                                </svg>
+                            </div>
+
+                            <div class="controls">
+                                <div class="prompt">Analyze Tuesday's interaction with Monday.<br>Predict Wednesday.</div>
+                                <div class="btn-group">
+                                    <button class="game-btn btn-bull" onclick="DailyFlowGame.submitAnswer('bullish')">
+                                        <h3>Bullish</h3>
+                                        <span>Target Tuesday High</span>
+                                    </button>
+                                    <button class="game-btn btn-neut" onclick="DailyFlowGame.submitAnswer('neutral')">
+                                        <h3>No Trade</h3>
+                                        <span>Neutral / Inside Bar</span>
+                                    </button>
+                                    <button class="game-btn btn-bear" onclick="DailyFlowGame.submitAnswer('bearish')">
+                                        <h3>Bearish</h3>
+                                        <span>Target Tuesday Low</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="overlay" id="feedback-overlay">
+                                <div class="feedback-header" id="fb-title"></div>
+                                <div class="feedback-text" id="fb-desc"></div>
+                                <button class="next-btn" onclick="DailyFlowGame.nextScenario()">Next Scenario &rarr;</button>
+                            </div>
+                        </div>
+
+                        <div id="completion-view" class="completion-screen">
+                            <div class="cert-container">
+                                <div class="cert-border">
+                                    <div class="cert-header">Certificate</div>
+                                    <div class="cert-subheader">of Achievement</div>
+                                    
+                                    <div class="cert-body">
+                                        This is to certify that the holder has successfully completed the
+                                        <span class="cert-highlight">Daily Bias Course</span>
+                                        and demonstrated proficiency in market flow analysis.
+                                    </div>
+                                    
+                                    <div class="cert-score-box">
+                                        <span class="cert-score-label">Final Win Rate</span>
+                                        <div class="cert-score-val" id="cert-score-val">100%</div>
+                                    </div>
+
+                                    <div class="final-badges" id="badge-container" style="justify-content:center; margin-top:0;"></div>
+
+                                    <div class="cert-footer">
+                                        <div class="cert-sig-block">
+                                            <div class="cert-sig-text" id="cert-date">Date</div>
+                                            <div class="cert-sig-line"></div>
+                                            <div class="cert-label">Date Completed</div>
+                                        </div>
+                                        
+                                        <div class="cert-seal">
+                                            ICT
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="next-btn" style="width:auto; margin: 30px auto;" onclick="DailyFlowGame.initGame(); document.getElementById('completion-view').style.display='none'; document.getElementById('game-view').style.display='block';">Start New Session</button>
+                        </div>
+                    </div>
+                `,
+                note: "Apply everything you've learned. Focus on Sweeps vs Closures.",
+                isInteractive: true,
+                type: 'game',
+                renderVisual: (id) => '' // No standard visual header for game
+            }
+        ];
+
+        // --- STATE & INIT (MAIN APP) ---
+        let currentIndex = 0;
+        let chartStep = 0;
+        const navList = document.getElementById('nav-list');
+        const contentArea = document.getElementById('content-area');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+
+        function init() { renderNav(); loadModule(0); }
+
+        function renderNav() {
+            navList.innerHTML = '';
+            modules.forEach((mod, idx) => {
+                const li = document.createElement('li');
+                li.className = `nav-item ${idx === currentIndex ? 'active' : ''} ${idx < currentIndex ? 'completed' : ''}`;
+                li.innerText = mod.title;
+                li.onclick = () => loadModule(idx);
+                navList.appendChild(li);
+            });
+            const pct = Math.round(((currentIndex + 1) / modules.length) * 100);
+            progressFill.style.width = `${pct}%`;
+            progressText.innerText = `${pct}% Completed`;
+        }
+
+        function loadModule(index) {
+            currentIndex = index;
+            const data = modules[index];
+            let html = `
+                <h1>${data.title}</h1>
+                <div class="subtitle">${data.subtitle}</div>
+                ${data.renderVisual(index) !== '' ? `<div class="visual-container">${data.renderVisual(index)}</div>` : ''}
+                ${data.content}
+                <div class="herman-note"><strong>Herman's Edge</strong>"${data.note}"</div>
+            `;
+            html += `<div style="display:flex; justify-content:space-between; margin-top:40px;">`;
+            if (index > 0) html += `<button class="btn-control" onclick="loadModule(${index - 1})">&larr; Previous</button>`; else html += `<div></div>`;
+            if (index < modules.length - 1) html += `<button class="btn-control" onclick="loadModule(${index + 1})">Next Module &rarr;</button>`; else html += `<button class="btn-control" style="color:#00bcd4;border-color:#00bcd4">Finish</button>`;
+            html += `</div>`;
+            contentArea.innerHTML = html;
+            renderNav();
+            
+            // Hook for Module Specific Logic
+            if (data.type && data.type !== 'game') initInteractiveChart(data.type);
+            if (data.type === 'game') {
+                setTimeout(() => DailyFlowGame.initGame(), 100);
+            }
+        }
+
+        function initInteractiveChart(type) {
+            const container = document.getElementById(`chart-${type}`);
+            chartStep = 0;
+            let btnX = 350, btnY = 200;
+            
+            container.innerHTML = `
+                <svg viewBox="0 0 500 250">
+                    <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"><path d="M0,0 L0,6 L9,3 z" fill="#d4af37" /></marker></defs>
+                    <rect width="100%" height="100%" fill="#0f1216" />
+                    <line x1="0" y1="50" x2="500" y2="50" stroke="#222" /><line x1="0" y1="200" x2="500" y2="200" stroke="#222" />
+                    
+                    <g id="layer-zones-${type}"></g>
+                    <g id="layer-candles-${type}"></g>
+                    <g id="layer-labels-${type}"></g>
+                    
+                    <g onclick="runSimulation('${type}')" style="cursor:pointer;">
+                        <rect id="button-bg" x="${btnX}" y="${btnY}" width="110" height="30" rx="5" fill="#d4af37"/>
+                        <text x="${btnX + 55}" y="${btnY + 20}" fill="#000" font-size="12" font-weight="bold" text-anchor="middle" style="pointer-events:none;">CLICK TO PLAY</text>
+                    </g>
+                </svg>`;
+        }
+
+        window.runSimulation = function(type) {
+            const zones = document.getElementById(`layer-zones-${type}`);
+            const candles = document.getElementById(`layer-candles-${type}`);
+            const labels = document.getElementById(`layer-labels-${type}`);
+            
+            if(!candles) return; 
+
+            chartStep++;
+            let cHtml = "", zHtml = "", lHtml = "";
+
+            if (type === 'reversal') {
+                zHtml = `<line x1="50" y1="80" x2="450" y2="80" stroke="#00c853" stroke-dasharray="4"/><text x="460" y="85" fill="#00c853" font-size="10">PDH</text>`;
+                if (chartStep >= 1) {
+                    cHtml += `<line x1="100" y1="80" x2="100" y2="190" class="candle-wick"/>
+                              <rect x="90" y="100" width="20" height="80" class="candle-up"/>`;
+                }
+                if (chartStep >= 2) {
+                    cHtml += `<line x1="150" y1="60" x2="150" y2="190" class="candle-wick"/> <rect x="140" y="100" width="20" height="60" class="candle-down"/> `;
+                    lHtml += `<text x="150" y="50" fill="#ff3d00" font-size="10" text-anchor="middle">SWEEP & CLOSE IN</text>`;
+                }
+                if (chartStep >= 3) {
+                    lHtml += `<path d="M 160,180 L 220,190" stroke="#ff3d00" stroke-width="2" marker-end="url(#arrow)"/>
+                              <text x="230" y="205" fill="#ff3d00" font-weight="bold">TARGET: WICK LOW</text>`;
+                    chartStep = 0;
+                }
+            } 
+            else if (type === 'continuation') {
+                zHtml = `<line x1="50" y1="80" x2="450" y2="80" stroke="#00c853" stroke-dasharray="4"/><text x="460" y="85" fill="#00c853" font-size="10">PDH</text>`;
+                if (chartStep >= 1) {
+                    cHtml += `<line x1="100" y1="80" x2="100" y2="160" class="candle-wick"/>
+                              <rect x="90" y="100" width="20" height="50" class="candle-up"/>`;
+                }
+                if (chartStep >= 2) {
+                    cHtml += `<line x1="150" y1="100" x2="150" y2="40" class="candle-wick"/>
+                              <rect x="140" y="50" width="20" height="50" class="candle-up"/>`;
+                    lHtml += `<text x="190" y="60" fill="#00c853" font-weight="bold" font-size="10">CLOSE OUTSIDE</text>`;
+                }
+                if (chartStep >= 3) {
+                    lHtml += `<path d="M 160,40 L 220,30" stroke="#00c853" stroke-width="2" marker-end="url(#arrow)"/>
+                              <text x="230" y="35" fill="#00c853" font-weight="bold">TARGET: WICK HIGH</text>`;
+                    chartStep = 0;
+                }
+            }
+            else if (type === 'nextcandle') {
+                zHtml = `<line x1="50" y1="80" x2="450" y2="80" stroke="#00c853" stroke-dasharray="4"/><text x="460" y="85" fill="#00c853" font-size="10">PDH</text>`;
+                if (chartStep >= 1) {
+                    cHtml += `<line x1="100" y1="60" x2="100" y2="160" class="candle-wick"/>
+                        <rect x="90" y="120" width="20" height="30" class="candle-up"/>
+                        <text x="100" y="200" fill="#777" font-size="10" text-anchor="middle">Day 1: Sweep</text>`;
+                }
+                if (chartStep >= 2) {
+                    cHtml += `<line x1="180" y1="120" x2="220" y2="120" stroke="#fff" stroke-dasharray="2"/>
+                        <text x="230" y="125" fill="#fff" font-size="10">OPEN</text>`;
+                }
+                if (chartStep >= 3) {
+                    cHtml += `<line x1="200" y1="120" x2="200" y2="100" class="candle-wick" stroke="#d4af37" stroke-width="2"/>
+                        <text x="210" y="100" fill="#d4af37" font-size="10">HIGH (Manip)</text>`;
+                }
+                if (chartStep >= 4) {
+                    cHtml += `<rect x="190" y="120" width="20" height="80" class="candle-down"/>
+                        <line x1="200" y1="200" x2="200" y2="210" class="candle-wick"/>
+                        <text x="230" y="210" fill="#ff3d00" font-size="10">LOW (Expand)</text>`;
+                    chartStep = 0;
+                }
+            }
+            if(cHtml) candles.innerHTML = (chartStep === 1) ? cHtml : candles.innerHTML + cHtml;
+            if(zHtml) zones.innerHTML = zHtml;
+            if(lHtml) labels.innerHTML = lHtml;
+            if(type === 'nextcandle' && chartStep === 1) { candles.innerHTML = cHtml; labels.innerHTML = ""; }
+        };
+
+        // --- DAILY FLOW GAME LOGIC (Encapsulated) ---
+        const DailyFlowGame = {
+            X_MON: 200, X_TUE: 450, X_WED: 700,
+            POOL_COUNTS: { bullish: 50, bearish: 50, neutral: 20 },
+            GAME_ROUNDS: 20,
+            gameDeck: [],
+            gameIndex: 0,
+            correctCount: 0,
+            streak: 0,
+            currentScenario: null,
+            isRevealed: false,
+            unlockedAchievements: [],
+            ACHIEVEMENTS: [
+                { id: 'first_blood', name: "First Blood", icon: "⚔️", condition: (stats) => stats.correct === 1 && stats.total === 1 },
+                { id: 'hat_trick', name: "Hat Trick", icon: "🎩", condition: (stats) => stats.streak === 3 },
+                { id: 'on_fire', name: "On Fire", icon: "🔥", condition: (stats) => stats.streak === 5 },
+                { id: 'god_mode', name: "God Mode", icon: "⚡", condition: (stats) => stats.streak === 10 },
+                { id: 'halfway_hero', name: "Diamond Hands", icon: "💎", condition: (stats) => stats.total === 10 && (stats.correct/10) === 1 },
+                { id: 'comeback', name: "Survivor", icon: "🛡️", condition: (stats) => stats.streak === 2 && stats.total > 5 && (stats.correct/stats.total) < 0.4 } 
+            ],
+
+            rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; },
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
+                return array;
+            },
+
+            createScenario(targetType) {
+                const c1Open = this.rand(150, 250);
+                const c1BodySize = this.rand(50, 90); 
+                const c1Dir = Math.random() > 0.5 ? 1 : -1;
+                const c1Close = c1Open + (c1BodySize * c1Dir); 
+                const c1High = Math.min(c1Open, c1Close) - this.rand(20, 40);
+                const c1Low = Math.max(c1Open, c1Close) + this.rand(20, 40);
+                const c1 = {o: c1Open, c: c1Close, h: c1High, l: c1Low};
+
+                let c2Open = c1Close;
+                let c2Close, c2High, c2Low, expl;
+                
+                if (targetType === 'neutral') {
+                    c2High = c1High + this.rand(5, 25); 
+                    c2Low = c1Low - this.rand(5, 25);
+                    c2Close = c2Open + this.rand(-15, 15);
+                    if(c2Close < c2High) c2Close = c2High + 2;
+                    if(c2Close > c2Low) c2Close = c2Low - 2;
+                    expl = "Neutral / No Trade. Tuesday failed to sweep Monday's range (Inside Bar). Market is undecided.";
+                } 
+                else if (targetType === 'bullish') {
+                    const setup = Math.random() > 0.5 ? 'sfp' : 'breakout';
+                    if (setup === 'sfp') {
+                        c2Low = c1Low + this.rand(15, 40); 
+                        c2High = c1High + this.rand(5, 15); 
+                        c2Close = c1Low - this.rand(10, 40); 
+                        expl = "Bullish Reversal (SFP). Tuesday swept Monday Low but closed INSIDE. Target Tuesday High.";
+                    } else {
+                        c2High = c1High - this.rand(15, 40); 
+                        c2Low = c1Low - this.rand(5, 15);
+                        c2Close = c1High - this.rand(5, 20); 
+                        expl = "Bullish Expansion. Tuesday swept Monday High and closed ABOVE. Target Tuesday High.";
+                    }
+                } 
+                else if (targetType === 'bearish') {
+                    const setup = Math.random() > 0.5 ? 'sfp' : 'breakout';
+                    if (setup === 'sfp') {
+                        c2High = c1High - this.rand(15, 40); 
+                        c2Low = c1Low - this.rand(5, 15);
+                        c2Close = c1High + this.rand(10, 40); 
+                        expl = "Bearish Reversal (SFP). Tuesday swept Monday High but closed INSIDE. Target Tuesday Low.";
+                    } else {
+                        c2Low = c1Low + this.rand(15, 40); 
+                        c2High = c1High + this.rand(5, 15);
+                        c2Close = c1Low + this.rand(5, 20); 
+                        expl = "Bearish Expansion. Tuesday swept Monday Low and closed BELOW. Target Tuesday Low.";
+                    }
+                }
+                c2High = Math.min(c2High, c2Open, c2Close);
+                c2Low = Math.max(c2Low, c2Open, c2Close);
+
+                const c3Open = c2Close;
+                let c3Close, c3High, c3Low;
+                if (targetType === 'bullish') {
+                    c3Close = c2High - this.rand(30, 60);
+                    c3High = c3Close - this.rand(5, 10);
+                    c3Low = c3Open + this.rand(5, 15);
+                } else if (targetType === 'bearish') {
+                    c3Close = c2Low + this.rand(30, 60);
+                    c3High = c3Open - this.rand(5, 15);
+                    c3Low = c3Close + this.rand(5, 10);
+                } else {
+                    c3Close = c3Open + this.rand(-10, 10);
+                    c3High = c3Open - 10;
+                    c3Low = c3Open + 10;
+                }
+
+                return { type: targetType, expl: expl, c1: c1, c2: {o:c2Open, c:c2Close, h:c2High, l:c2Low}, c3: {o:c3Open, c:c3Close, h:c3High, l:c3Low} };
+            },
+
+            drawCandle(x, data, opacity=1, label=null) {
+                const isUp = data.c < data.o; 
+                const fill = isUp ? 'var(--game-candle-green)' : 'var(--game-candle-red)';
+                const stroke = isUp ? 'var(--game-candle-green-stroke)' : 'var(--game-candle-red-stroke)';
+                let wick = `<line x1="${x+25}" y1="${data.h}" x2="${x+25}" y2="${data.l}" stroke="${stroke}" stroke-width="2" />`;
+                let bodyY = Math.min(data.o, data.c);
+                let bodyH = Math.abs(data.o - data.c);
+                if(bodyH < 2) bodyH = 2; 
+                let body = `<rect x="${x}" y="${bodyY}" width="50" height="${bodyH}" fill="${fill}" stroke="${stroke}" stroke-width="1.5" />`;
+                let text = "";
+                if(label) text = `<text x="${x+25}" y="${data.h - 15}" text-anchor="middle" font-size="11" fill="#6b7280" font-weight="600">${label}</text>`;
+                return `<g opacity="${opacity}">${wick}${body}${text}</g>`;
+            },
+
+            drawMystery(x, startY) {
+                return `<g class="mystery-group"><rect x="${x}" y="${startY - 40}" width="50" height="80" rx="6" fill="#f9fafb" stroke="#9ca3af" stroke-width="2" stroke-dasharray="4 4"/><text x="${x+25}" y="${startY + 12}" text-anchor="middle" dominant-baseline="middle" font-family="Playfair Display" font-size="40" fill="#9ca3af" font-weight="bold">?</text></g>`;
+            },
+
+            drawNoTrade(x, startY) {
+                return `<g class="no-trade-group" opacity="0.6"><circle cx="${x+25}" cy="${startY}" r="25" fill="none" stroke="#6b7280" stroke-width="2" opacity="0.5"/><line x1="${x+10}" y1="${startY+15}" x2="${x+40}" y2="${startY-15}" stroke="#6b7280" stroke-width="2" opacity="0.5"/><text x="${x+25}" y="${startY + 45}" text-anchor="middle" font-size="12" font-weight="600" fill="#6b7280" letter-spacing="1">NO TRADE</text></g>`;
+            },
+
+            checkAchievements() {
+                const stats = { correct: this.correctCount, streak: this.streak, total: this.gameIndex + 1 };
+                this.ACHIEVEMENTS.forEach(ach => {
+                    if(!this.unlockedAchievements.includes(ach.id)) {
+                        if(ach.condition(stats)) {
+                            this.unlockedAchievements.push(ach.id);
+                            this.showToast(ach);
+                        }
+                    }
+                });
+            },
+
+            showToast(ach) {
+                const container = document.getElementById('toast-area');
+                const toast = document.createElement('div');
+                toast.className = 'achievement';
+                toast.innerHTML = `<div class="ach-icon">${ach.icon}</div><div class="ach-text"><span class="ach-title">Achievement Unlocked</span><span class="ach-name">${ach.name}</span></div>`;
+                container.appendChild(toast);
+                setTimeout(() => toast.remove(), 4000);
+            },
+
+            renderScenario() {
+                if(this.gameIndex >= this.GAME_ROUNDS) { this.endGame(); return; }
+                this.currentScenario = this.gameDeck[this.gameIndex];
+                this.isRevealed = false;
+                
+                document.getElementById('game-progress-text').innerText = `Scenario ${this.gameIndex + 1} / ${this.GAME_ROUNDS}`;
+                const layerC = document.getElementById('candles-layer');
+                const layerL = document.getElementById('levels-layer');
+                if(!layerC || !layerL) return;
+
+                const c1 = this.currentScenario.c1;
+                const c1H = `<line x1="${this.X_MON+25}" y1="${c1.h}" x2="${this.X_TUE+60}" y2="${c1.h}" stroke="#6b7280" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/><text x="${this.X_MON}" y="${c1.h-5}" fill="#9ca3af" font-size="9">MON HIGH</text>`;
+                const c1L = `<line x1="${this.X_MON+25}" y1="${c1.l}" x2="${this.X_TUE+60}" y2="${c1.l}" stroke="#6b7280" stroke-width="1" stroke-dasharray="3 3" opacity="0.5"/><text x="${this.X_MON}" y="${c1.l+12}" fill="#9ca3af" font-size="9">MON LOW</text>`;
+                
+                const c2 = this.currentScenario.c2;
+                const c2H = `<line x1="${this.X_TUE+25}" y1="${c2.h}" x2="900" y2="${c2.h}" stroke="var(--game-level-high)" stroke-dasharray="4 4" opacity="0.8"/><text x="830" y="${c2.h-5}" fill="var(--game-level-high)" font-size="10" font-weight="bold">TARGET HIGH (TUE)</text>`;
+                const c2L = `<line x1="${this.X_TUE+25}" y1="${c2.l}" x2="900" y2="${c2.l}" stroke="var(--game-level-low)" stroke-dasharray="4 4" opacity="0.8"/><text x="830" y="${c2.l+14}" fill="var(--game-level-low)" font-size="10" font-weight="bold">TARGET LOW (TUE)</text>`;
+
+                layerL.innerHTML = c1H + c1L + c2H + c2L;
+
+                const svgC1 = this.drawCandle(this.X_MON, this.currentScenario.c1, 0.5, "Monday");
+                const svgC2 = this.drawCandle(this.X_TUE, this.currentScenario.c2, 1, "Tuesday");
+                const svgC3 = this.drawMystery(this.X_WED, this.currentScenario.c3.o);
+                
+                const conn1 = `<line x1="${this.X_MON+50}" y1="${this.currentScenario.c1.c}" x2="${this.X_TUE}" y2="${this.currentScenario.c2.o}" stroke="#9ca3af" stroke-dasharray="2 2" stroke-width="0.5"/>`;
+                const conn2 = `<line x1="${this.X_TUE+50}" y1="${this.currentScenario.c2.c}" x2="${this.X_WED}" y2="${this.currentScenario.c3.o}" stroke="#9ca3af" stroke-dasharray="2 2" stroke-width="0.5"/>`;
+
+                layerC.innerHTML = svgC1 + conn1 + svgC2 + conn2 + svgC3;
+            },
+
+            submitAnswer(choice) {
+                if(this.isRevealed) return;
+                this.isRevealed = true;
+
+                const isCorrect = choice === this.currentScenario.type;
+                const fbTitle = document.getElementById('fb-title');
+                const fbDesc = document.getElementById('fb-desc');
+
+                let c3Visual;
+                if (this.currentScenario.type === 'neutral') {
+                    c3Visual = this.drawNoTrade(this.X_WED, this.currentScenario.c3.o);
+                } else {
+                    c3Visual = this.drawCandle(this.X_WED, this.currentScenario.c3, 1, "Wednesday");
+                }
+                
+                const layerC = document.getElementById('candles-layer');
+                const svgC1 = this.drawCandle(this.X_MON, this.currentScenario.c1, 0.5, "Monday");
+                const svgC2 = this.drawCandle(this.X_TUE, this.currentScenario.c2, 1, "Tuesday");
+                const conn1 = `<line x1="${this.X_MON+50}" y1="${this.currentScenario.c1.c}" x2="${this.X_TUE}" y2="${this.currentScenario.c2.o}" stroke="#9ca3af" stroke-dasharray="2 2" stroke-width="0.5"/>`;
+                const conn2 = `<line x1="${this.X_TUE+50}" y1="${this.currentScenario.c2.c}" x2="${this.X_WED}" y2="${this.currentScenario.c3.o}" stroke="#9ca3af" stroke-dasharray="2 2" stroke-width="0.5"/>`;
+                
+                layerC.innerHTML = svgC1 + conn1 + svgC2 + conn2 + c3Visual;
+
+                if(isCorrect) {
+                    this.correctCount++;
+                    this.streak++;
+                    fbTitle.innerHTML = `<span style="color:var(--game-candle-green)">✔ Correct Analysis</span>`;
+                    this.checkAchievements();
+                } else {
+                    this.streak = 0;
+                    fbTitle.innerHTML = `<span style="color:var(--game-candle-red)">✘ Incorrect Analysis</span>`;
+                }
+
+                document.getElementById('streak-val').innerText = this.streak;
+                const rate = Math.round((this.correctCount / (this.gameIndex+1))*100);
+                document.getElementById('acc-val').innerText = rate + "%";
+                
+                fbDesc.innerHTML = this.currentScenario.expl;
+                document.getElementById('feedback-overlay').classList.add('visible');
+            },
+
+            nextScenario() {
+                document.getElementById('feedback-overlay').classList.remove('visible');
+                setTimeout(() => { this.gameIndex++; this.renderScenario(); }, 300);
+            },
+
+            endGame() {
+                document.getElementById('game-view').style.display = 'none';
+                document.getElementById('completion-view').style.display = 'block';
+                
+                // --- UPDATE CERTIFICATE DATA ---
+                const finalRate = Math.round((this.correctCount / this.GAME_ROUNDS) * 100);
+                const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+                
+                document.getElementById('cert-score-val').innerText = finalRate + "%";
+                document.getElementById('cert-date').innerText = dateStr;
+
+                // --- BADGES ---
+                const badgeCont = document.getElementById('badge-container');
+                badgeCont.innerHTML = "";
+                if(this.unlockedAchievements.length > 0) {
+                    this.unlockedAchievements.forEach(id => {
+                        const ach = this.ACHIEVEMENTS.find(a => a.id === id);
+                        const badge = document.createElement('div');
+                        badge.className = 'badge';
+                        badge.innerText = `${ach.icon} ${ach.name}`;
+                        badgeCont.appendChild(badge);
+                    });
+                } else {
+                    badgeCont.innerHTML = "<span style='color:#9ca3af; font-size:0.8rem;'>No badges earned.</span>";
+                }
+            },
+
+            initGame() {
+                this.gameIndex = 0;
+                this.correctCount = 0;
+                this.streak = 0;
+                this.unlockedAchievements = [];
+                let pool = [];
+                for(let i=0; i<this.POOL_COUNTS.bullish; i++) pool.push(this.createScenario('bullish'));
+                for(let i=0; i<this.POOL_COUNTS.bearish; i++) pool.push(this.createScenario('bearish'));
+                for(let i=0; i<this.POOL_COUNTS.neutral; i++) pool.push(this.createScenario('neutral'));
+                pool = this.shuffle(pool);
+                this.gameDeck = pool.slice(0, this.GAME_ROUNDS);
+                
+                // DOM RESET
+                document.getElementById('streak-val').innerText = "0";
+                document.getElementById('acc-val').innerText = "0%";
+                document.getElementById('game-view').style.display = 'block';
+                document.getElementById('completion-view').style.display = 'none';
+                this.renderScenario();
+            }
+        };
+
+        init();
+    </script>
+</body>
+</html>
