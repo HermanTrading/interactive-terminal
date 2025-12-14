@@ -625,6 +625,35 @@
         }
     }
 
+    // --- FUNCTION: JUMP TO STEP VIA SIDEBAR ---
+    function jumpToStep(index) {
+        // Remove active class from CURRENT
+        document.getElementById(`mod-${currentStep}`).classList.remove('active');
+        document.getElementById(`btn-${currentStep}`).classList.remove('active');
+
+        // Update Index
+        currentStep = index;
+
+        // Add active class to NEW
+        document.getElementById(`mod-${currentStep}`).classList.add('active');
+        document.getElementById(`btn-${currentStep}`).classList.add('active');
+
+        // Update Stats Bar
+        updateStats();
+        
+        // Reset Scroll
+        document.getElementById('viewport').scrollTop = 0;
+    }
+
+    // Assign listeners to nav buttons
+    for (let i = 0; i < totalSteps; i++) {
+        const btn = document.getElementById(`btn-${i}`);
+        if(btn) {
+            btn.addEventListener('click', () => jumpToStep(i));
+        }
+    }
+    // ----------------------------------------------
+
     function updateStats() {
         document.getElementById('xp-val').innerText = xp;
         document.getElementById('progress-bar').style.width = ((currentStep + 1) / totalSteps * 100) + "%";
