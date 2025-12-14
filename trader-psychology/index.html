@@ -538,6 +538,32 @@
         }
     }
 
+    // --- NEW FUNCTIONALITY: JUMP TO LESSON VIA SIDEBAR ---
+    function jumpToLesson(index) {
+        // Remove active class from CURRENT lesson and nav
+        document.getElementById(`lesson-${currentLesson}`).classList.remove('active');
+        document.getElementById(`nav-${currentLesson}`).classList.remove('active');
+
+        // Update index
+        currentLesson = index;
+
+        // Add active class to NEW lesson and nav
+        document.getElementById(`lesson-${currentLesson}`).classList.add('active');
+        document.getElementById(`nav-${currentLesson}`).classList.add('active');
+
+        // Reset scroll and update UI
+        document.getElementById('main-area').scrollTop = 0;
+        updateStats();
+    }
+
+    // Add event listeners to all nav items
+    for (let i = 0; i < totalLessons; i++) {
+        document.getElementById(`nav-${i}`).addEventListener('click', function() {
+            jumpToLesson(i);
+        });
+    }
+    // -----------------------------------------------------
+
     // --- Module Specific Logic ---
 
     // Module 1 Slider
