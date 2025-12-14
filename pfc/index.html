@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portsmouth Fire Compliance: Landlord Safety Guide</title>
+    <style>
+        :root {
+            --primary: #c0392b; /* Fire Red */
+            --primary-dark: #922b21;
+            --secondary: #2c3e50; /* Dark Blue */
+            --sidebar-bg: #34495e;
+            --text-light: #ecf0f1;
+            --text-dark: #333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* --- LAYOUT --- */
+        .app-wrapper {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* --- SIDEBAR --- */
+        .sidebar {
+            width: 280px;
+            background-color: var(--sidebar-bg);
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+
+        .sidebar h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #e74c3c;
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 10px;
+        }
+
+        .nav-tree {
+            list-style: none;
+            padding: 0;
+            overflow-y: auto;
+        }
+
+        .nav-tree li {
+            padding: 12px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            transition: background 0.3s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-tree li:hover {
+            background-color: #2c3e50;
+        }
+
+        .nav-tree li.active {
+            background-color: var(--primary);
+            font-weight: bold;
+        }
+        
+        .nav-tree li::before {
+            content: '•';
+            margin-right: 10px;
+            color: #95a5a6;
+        }
+        .nav-tree li.active::before {
+            color: white;
+        }
+
+        /* --- MAIN CONTENT AREA --- */
+        .main-content {
+            flex: 1;
+            position: relative;
+            background: white;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start; 
+            opacity: 0;
+            transform: translateX(50px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+            overflow-y: auto;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: translateX(0);
+            pointer-events: all;
+            z-index: 5;
+        }
+
+        h1 { color: var(--primary); font-size: 2.2rem; margin-bottom: 5px; text-align: center; }
+        h3 { color: var(--secondary); font-size: 1.4rem; margin-bottom: 20px; text-align: center; font-weight: 400; }
+        p { font-size: 1.1rem; line-height: 1.6; max-width: 800px; color: #555; text-align: center; margin-bottom: 20px; }
+
+        /* --- CONTROLS --- */
+        .controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            z-index: 20;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 12px 30px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+        }
+
+        .btn-next { background-color: var(--primary); color: white; }
+        .btn-next:hover { background-color: var(--primary-dark); }
+        .btn-next:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        .btn-prev { background-color: var(--secondary); color: white; }
+        .btn-prev:hover { background-color: #1a252f; }
+        .btn-prev:disabled { background-color: #ccc; cursor: not-allowed; }
+
+        /* --- VISUAL STAGE --- */
+        .visual-stage {
+            width: 100%;
+            max-width: 500px;
+            height: 350px;
+            background: #f0f3f5;
+            border: 2px solid #bdc3c7;
+            border-radius: 8px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* SCENARIO 1: DOOR ART */
+        .front-door-container {
+            width: 160px;
+            height: 300px;
+            background: #2c3e50; 
+            padding: 5px;
+            border-radius: 2px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        .front-door {
+            width: 100%;
+            height: 100%;
+            background: #c0392b; 
+            position: relative;
+            border: 1px solid #922b21;
+        }
+        .door-panel {
+            width: 120px;
+            height: 100px;
+            border: 2px inset #a93226;
+            margin: 20px auto;
+        }
+        .door-handle {
+            width: 10px;
+            height: 40px;
+            background: silver;
+            position: absolute;
+            right: 15px;
+            top: 160px;
+            border-radius: 2px;
+        }
+        /* CORRECTION 1: Smaller Letterbox */
+        .letterbox-slot {
+            width: 80px;  /* Reduced from 100px */
+            height: 15px; /* Reduced from 25px */
+            background: silver;
+            position: absolute;
+            left: 40px;   /* Adjusted centering */
+            bottom: 80px;
+            border: 1px solid #777;
+        }
+
+        /* SCENARIO 3: DOORS */
+        .door-compare-box {
+            display: flex; gap: 20px; align-items: flex-end;
+        }
+        .door-comp {
+            width: 100px; 
+            height: 200px; /* FIXED HEIGHT */
+            display: flex; justify-content: center; align-items: center;
+            color: white; font-weight: bold;
+        }
+
+        /* SCENARIO 4: GAP VISUALIZATION */
+        .gap-demo-container {
+            display: flex; flex-direction: column; width: 100%; height: 100%;
+            justify-content: center; align-items: center; background: #222;
+        }
+        .gap-view { display: flex; gap: 15px; position: relative; }
+        .wall-section { width: 60px; height: 200px; background: #7f8c8d; color: white; display:flex; align-items:center; justify-content:center; }
+        .door-section { width: 60px; height: 200px; background: #c0392b; color: white; display:flex; align-items:center; justify-content:center; position: relative; }
+        .intumescent-strip {
+            position: absolute; left: -15px; top: 0; width: 4px; height: 100%; background: #555;
+            transition: width 2s ease, background 0.5s;
+        }
+        .smoke-particle {
+            position: absolute; width: 8px; height: 8px; background: rgba(255,255,255,0.6); border-radius: 50%;
+            animation: smokeRise 1.5s infinite linear; left: 63px; z-index: 5;
+        }
+        @keyframes smokeRise { 0% { top: 200px; opacity: 0; } 50% { opacity: 1; } 100% { top: 0px; opacity: 0; } }
+        .gap-view.sealed .intumescent-strip { width: 15px; background: white; left: -15px; }
+        .gap-view.sealed .smoke-particle { display: none; }
+
+        /* SCENARIO 5: HINGE ART */
+        .hinge-art {
+            width: 120px; height: 180px; background: linear-gradient(135deg, #bdc3c7, #95a5a6);
+            border-radius: 4px; position: relative; box-shadow: 2px 2px 5px rgba(0,0,0,0.3); border: 1px solid #7f8c8d;
+        }
+        .hinge-knuckle {
+            position: absolute; right: -10px; top: 0; width: 20px; height: 100%;
+            background: linear-gradient(to right, #bdc3c7, #7f8c8d, #bdc3c7);
+            border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .knuckle-seg { height: 35px; border-bottom: 1px solid #555; }
+        .screw-hole { width: 15px; height: 15px; background: #555; border-radius: 50%; position: absolute; left: 50%; transform: translateX(-50%); }
+
+        /* SCENARIO 6: CLOSER ART */
+        .door-closer-demo {
+            width: 200px; height: 300px; border: 8px solid #333; background: #eee;
+            position: relative; overflow: hidden;
+        }
+        .door-leaf-closer {
+            width: 100%; height: 100%; background: #c0392b;
+            transform-origin: left; transition: transform 1.5s ease-in-out;
+            transform: perspective(600px) rotateY(0deg); position: relative;
+        }
+        .closer-body {
+            width: 80px; height: 25px; background: linear-gradient(to bottom, #bdc3c7, #95a5a6);
+            position: absolute; top: 15px; left: 20px;
+            border: 1px solid #777; box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+            /* Arms removed per request */
+        }
+        .door-leaf-closer.open { transform: perspective(600px) rotateY(45deg); }
+
+        /* SCENARIO 8: GLASS & FIRE */
+        .glass-frame {
+            width: 120px; height: 180px; border: 8px solid #c0392b;
+            background: rgba(200, 230, 255, 0.3); /* Transparent Glass */
+            position: relative; overflow: hidden;
+            display: flex; justify-content: center; align-items: center;
+        }
+        .fire-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at bottom, #f1c40f, #e67e22, #c0392b, transparent 70%);
+            animation: flicker 0.2s infinite alternate;
+            z-index: -1;
+        }
+        @keyframes flicker {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.05); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="app-wrapper">
+    
+    <nav class="sidebar">
+        <h2>PFC Safety Guide</h2>
+        <ul class="nav-tree" id="navTree">
+            <li onclick="goToSlide(0)" class="active">1. Intro & Safety</li>
+            <li onclick="goToSlide(1)">2. Legal Reality</li>
+            <li onclick="goToSlide(2)">3. FD30 vs Standard</li>
+            <li onclick="goToSlide(3)">4. Mind The Gap</li>
+            <li onclick="goToSlide(4)">5. Fire Rated Hinges</li>
+            <li onclick="goToSlide(5)">6. Overhead Closer</li>
+            <li onclick="goToSlide(6)">7. The Letterbox</li>
+            <li onclick="goToSlide(7)">8. Glazing/Thresholds</li>
+            <li onclick="goToSlide(8)">9. Why Portsmouth?</li>
+            <li onclick="goToSlide(9)">10. Get Quote</li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <div class="slide active" id="slide-0">
+            <h1>Are Your Tenants Actually Safe?</h1>
+            <h3>The Hidden Dangers in Front Doors</h3>
+            <div class="visual-stage" style="background: white; border: none;">
+                <div class="front-door-container">
+                    <div class="front-door">
+                        <div class="door-panel"></div>
+                        <div class="door-panel" style="margin-top:5px;"></div>
+                        <div class="door-handle"></div>
+                        <div class="letterbox-slot"></div> </div>
+                </div>
+            </div>
+            <p><strong>Your front door is the first line of defense.</strong><br> If it's not compliant, fire spreads in minutes, not hours.</p>
+        </div>
+
+        <div class="slide" id="slide-1">
+            <h1>The Legal Reality</h1>
+            <h3>Fire Safety (England) Regulations 2022</h3>
+            <div class="visual-stage">
+                <div style="font-size: 5rem;">⚖️</div>
+            </div>
+            <p>Landlords are legally responsible. Ignorance is not a defense. Non-compliance leads to huge fines and void insurance policies.</p>
+        </div>
+
+        <div class="slide" id="slide-2">
+            <h1>FD30 vs. Standard Doors</h1>
+            <h3>30 Minutes vs. 5 Minutes</h3>
+            <div class="visual-stage">
+                <div class="door-compare-box">
+                    <div class="door-comp" style="background:#c0392b;">FD30</div>
+                    <div class="door-comp" style="background:#e67e22; opacity:0.6; color:black;">Standard</div>
+                </div>
+            </div>
+            <p>A certified FD30S door core is dense and designed to withstand 800°C+. A standard hollow door (even if it looks the same) vanishes in minutes.</p>
+        </div>
+
+        <div class="slide" id="slide-3">
+            <h1>Mind The Gap</h1>
+            <h3>Intumescent Strips & Cold Smoke Seals</h3>
+            <div class="visual-stage" style="background: #222;">
+                <div class="gap-demo-container">
+                    <div class="gap-view" id="gapView">
+                        <div class="wall-section">FRAME</div>
+                        <div class="smoke-particle" style="animation-delay:0s"></div>
+                        <div class="smoke-particle" style="animation-delay:0.5s"></div>
+                        <div class="smoke-particle" style="animation-delay:1s"></div>
+                        <div class="door-section">
+                            DOOR
+                            <div class="intumescent-strip"></div>
+                        </div>
+                    </div>
+                    <button onclick="toggleHeat()" style="margin-top:15px; padding:8px 15px; background:#e67e22; color:white;">🔥 APPLY FIRE HEAT 🔥</button>
+                    <p style="color:#ccc; font-size:0.8rem; margin-top:10px;">Click to simulate heat reaction</p>
+                </div>
+            </div>
+            <p>Gaps >4mm let deadly smoke through. Our doors use intumescent strips that <strong>expand 5-10x their size</strong> under heat.</p>
+        </div>
+
+        <div class="slide" id="slide-4">
+            <h1>Hinges Matter</h1>
+            <h3>Grade 13, CE Marked, Fire Rated</h3>
+            <div class="visual-stage">
+                <div class="hinge-art">
+                    <div style="position:absolute; top:10px; left:10px; font-size:9px;">Grade 13</div>
+                    <div class="screw-hole" style="top:30px;"></div>
+                    <div class="screw-hole" style="top:80px;"></div>
+                    <div class="screw-hole" style="top:130px;"></div>
+                    <div class="hinge-knuckle">
+                        <div class="knuckle-seg"></div>
+                        <div class="knuckle-seg"></div>
+                        <div class="knuckle-seg"></div>
+                        <div class="knuckle-seg" style="border:none;"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Standard hinges melt. We use <strong>3x Grade 13 Stainless Steel Hinges</strong> per door. They don't deform under heat.</p>
+        </div>
+
+        <div class="slide" id="slide-5">
+            <h1>Controlled Closing</h1>
+            <h3>Overhead Hydraulics (No Perko Chains!)</h3>
+            <div class="visual-stage">
+                <div class="door-closer-demo">
+                    <div class="door-leaf-closer" id="closerDoor">
+                        <div class="closer-body"></div>
+                    </div>
+                </div>
+            </div>
+            <div style="margin-top: -40px; margin-bottom: 20px;">
+                 <button onclick="toggleDoor()" style="background:#34495e; color:white; padding:5px 15px;">Open / Close Door</button>
+            </div>
+            <p>Concealed "Perko" chains snap easily. We install industry-standard <strong>Overhead Door Closers</strong> to ensure the door latches fully every time.</p>
+        </div>
+
+        <div class="slide" id="slide-6">
+            <h1>The Letterbox Chimney</h1>
+            <h3>Fire Rated Letter Plates</h3>
+            <div class="visual-stage">
+                <div style="width:200px; height:60px; border:4px solid #333; background:silver; display:flex; align-items:center; justify-content:center; position:relative;">
+                    <span style="font-weight:bold;">Fire Rated</span>
+                    <div style="position:absolute; bottom:0; width:100%; height:10px; background:#444;">Intumescent Liner</div>
+                </div>
+            </div>
+            <p>Standard letterboxes act like a chimney. Ours contain an intumescent liner that seals the slot shut when hot.</p>
+        </div>
+
+        <div class="slide" id="slide-7">
+            <h1>Glazing & Thresholds</h1>
+            <h3>Pyroguard Glass & Hardwood Thresholds</h3>
+            <div class="visual-stage" style="background: #333;">
+                 <div class="glass-frame">
+                     <div class="fire-bg"></div>
+                     <span style="font-size:0.8rem; transform: rotate(-45deg); font-weight:bold; color:black; z-index:2;">CERTIFIED<br>PYRO GLASS</span>
+                 </div>
+            </div>
+            <p>Any glass must be fire-rated (Pyrodur/Pyroguard). Look how it holds back the fire behind it.</p>
+        </div>
+
+        <div class="slide" id="slide-8">
+            <h1>Why Portsmouth Fire Compliance?</h1>
+            <h3>The Gold Standard</h3>
+            <ul style="text-align: left; font-size: 1.1rem; line-height: 2;">
+                <li>✅ <strong>BM TRADA Q-Mark</strong> Certified Installers</li>
+                <li>✅ Detailed audit trail & certification provided</li>
+                <li>✅ We use only specified, tested hardware</li>
+                <li>✅ Local expertise in Portsmouth and surrounding areas</li>
+            </ul>
+        </div>
+
+        <div class="slide" id="slide-9">
+            <h1>Secure Your Property Today</h1>
+            <p style="font-size: 1.3rem; color: #c0392b; font-weight: bold;">Don't wait for a fire inspection failure.</p>
+            
+            <a href="https://www.portsmouthfirecompliance.com/index" target="_blank" style="background-color: #27ae60; color: white; padding: 15px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 1.2rem; display:inline-block; margin: 20px 0;">
+                GET COMPLIANT NOW
+            </a>
+            
+            <p style="margin-top: 20px; font-size: 0.9rem;">
+                <a href="https://www.portsmouthfirecompliance.com/index" style="color:#2980b9;">www.portsmouthfirecompliance.com</a>
+            </p>
+        </div>
+
+        <div class="controls">
+            <button class="btn-prev" id="prevBtn" onclick="moveSlide(-1)">Previous Step</button>
+            <button class="btn-next" id="nextBtn" onclick="moveSlide(1)">Next Step</button>
+        </div>
+
+    </main>
+</div>
+
+<script>
+    let currentSlideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+    const navItems = document.querySelectorAll('.nav-tree li');
+    const totalSlides = slides.length;
+    const nextBtn = document.getElementById('nextBtn');
+    const prevBtn = document.getElementById('prevBtn');
+
+    function updateUI() {
+        slides.forEach((slide, index) => {
+            slide.classList.remove('active');
+            if(index === currentSlideIndex) slide.classList.add('active');
+        });
+        navItems.forEach((item, index) => {
+            item.classList.remove('active');
+            if(index === currentSlideIndex) item.classList.add('active');
+        });
+
+        prevBtn.disabled = (currentSlideIndex === 0);
+        
+        if (currentSlideIndex === totalSlides - 1) {
+            nextBtn.disabled = true;
+            nextBtn.innerText = "Visit Website Above";
+        } else {
+            nextBtn.disabled = false;
+            nextBtn.innerText = "Next Step";
+        }
+    }
+
+    function moveSlide(dir) {
+        const newIndex = currentSlideIndex + dir;
+        if (newIndex >= 0 && newIndex < totalSlides) {
+            currentSlideIndex = newIndex;
+            updateUI();
+        }
+    }
+
+    function goToSlide(index) {
+        currentSlideIndex = index;
+        updateUI();
+    }
+
+    function toggleHeat() {
+        document.getElementById('gapView').classList.toggle('sealed');
+    }
+
+    function toggleDoor() {
+        document.getElementById('closerDoor').classList.toggle('open');
+    }
+
+    updateUI();
+</script>
+
+</body>
+</html>
